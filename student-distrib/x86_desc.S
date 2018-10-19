@@ -84,6 +84,10 @@ ldt_desc_ptr:
 
 gdt_bottom:
 
+gdt_desc_ptr:
+    .word gdt_bottom - gdt - 1      # number of elements in GDT table
+    .long gdt                       # address to GDT table
+
     .align 16
 ldt:
     .rept 4
