@@ -2,7 +2,7 @@
 ////////////////////Hardware interrupt handlers and exception handlers should have their DPL set to 0, The system call handler should have its DPL set to 3 s
 //////////////set keyboard rtc handler also
 #include "lib.h"
-
+#include "idt.h"
 
 #define SYSTEM_CALL 0x80
 #define KERNAL_SEG 0x0010
