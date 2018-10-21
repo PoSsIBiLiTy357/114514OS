@@ -10,10 +10,12 @@
 /*
 * rtc_init
 *   DESCRIPTION: Initializes the real time clock by initializng the clock frequency. 
-*   This is done by disabling Non-Maskable Interrupts (NMI) in the CMOS (which
-*   contains the RTC in ports 0x70 as a register number of index and 0x71 for R/W
-*   data). We then enable the RTC on IRQ line
-*   8 in the PIC
+*       This is done by disabling Non-Maskable Interrupts (NMI) in the CMOS (which
+*       contains the RTC in ports 0x70 as a register number of index and 0x71 for R/W
+*       data). Frequency is set by writing the divisor into lower bits of register A.
+*       We then enable the RTC on IRQ line 8 on the PIC by retrieving hte previous 
+*       value and setting the 6th bit in register B.
+*
 *   INPUTS: none
 *   OUTPUTS: none
 *   RETURN VALUE: none
@@ -45,6 +47,15 @@ void rtc_init() {
 }
 
 
+/*
+* rtc_int_handler
+*   DESCRIPTION: Interrupt handler for RTC interrupts. Should call a test
+*       functoin somehow. Needs work.
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*/
 void rtc_int_handler() {
     /* Disable other incoming interrupts */
     cli();
