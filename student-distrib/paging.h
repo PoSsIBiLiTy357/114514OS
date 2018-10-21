@@ -8,9 +8,10 @@
 
 
 /* An page descriptor entry (goes into the PDT) */
-typedef union pdt_4kb_t {
+typedef union pdt_entry_t {
     uint32_t val;
-    struct {
+
+    struct kb {
 
         uint32_t pt_present  : 1;
         uint32_t pt_rw       : 1;
@@ -24,14 +25,10 @@ typedef union pdt_4kb_t {
         uint32_t pt_avail    : 3;
         uint32_t pt_base_addr  : 20;
 
+    }__attribute__ ((packed)) kb;
 
-    } __attribute__ ((packed));
-} pdt_4kb_t;
 
-/* An page descriptor entry (goes into the PDT) */
-typedef union pdt_4mb_t {
-    uint32_t val;
-    struct {
+    struct mb {
 
         uint32_t pt_present  : 1;
         uint32_t pt_rw       : 1;
@@ -47,15 +44,8 @@ typedef union pdt_4mb_t {
         uint32_t pt_reserved : 9;
         uint32_t pt_base_addr  : 10;
 
+    }__attribute__ ((packed)) mb;
 
-    } __attribute__ ((packed));
-} pdt_4mb_t;
-
-
-/* An page descriptor entry (goes into the PDT) */
-typedef union pdt_entry_t {
-    pdt_4kb_t kb;
-    pdt_4mb_t mb;
 } pdt_entry_t;
 
 
@@ -80,9 +70,6 @@ typedef union pt_entry_t {
 
     } __attribute__ ((packed));
 } pt_entry_t;
-
-
-
 
 extern pte_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
 extern pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
