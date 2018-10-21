@@ -1,3 +1,4 @@
+
 /* kernel.c - the C part of the kernel
  * vim:ts=4 noexpandtab
  */
@@ -141,7 +142,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
-
+	idt_init();
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
