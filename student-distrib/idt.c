@@ -7,109 +7,192 @@
 #define SYSTEM_CALL 0x80
 #define KERNAL_SEG 0x0010
 void exception_0_de(){
+	cli();
 	clear();
+	
 	printf("Divide Error Exception");
+	while(1);
+	sti();
 }
 
 void exception_1_db(){
+	cli()
 	clear();
+	
 	printf("Debug Exception");
+	while(1);
+	sti();
 }
 
 void exception_2_nmi(){
+	cli();
 	clear();
+	
 	printf("Non Maskable Interrupt");
+	while(1);
+	sti();
 }
 
 void exception_3_bp(){
+	cli();
 	clear();
+	
 	printf("Breakpoint Exception");
+	while(1);
+	sti();
 }
 
 void exception_4_of(){
+	cli();
 	clear();
+	
 	printf("Overflow Exception");
+	while(1);
+	sti();
 }
 
 void exception_5_br(){
+	cli();
 	clear();
+	
 	printf("BOUND Range Exceeded Exception");
+	while(1);
+	sti();
 }
 
 void exception_6_ud(){
+	cli();
 	clear();
+	
 	printf("—Invalid Opcode Exception");
+	while(1);
+	sti();
 }
 
 void exception_7_nm(){
+	cli();
 	clear();
+	
 	printf("Device Not Available Exception");
+	while(1);
+	sti();
 }
 
 void exception_8_df(){
+	cli();
 	clear();
+	
 	printf("Double Fault Exception");
+	while(1);
+	sti();
 }
 
 void exception_9_cso(){
+	cli();
 	clear();
+	
 	printf("Coprocessor Segment Overrun");
+	while(1);
+	sti();
 }
 
 void exception_10_ts(){
+	cli();
 	clear();
+	
 	printf("Invalid TSS Exception");
+	while(1);
+	sti();
 }
 
 void exception_11_np(){
+	cli();
 	clear();
+	
 	printf("Segment Not Present");
+	while(1);
+	sti();
 }
 
 void exception_12_ss(){
+	cli();
 	clear();
+	
 	printf("Stack Fault Exception");
+	while(1);
+	sti();
 }
 
 void exception_13_gp(){
+	cli();
 	clear();
+	
 	printf("General Protection Exception");
+	while(1);
+	sti();
 }
 
 void exception_14_pf(){
+	cli();
 	clear();
+	
 	printf("Page-Fault Exception ");
+	while(1);
+	sti();
 }
 void exception_15_rs(){
+	cli();
 	clear();
+	
 	printf("Reserved");
+	while(1);
+	sti();
 }
 
 void exception_16_mf(){
+	cli();
 	clear();
+	
 	printf("x87 FPU Floating-Point Error");
+	while(1);
+	sti();
 }
 
 void exception_17_ac(){
+	cli();
 	clear();
+
 	printf("Alignment Check Exception");
+	while(1);
+	sti();
 }
 
 void exception_18_mc(){
+	cli();
 	clear();
+
 	printf("Machine-Check Exception");
+	while(1);
+	sti();
 }
 
 void exception_19_xf(){
+	cli();
 	clear();
+	
 	printf("SIMD Floating-Point Exception");
+	while(1);
+	sti();
 }
 
 
 /*user defined handlers or undefined*/
 void exception_user_defined(){
+	cli();
 	clear();
 	printf("User Defined or Undefined Exception!");
+	while(1);
+	sti();
 }
 
 void idt_init(){
