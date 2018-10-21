@@ -5,42 +5,84 @@
 #include "lib.h"
 
 #define PAGE_ENTRY_SIZE 1024
+
+
 /* An page descriptor entry (goes into the PDT) */
-typedef union pdt_entry_t {
+typedef union pdt_4kb_t {
     uint32_t val;
     struct {
-        uint32_t page_present : 1;
-        uint32_t page_ignore : 1;
-        uint32_t page_rw : 1;
-        uint32_t page_us      : 1;
-        uint32_t page_cache_da : 1;
-        uint32_t page_accessed       : 1;
-        uint32_t page_size : 1;
-        uint32_t page_wthrough : 1;
-        uint32_t page_avail : 3;
-        uint32_t page_pt_addr : 20;
+
+        uint32_t pt_present  : 1;
+        uint32_t pt_rw       : 1;
+        uint32_t pt_us       : 1;
+        uint32_t pt_wthrough : 1;
+        uint32_t pt_cache_da : 1;
+        uint32_t pt_accessed : 1;
+        uint32_t pt_reserved : 1;
+        uint32_t pt_size     : 1;
+        uint32_t pt_global   : 1;
+        uint32_t pt_avail    : 3;
+        uint32_t pt_base_addr  : 20;
+
 
     } __attribute__ ((packed));
+} pdt_4kb_t;
+
+/* An page descriptor entry (goes into the PDT) */
+typedef union pdt_4mb_t {
+    uint32_t val;
+    struct {
+
+        uint32_t pt_present  : 1;
+        uint32_t pt_rw       : 1;
+        uint32_t pt_us       : 1;
+        uint32_t pt_wthrough : 1;
+        uint32_t pt_cache_da : 1;
+        uint32_t pt_accessed : 1;
+        uint32_t pt_dirty    : 1;
+        uint32_t pt_size     : 1;
+        uint32_t pt_global   : 1;
+        uint32_t pt_avail    : 3;
+        uint32_t pt_attr     : 1;
+        uint32_t pt_reserved : 9;
+        uint32_t pt_base_addr  : 10;
+
+
+    } __attribute__ ((packed));
+} pdt_4mb_t;
+
+
+/* An page descriptor entry (goes into the PDT) */
+typedef union pdt_entry_t {
+    pdt_4kb_t kb;
+    pdt_4mb_t mb;
 } pdt_entry_t;
 
 
+
 /* An page table entry (goes into the PT) */
-typedef union pte_entry_t {
+typedef union pt_entry_t {
     uint32_t val;
     struct {
-        uint32_t page_present : 1;
-        uint32_t page_rw : 1;
-        uint32_t page_us      : 1;
-        uint32_t page_global : 1;
-        uint32_t page_dirty : 1;
-        uint32_t page_accessed       : 1;
-        uint32_t page_cache_da : 1;
-        uint32_t page_wthrough : 1;
-        uint32_t page_avail : 3;
-        uint32_t page_pa_addr 20;
+
+      uint32_t page_present  : 1;
+      uint32_t page_rw       : 1;
+      uint32_t page_us       : 1;
+      uint32_t page_wthrough : 1;
+      uint32_t page_cache_da : 1;
+      uint32_t page_accessed : 1;
+      uint32_t page_dirty    : 1;
+      uint32_t page_attr     : 1;
+      uint32_t page_global   : 1;
+      uint32_t page_avail    : 3;
+      uint32_t page_addr     : 20;
+
 
     } __attribute__ ((packed));
-} pte_entry_t;
+} pt_entry_t;
+
+
+
 
 extern pte_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
 extern pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
