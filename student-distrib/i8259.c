@@ -1,7 +1,9 @@
 /* i8259.c - Functions to interact with the 8259 interrupt controller
  * vim:ts=4 noexpandtab
  */
-
+// reference https://wiki.osdev.org/PIC
+ 
+ 
 #include "i8259.h"
 #include "lib.h"
 
@@ -43,12 +45,32 @@ void i8259_init(void) {
 
 /* Enable (unmask) the specified IRQ */
 void enable_irq(uint32_t irq_num) {
-	
+	uint16_t port;
+    uint8_t value;
+ 
+    if(irq_num < 8) {
+        port = 0x21;
+    } else {
+        port = 0xA1;
+        irq_num -= 8;
+    }
+    value = inb(port) & ~(1 << irq_num);
+    outb(port, value); 
 }
 
 /* Disable (mask) the specified IRQ */
 void disable_irq(uint32_t irq_num) {
-	
+	uint16_t port;
+    uint8_t value;
+ 
+    if(irq_num < 8) {
+        port = 0x21;
+    } else {
+        port = 0xA1;
+        irq_num -= 8;
+    }
+    value = inb(port) | (1 << irq_num);
+    outb(port, value);  	
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */
