@@ -195,6 +195,10 @@ void exception_user_defined(){
 	sti();
 }
 
+
+
+///////////not sure whether I can write the assembly this way due to https://wiki.osdev.org/Interrupt_Service_Routines
+
 void idt_init(){
 	int i;
 	for (i = 0; i< NUM_VEC; i++){
@@ -245,8 +249,8 @@ void idt_init(){
 	SET_IDT_ENTRY(idt[17], exception_17_ac);
 	SET_IDT_ENTRY(idt[18], exception_18_mc);
 	SET_IDT_ENTRY(idt[19], exception_19_xf);
-	SET_IDT_ENTRY(idt[0x21], keyboard_handler);
-	SET_IDT_ENTRY(idt[0x28], rtc_handler);
+	SET_IDT_ENTRY(idt[0x21], keyboard_handler_asm);
+	SET_IDT_ENTRY(idt[0x28], rtc_handler_asm);
 	
 	idt[SYSTEM_CALL].reserved3 = 1;		//system call handler is trap gate
 	for (i = 20; i < NUM_VEC; i++){
