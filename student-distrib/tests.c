@@ -96,17 +96,12 @@ int exception_test(){
 *   RETURN VALUE: int PASS
 */
 int page_nofault_test(){
-    // TEST_HEADER;
-	// int *a = 0x00000;
-	// int b = a;
-	// printf("%d\n", b);
-    // return FAIL;
 	TEST_HEADER;
-	unsigned long *a = 0x00000;
-	unsigned long b = *a;
+	int *a = (int *)0xB8000;
+	int b = *a;
 	b++;
 	printf("%d\n", *a);
-    return FAIL;
+    return PASS;
 }
 
 
@@ -122,14 +117,9 @@ int page_nofault_test(){
 *	SIDE EFFECTS : triggers page fault
 */
 int page_fault_test(){
-    // TEST_HEADER;
-	// int *a = 0x00000;
-	// int b = a;
-	// printf("%d\n", b);
-    // return FAIL;
 	TEST_HEADER;
-	unsigned long *a = 0x00000;
-	unsigned long b = *a;
+	int *a = (int *)0x00000;
+	int b = *a;
 	b++;
 	printf("%d\n", *a);
     return FAIL;
