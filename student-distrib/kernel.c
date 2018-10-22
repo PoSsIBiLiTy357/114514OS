@@ -146,6 +146,8 @@ void entry(unsigned long magic, unsigned long addr) {
     idt_init();
     lidt(idt_desc_ptr);
     init_keyboard();
+    
+    rtc_init();
 
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
