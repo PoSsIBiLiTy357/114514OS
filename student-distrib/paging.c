@@ -1,6 +1,7 @@
 #include "types.h"
 #include "lib.h"
 #include "paging.h"
+#define ASM 1
 
 #define PAGE_ENTRY_SIZE 1024
 pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
@@ -102,18 +103,21 @@ void paging_init(){
     __asm__ (
 
               //page_directory address to cr3
-              "leal page_directory,%eax;"
-              "movl %eax,%cr3;"
+              "leal page_directory,%eax; \n"
+              "movl %eax,%cr3;           \n"
 
               //set PSE(bit4) of cr4 4-MB page enable
-              "movl %cr4, %eax;"
-              "orl $0x00000010, %eax;"
-              "movl %eax, %cr4;"
+              "movl %cr4, %eax;          \n"
+              "orl $0x00000010, %eax;    \n"
+              "movl %eax, %cr4;          \n"
 
               //set PG(bit31) and protection(bit0) of cr0
-              "movl %cr0,%eax;"
-              "orl $0x80000001, %eax;"
-              "movl %eax,%cr0;"
+              "movl %cr0,%eax;           \n"
+              "orl $0x80000001, %eax;    \n"
+              "movl %eax,%cr0;           \n"
+              :/* no output */
+              : "a"((page_directory+0))
+              : "%eax"
     );
 
 }
