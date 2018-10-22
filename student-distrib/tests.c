@@ -17,6 +17,9 @@ static inline void assertion_failure(){
 	asm volatile("int $15");
 }
 
+static int RTC_ctr = 0;
+char * RTC_output[5] = { "Omae ", "wa ", "mo", "shindieru...\n", "NANI?!?!\n" };
+
 
 /* Checkpoint 1 tests */
 
@@ -46,6 +49,23 @@ int idt_test(){
 }
 
 // add more tests here
+
+void RTC_test() {
+	TEST_HEADER;
+
+	/* Prints "Omae wa mo shindieru..." in first four interrupts */
+	if (RTC_ctr < 4) {
+		printf("%s", RTC_output[RTC_ctr]);
+	}
+	
+	/* Print NANI?!?! after a few more interrupts */
+	if (RTC_ctr == 10) {
+		printf("%s", RTC_output[4]);
+	}
+
+	/* Increment counter */
+	RTC_ctr++;
+}
 
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */

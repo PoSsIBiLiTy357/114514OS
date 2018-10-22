@@ -61,6 +61,9 @@ void rtc_int_handler() {
     cli();
 
     /* NEED SOME FORM OF RTC INTERRUPT HANDLER TEST */
+    #if(RUN_TESTS == 1)
+    RTC_test();
+    #endif
 
     /* Re-enable interrupts by discarding interrupt mask in register C */
     outb(STATUS_REG_C, CMOS_ADDR);              /* Select register C            */
