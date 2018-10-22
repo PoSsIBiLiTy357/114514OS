@@ -4,7 +4,7 @@
 #include "types.h"
 #include "lib.h"
 
-#define PAGE_ENTRY_SIZE 1024
+extern void paging_init();
 
 
 /* An page descriptor entry (goes into the PDT) */
@@ -71,5 +71,4 @@ typedef union pt_entry_t {
     } __attribute__ ((packed));
 } pt_entry_t;
 
-extern pte_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
-extern pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
+#endif
