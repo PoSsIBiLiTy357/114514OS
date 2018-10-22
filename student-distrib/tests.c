@@ -128,6 +128,7 @@ int page_fault_test(){
 	TEST_HEADER;
 	unsigned long *a = 0x00000;
 	unsigned long b = *a;
+	b++;
 	printf("%d\n", *a);
     return FAIL;
 }
