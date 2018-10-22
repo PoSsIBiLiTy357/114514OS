@@ -153,4 +153,12 @@ do {                                    \
     );                                  \
 } while (0)
 
+static inline void io_wait(void)
+{
+    /* TODO: This is probably fragile. */
+    asm volatile ( "jmp 1f\n\t"
+                   "1:jmp 2f\n\t"
+                   "2:" );
+}
+
 #endif /* _LIB_H */
