@@ -50,7 +50,8 @@ int idt_test(){
 
 int exception_de_test(){
 	TEST_HEADER;
-	int a = 1/0;
+	// int a = 1/0;			/* Uncomment this to run test */
+	return 1;
 }
 
 int exception_test(){
@@ -60,17 +61,27 @@ int exception_test(){
 }
 
 int page_nofault_test(){
-    TEST_HEADER;
-	int *a = 0xb8000;
-	int b = a;
+    // TEST_HEADER;
+	// int *a = 0xb8000;
+	// int b = a;
+	// printf("%d\n", b);
+    // return PASS;
+	TEST_HEADER;
+	unsigned long *a = (unsigned long*)0xb8000;
+	unsigned long b = (unsigned long)a;
 	printf("%d\n", b);
     return PASS;
 }
 
 int page_fault_test(){
-    TEST_HEADER;
-	int *a = 0x00000;
-	int b = a;
+    // TEST_HEADER;
+	// int *a = 0x00000;
+	// int b = a;
+	// printf("%d\n", b);
+    // return FAIL;
+	TEST_HEADER;
+	unsigned long *a = 0x00000;
+	unsigned long b = (unsigned long)a;
 	printf("%d\n", b);
     return FAIL;
 }
