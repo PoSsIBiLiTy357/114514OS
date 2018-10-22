@@ -1,5 +1,5 @@
 *.o
 *.dep
 student-distrib/bootimg
-*.img
+bootimg
 
