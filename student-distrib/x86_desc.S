@@ -11,6 +11,7 @@
 .globl tss, tss_desc_ptr, ldt, ldt_desc_ptr
 .globl gdt_ptr
 .globl idt_desc_ptr, idt
+.globl gdt_desc_ptr
 
 .align 4
 
@@ -35,6 +36,10 @@ _tss:
 tss_bottom:
 
     .align  16
+gdt_desc:
+    .word gdt_bottom - gdt - 1
+    .long gdt
+    
 gdt:
 _gdt:
 
@@ -83,6 +88,10 @@ ldt_desc_ptr:
     .quad 0
 
 gdt_bottom:
+
+gdt_desc_ptr:
+    .word gdt_bottom - gdt - 1      # number of elements in GDT table
+    .long gdt                       # address to GDT table
 
     .align 16
 ldt:

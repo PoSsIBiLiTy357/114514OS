@@ -45,6 +45,12 @@ int idt_test(){
 	return result;
 }
 
+int exception_test(){
+    TEST_HEADER;
+    asm volatile("int $33");
+    return 1;
+}
+
 // add more tests here
 
 /* Checkpoint 2 tests */
@@ -56,5 +62,6 @@ int idt_test(){
 /* Test suite entry point */
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("exception_test", exception_test());
 	// launch your tests here
 }
