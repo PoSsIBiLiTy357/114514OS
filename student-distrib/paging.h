@@ -4,8 +4,8 @@
 #include "types.h"
 #include "lib.h"
 
-extern void paging_init();
 
+extern void paging_init();
 
 /* An page descriptor entry (goes into the PDT) */
 typedef union pdt_entry_t {
@@ -70,5 +70,9 @@ typedef union pt_entry_t {
 
     } __attribute__ ((packed));
 } pt_entry_t;
+
+
+
+
 
 #endif

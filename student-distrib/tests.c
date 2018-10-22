@@ -56,7 +56,7 @@ int PAGE_True_test(){
 
 int PAGE_Fault_test(){
 	TEST_HEADER;
-	int *a = 0x08000;
+	int *a = 0x00000;
 	int b = a;
 	printf("%d \n", b);
 	return FAIL;
@@ -72,4 +72,6 @@ int PAGE_Fault_test(){
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
+	TEST_OUTPUT("PAGE_True_test", PAGE_True_test());
+	TEST_OUTPUT("PAGE_Fault_test", PAGE_Fault_test());
 }

@@ -8,8 +8,11 @@
 #include "i8259.h"
 #include "debug.h"
 #include "tests.h"
+#include "idt.h"
+#include "keyboard.h"
+#include "paging.h"
 
-#define RUN_TESTS
+#define RUN_TESTS   1
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -137,12 +140,14 @@ void entry(unsigned long magic, unsigned long addr) {
     }
 
     /* Init the PIC */
-    i8259_init();
-
-    paging_init();
+    //i8259_init();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
+    idt_init();
+    lidt(idt_desc_ptr);
+    //init_keyboard();
+    paging_init();
 
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your

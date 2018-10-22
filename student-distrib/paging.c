@@ -70,19 +70,7 @@ void paging_init(){
 
     int i;
 
-    //4kB page directory table
-    pdt_init_kb(0);
-    page_directory[0].kb.pt_present = 1;
-    page_directory[0].kb.pt_rw = 1;
-    page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12;
-
-    //4MB kernel page
-    pdt_init_mb(1);
-    page_directory[1].mb.pt_global = 1;
-    page_directory[1].mb.pt_present = 1;
-    page_directory[1].mb.pt_base_addr = 1;
-
-    printf("PAGE_dir 0 1 OK\n", );
+    //printf("PAGE_dir 0 1 OK\n");
 
     for(i = 2; i < PAGE_ENTRY_SIZE; i++){
         pdt_init_mb(i);
@@ -92,34 +80,44 @@ void paging_init(){
 
     for(i = 0; i < PAGE_ENTRY_SIZE; i++){
         pt_init(i);
+        page_table[i].page_present = 0;
         page_table[i].page_addr = i;
     }
+
+    //4kB page directory table
+    pdt_init_kb(0);
+    page_directory[0].kb.pt_present = 1;
+    page_directory[0].kb.pt_rw = 1;
+    page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12;
 
     //mark video mem present in page table
     page_table[0xB8].page_present = 1;
     page_table[0xB8].page_rw = 1;
     page_table[0xB8].page_cache_da = 1;
+    //4MB kernel page
+    pdt_init_mb(1);
+    page_directory[1].mb.pt_global = 1;
+    page_directory[1].mb.pt_present = 1;
+    page_directory[1].mb.pt_base_addr = 1;
 
-    printf("PAGE_INIT OK\n", );
+
+    printf("PAGE_INIT OK\n");
 
     __asm__ (
+            //page_directory address to cr3
+            "movl %0, %%cr3           \n"
+            //set PSE(bit4) of cr4 4-MB page enable
+            "movl %%cr4, %%ebx        \n"
+            "orl $0x00000010, %%ebx   \n"
+            "movl %%ebx, %%cr4        \n"
 
-              //page_directory address to cr3
-              "leal %0,%eax; \n"
-              "movl %eax,%cr3;           \n"
-
-              //set PSE(bit4) of cr4 4-MB page enable
-              "movl %cr4, %eax;          \n"
-              "orl $0x00000010, %eax;    \n"
-              "movl %eax, %cr4;          \n"
-
-              //set PG(bit31) and protection(bit0) of cr0
-              "movl %cr0,%eax;           \n"
-              "orl $0x80000001, %eax;    \n"
-              "movl %eax,%cr0;           \n"
-              :/* no output */
-              : "a"((page_directory+0))
-              : "%eax"
-    );
-
+            //set PG(bit31) and protection(bit0) of cr0
+            "movl %%cr0, %%ebx         \n"
+            "orl $0x80000001, %%ebx   \n"
+            "movl %%ebx, %%cr0"
+            : /* no output */
+            : "a"((page_directory+0))
+            : "%ebx"
+        );   
+ 
 }
