@@ -3,6 +3,6 @@
 #include "scan_code.h"
 
 
-extern void init_keyboard();
+extern void init_keyboard(void);
 
-extern void keyboard_handler();
+extern void keyboard_handler(void);

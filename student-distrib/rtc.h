@@ -9,10 +9,6 @@
 #include "lib.h"
 #include "i8259.h"
 
-#if (RUN_TESTS == 1)
-#include "tests.h"
-#endif
-
 #define STATUS_REG_A    0x0A
 #define STATUS_REG_B    0x0B
 #define STATUS_REG_C    0x0C

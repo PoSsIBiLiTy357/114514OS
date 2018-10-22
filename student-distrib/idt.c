@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "idt.h"
 #include "x86_desc.h"
+
 //#include "interrupt_service_wrapper.h"
 #define SYSTEM_CALL 0x80
 #define KERNAL_SEG 0x0010
@@ -29,7 +30,7 @@ void exception_2_nmi(){
 	cli();
 	clear();
 	
-	printf("Non Maskable Interrupt");
+	printf(" Non Maskable Interrupt\n");
 	while(1);
 	sti();
 }
@@ -250,11 +251,12 @@ void idt_init(){
 	SET_IDT_ENTRY(idt[17], exception_17_ac);
 	SET_IDT_ENTRY(idt[18], exception_18_mc);
 	SET_IDT_ENTRY(idt[19], exception_19_xf);
+	for (i = 20; i < NUM_VEC; i++){
+		SET_IDT_ENTRY(idt[i], exception_user_defined);
+	}
 	SET_IDT_ENTRY(idt[0x21], keyboard_handler);
 	SET_IDT_ENTRY(idt[0x28], rtc_int_handler);
 	
 	idt[SYSTEM_CALL].reserved3 = 1;		//system call handler is trap gate
-	for (i = 20; i < NUM_VEC; i++){
-		SET_IDT_ENTRY(idt[i], exception_user_defined);
-	}
+
 }

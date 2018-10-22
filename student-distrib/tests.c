@@ -17,9 +17,6 @@ static inline void assertion_failure(){
 	asm volatile("int $15");
 }
 
-static int RTC_ctr = 0;
-char * RTC_output[5] = { "Omae ", "wa ", "mo", "shindieru...\n", "NANI?!?!\n" };
-
 
 /* Checkpoint 1 tests */
 
@@ -48,24 +45,29 @@ int idt_test(){
 	return result;
 }
 
-// add more tests here
-
-void RTC_test() {
-	TEST_HEADER;
-
-	/* Prints "Omae wa mo shindieru..." in first four interrupts */
-	if (RTC_ctr < 4) {
-		printf("%s", RTC_output[RTC_ctr]);
-	}
-	
-	/* Print NANI?!?! after a few more interrupts */
-	if (RTC_ctr == 10) {
-		printf("%s", RTC_output[4]);
-	}
-
-	/* Increment counter */
-	RTC_ctr++;
+int exception_test(){
+    TEST_HEADER;
+    asm volatile("int $1");
+    return 1;
 }
+
+int page_nofault_test(){
+    TEST_HEADER;
+	int *a = 0xb8000;
+	int b = a;
+	printf("%d\n", b);
+    return PASS;
+}
+
+int page_fault_test(){
+    TEST_HEADER;
+	int *a = 0x00000;
+	int b = a;
+	printf("%d\n", b);
+    return FAIL;
+}
+
+// add more tests here
 
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
@@ -76,5 +78,8 @@ void RTC_test() {
 /* Test suite entry point */
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("page_nofault_test", page_nofault_test());
+	TEST_OUTPUT("page_fault_test", page_fault_test());
+	//TEST_OUTPUT("exception_test", exception_test());
 	// launch your tests here
 }

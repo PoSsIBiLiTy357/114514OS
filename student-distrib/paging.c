@@ -1,9 +1,14 @@
 #include "types.h"
 #include "lib.h"
 #include "paging.h"
+#define ASM 1
+
+#define PAGE_ENTRY_SIZE 1024
+pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
+pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
 
 
-void pdt_init_kb(int idx) {
+void pdt_init_kb(int idx){
 
        pdt_entry_t pdt_entry;
        pdt_entry.kb.pt_present  = 0;
@@ -19,7 +24,6 @@ void pdt_init_kb(int idx) {
        pdt_entry.kb.pt_base_addr = 0;
 
        page_directory[idx] = pdt_entry;
-
 }
 
 void pdt_init_mb(int idx){
@@ -65,37 +69,55 @@ void pt_init(int idx){
 void paging_init(){
 
     int i;
-    for(i = 1; i < PAGE_ENTRY_SIZE; i++){
+
+    //printf("PAGE_dir 0 1 OK\n");
+
+    for(i = 2; i < PAGE_ENTRY_SIZE; i++){
         pdt_init_mb(i);
-        page_directory[i].mb.pt_base_addr = i*1024;
-        page_directory[i].mb.pt_size = 1;
+        page_directory[i].mb.pt_base_addr = i;
         page_directory[i].mb.pt_rw = 1;
     }
 
     for(i = 0; i < PAGE_ENTRY_SIZE; i++){
         pt_init(i);
+        page_table[i].page_present = 0;
         page_table[i].page_addr = i;
-        page_table[i].page_rw = 1;
     }
 
     //4kB page directory table
+    pdt_init_kb(0);
     page_directory[0].kb.pt_present = 1;
-    page_directory[0].kb.pt_size = 0;
+    page_directory[0].kb.pt_rw = 1;
+    page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12;
+
     //mark video mem present in page table
-    page_table[0xB8000].page_present = 1;
-
+    page_table[0xB8].page_present = 1;
+    page_table[0xB8].page_rw = 1;
+    page_table[0xB8].page_cache_da = 1;
     //4MB kernel page
+    pdt_init_mb(1);
     page_directory[1].mb.pt_global = 1;
-    page_directory[1].mb.pt_size = 1;
     page_directory[1].mb.pt_present = 1;
-
-/* the PSE flag in CR4 is set, both 4-MByte pages and page tables for 4-KByte pages can
-be accessed from the same page directory
-*/
-// asm(
+    page_directory[1].mb.pt_base_addr = 1;
 
 
+    printf("PAGE_INIT OK\n");
 
-// );
+    __asm__ (
+            //page_directory address to cr3
+            "movl %0, %%cr3           \n"
+            //set PSE(bit4) of cr4 4-MB page enable
+            "movl %%cr4, %%ebx        \n"
+            "orl $0x00000010, %%ebx   \n"
+            "movl %%ebx, %%cr4        \n"
 
+            //set PG(bit31) and protection(bit0) of cr0
+            "movl %%cr0, %%ebx         \n"
+            "orl $0x80000001, %%ebx   \n"
+            "movl %%ebx, %%cr0"
+            : /* no output */
+            : "a"((page_directory+0))
+            : "%ebx"
+        );   
+ 
 }
