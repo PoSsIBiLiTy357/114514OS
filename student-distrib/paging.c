@@ -65,8 +65,8 @@ void pt_init(int idx){
 void paging_init(){
 
     int i;
-    for(i = 1; i < PAGE_ENTRY_SIZE; i++){
-        pdt_init_mb(i);
+    for(i = 2; i < PAGE_ENTRY_SIZE; i++){
+        pdt_init_kb(i);
         page_directory[i].mb.pt_base_addr = i*1024;
         page_directory[i].mb.pt_size = 1;
         page_directory[i].mb.pt_rw = 1;
@@ -79,6 +79,7 @@ void paging_init(){
     }
 
     //4kB page directory table
+    pdt_init_kb(0);
     page_directory[0].kb.pt_present = 1;
     page_directory[0].kb.pt_size = 0;
     //mark video mem present in page table
