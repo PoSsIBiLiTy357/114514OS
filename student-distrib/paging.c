@@ -1,13 +1,17 @@
 #include "types.h"
 #include "lib.h"
 #include "paging.h"
+#include "x86_desc.h"
 #define ASM 1
 
-#define PAGE_ENTRY_SIZE 1024
-pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
-pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
-
-
+/*
+ *void pdt_init_kb(int idx)
+ *     DESCRIPTION: PDT entery 4KB initialization 
+ *     INPUTS: int idx
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ *     SIDE EFFECTS: initialize PDT idx entry as 4KB entry
+ */
 void pdt_init_kb(int idx){
 
        pdt_entry_t pdt_entry;
@@ -26,6 +30,14 @@ void pdt_init_kb(int idx){
        page_directory[idx] = pdt_entry;
 }
 
+/*
+ *void pdt_init_mb(int idx)
+ *     DESCRIPTION: PDT entery 4MB initialization 
+ *     INPUTS: int idx
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ *     SIDE EFFECTS: initialize PDT idx entry as 4MB entry
+ */
 void pdt_init_mb(int idx){
 
        pdt_entry_t pdt_entry;
@@ -46,7 +58,14 @@ void pdt_init_mb(int idx){
       page_directory[idx] = pdt_entry;
 }
 
-
+/*
+ *void pt_init(int idx)
+ *     DESCRIPTION: PT entery initialization 
+ *     INPUTS: int idx
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ *     SIDE EFFECTS: initialize PT idx entry
+ */
 void pt_init(int idx){
 
       pt_entry_t pt_entry;
@@ -66,35 +85,50 @@ void pt_init(int idx){
 }
 
 
+/*
+ *void paging_init()
+ *     DESCRIPTION: PT and PDT initialization 
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ *     SIDE EFFECTS:  
+ *      1.creating a page directory and a page table with valid PDEs and PTEs. 
+ *      2.0-4 MB of broken down into 4 kB pages, 4-8MB is single 4 MB page.
+ *      3.Mark Video Mem present
+ *      4.Set CR0, CR4 registers properly
+ */
 void paging_init(){
 
     int i;
 
-    //printf("PAGE_dir 0 1 OK\n");
-
+    //create index 2-1023 PDEs
     for(i = 2; i < PAGE_ENTRY_SIZE; i++){
         pdt_init_mb(i);
         page_directory[i].mb.pt_base_addr = i;
         page_directory[i].mb.pt_rw = 1;
     }
 
+    //create all 1024 PTEs
     for(i = 0; i < PAGE_ENTRY_SIZE; i++){
         pt_init(i);
         page_table[i].page_present = 0;
         page_table[i].page_addr = i;
     }
 
-    //4kB page directory table
+    //create index 0-4MB as 4kB page directory entry
     pdt_init_kb(0);
     page_directory[0].kb.pt_present = 1;
     page_directory[0].kb.pt_rw = 1;
-    page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12;
+    //assign page table base addr(right shift 12 bits) to PDE 0
+    page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12; 
 
-    //mark video mem present in page table
-    page_table[0xB8].page_present = 1;
-    page_table[0xB8].page_rw = 1;
-    page_table[0xB8].page_cache_da = 1;
-    //4MB kernel page
+    //mark video mem present in corresponding page table entry
+    page_table[PT_VIDEO].page_present = 1;
+    page_table[PT_VIDEO].page_rw = 1;
+    page_table[PT_VIDEO].page_cache_da = 1;
+    page_table[PT_VIDEO].page_addr = PT_VIDEO;
+
+    //create 4-8MB kernel as 4MB page directory entry
     pdt_init_mb(1);
     page_directory[1].mb.pt_global = 1;
     page_directory[1].mb.pt_present = 1;

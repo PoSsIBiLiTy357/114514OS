@@ -148,7 +148,7 @@ void entry(unsigned long magic, unsigned long addr) {
     lidt(idt_desc_ptr);
     //init_keyboard();
     paging_init();
-
+    
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
