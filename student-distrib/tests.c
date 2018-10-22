@@ -17,6 +17,10 @@ static inline void assertion_failure(){
 	asm volatile("int $15");
 }
 
+/* Counter for RTC interrupts */
+static int RTC_ctr = 0;
+extern int clr_flag;
+
 
 /* Checkpoint 1 tests */
 
@@ -66,6 +70,33 @@ int page_fault_test(){
 	printf("%d\n", b);
     return FAIL;
 }
+
+/*
+* RTC_test
+*   DESCRIPTION: This is a test function called by RTC interrupt handler to simply 
+*		print the number of interrupts that have been triggered. This only counts 
+*		up to the 15th interrupt.
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*	SIDE EFFECTS : increments an interrupt counter global variable RTC_ctr
+*/
+void RTC_test() {
+	/* Print the test header only once */
+	if (clr_flag == 1) { TEST_HEADER; }
+
+	/* Prints count of how many interrupts have been hit and increments ctr */
+	if (RTC_ctr < 15) {
+		printf("Interrupt no. %d\n", RTC_ctr++);
+	}
+
+	/* Stops counting after 15 interrupts */
+	if (RTC_ctr == 15) {
+		printf("This is the 15th successful interrupt, end of test.");
+	}
+}
+
 
 // add more tests here
 

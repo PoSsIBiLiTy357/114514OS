@@ -6,6 +6,8 @@
 
 #include "rtc.h"
 
+int clr_flag = 0;
+
 
 /*
 * rtc_init
@@ -57,16 +59,20 @@ void rtc_init() {
 *   RETURN VALUE: none
 */
 void rtc_int_handler() {
+    
     /* Disable other incoming interrupts */
     cli();
 
-    /* NEED SOME FORM OF RTC INTERRUPT HANDLER TEST */
-    clear();
-    printf("RTC TRIGGERED");
+    /* Clear screen only once and call RTC_tests() defined in tests.c */
+    if (clr_flag++ == 0) { clear(); }
+    RTC_test();
 
     /* Re-enable interrupts by discarding interrupt mask in register C */
     outb(STATUS_REG_C, CMOS_ADDR);              /* Select register C            */
     inb(CMOS_DATA);                             /* Discard interrupt mask       */
+
+    /* Send EOI for RTC interrupt */
+    send_eoi(IRQ_RTC);
 
     /* Re-enable other incoming interrupts */
     sti();
