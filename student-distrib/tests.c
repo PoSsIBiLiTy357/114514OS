@@ -49,6 +49,11 @@ int idt_test(){
 	return result;
 }
 
+int exception_de_test(){
+	TEST_HEADER;
+	int a = 1/0;
+}
+
 int exception_test(){
     TEST_HEADER;
     asm volatile("int $1");
@@ -87,12 +92,14 @@ void RTC_test() {
 	if (clr_flag == 1) { TEST_HEADER; }
 
 	/* Prints count of how many interrupts have been hit and increments ctr */
-	if (RTC_ctr < 15) {
-		printf("Interrupt no. %d\n", RTC_ctr++);
+	if (RTC_ctr < 25 && RTC_ctr > 10) {
+		printf("Interrupt no. %d\n", (RTC_ctr - 10));
+		//RTC_ctr++;
 	}
+	RTC_ctr++;
 
 	/* Stops counting after 15 interrupts */
-	if (RTC_ctr == 15) {
+	if (RTC_ctr == 25) {
 		printf("This is the 15th successful interrupt, end of test.");
 	}
 }
@@ -111,6 +118,9 @@ void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
 	TEST_OUTPUT("page_fault_test", page_fault_test());
+	
+	//TEST_OUTPUT("exception_de_test", exception_de_test());
 	//TEST_OUTPUT("exception_test", exception_test());
+	
 	// launch your tests here
 }

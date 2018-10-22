@@ -146,7 +146,7 @@ void entry(unsigned long magic, unsigned long addr) {
     idt_init();
     lidt(idt_desc_ptr);
     init_keyboard();
-    
+
     rtc_init();
 
     /* Enable interrupts */
@@ -158,7 +158,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
 #ifdef RUN_TESTS
     /* Run tests */
-    //launch_tests();
+    launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
 
