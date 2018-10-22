@@ -22,31 +22,20 @@ void i8259_init(void) {
 	slave_mask=0xFF;
 	
 	outb(ICW1,0x20);  // starts the initialization sequence (in cascade mode)
-	//io_wait();
 	outb(ICW1,0xA0);
-	//io_wait();
+
 	outb(ICW2_MASTER,0x21);      // ICW2: Master PIC vector offset
-	//io_wait();
 	outb(ICW2_SLAVE,0xA1);       // ICW2: Slave PIC vector offset
-	//io_wait();
+
 	outb(ICW3_MASTER,0x21);      // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
-	//io_wait();
 	outb(ICW3_SLAVE,0xA1);       // ICW3: tell Slave PIC its cascade identity (0000 0010)
-	//io_wait();
  
 	outb(ICW4,0x21);
-	//io_wait();
 	outb(ICW4,0xA1);
-	//io_wait();
 	
 	outb(master_mask, 0x21); 
     outb(slave_mask, 0xA1);  
-		
-	//master_mask=inb(0x21);  
-	//slave_mask=inb(0xA1);
-	
-	//outb(master_mask,0x21);   // restore saved masks.
-	//outb(slave_mask,0xA1);
+
 }
 
 /* Enable (unmask) the specified IRQ */

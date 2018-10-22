@@ -17,7 +17,7 @@ static inline void assertion_failure(){
 	asm volatile("int $15");
 }
 
-/* Counter for RTC interrupts */
+/* Counter for RTC interrupts declared in RTC.c */
 extern int RTC_ctr;
 
 
@@ -48,18 +48,51 @@ int idt_test(){
 	return result;
 }
 
+
+/*
+* exception_de_test()
+*   DESCRIPTION: This is a simple test to trigger a divide by zero
+* 		exception (by dividing an integer by 0 of course).
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: int 1 (should not be reached)
+*   NOTE: variable declaration line triggers a compiler warning, 
+*		  uncomment to use test case.
+*/
 int exception_de_test(){
 	TEST_HEADER;
 	// int a = 1/0;			/* Uncomment this to run test */
 	return 1;
 }
 
+
+/*
+* exception_test()
+*   DESCRIPTION: This is a simple test to trigger an exception.
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: int 1 (should not be reached)
+*/
 int exception_test(){
     TEST_HEADER;
     asm volatile("int $1");
     return 1;
 }
 
+
+/*
+* page_fault_test()
+*   DESCRIPTION: This is a positive test case that should pass. This tests
+*		page faults by attempting to dereference valid memory at address
+*		0xb8000 (this is where video memory is stored). Page fault should not
+*		trigger an exception here.
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: int PASS
+*/
 int page_nofault_test(){
     // TEST_HEADER;
 	// int *a = 0xb8000;
@@ -73,6 +106,18 @@ int page_nofault_test(){
     return PASS;
 }
 
+
+/*
+* page_fault_test()
+*   DESCRIPTION: This is a negative test case that should fail. This tests
+*		page faults by attempting to dereference inaccessible memory at
+*		address 0x00000.
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: int FAIL
+*	SIDE EFFECTS : triggers page fault
+*/
 int page_fault_test(){
     // TEST_HEADER;
 	// int *a = 0x00000;
@@ -85,6 +130,7 @@ int page_fault_test(){
 	printf("%d\n", b);
     return FAIL;
 }
+
 
 /*
 * RTC_test

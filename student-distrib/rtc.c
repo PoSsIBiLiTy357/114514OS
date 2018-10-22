@@ -6,8 +6,8 @@
 
 #include "rtc.h"
 
+/* Counter for how many times interrupt handler is reached */
 int RTC_ctr = 0;
-
 
 /*
 * rtc_init
