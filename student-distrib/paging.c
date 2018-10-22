@@ -93,10 +93,22 @@ void paging_init(){
 /* the PSE flag in CR4 is set, both 4-MByte pages and page tables for 4-KByte pages can
 be accessed from the same page directory
 */
-asm(
-
-
-
-);
+    
+    //1. page_dir address to cr3
+    //2. set paging and protection bits of cr0
+    //3. set cr4 to enable 4bits
+    //0x00000010 for enabling 4mb size
+    //0x80000001 for enabling protected mode and paging mode
+    __asm__ ( "leal page_dir,%eax;"
+              "movl %eax,%cr3;"            
+              
+              "movl %cr4, %eax;"
+              "orl $0x00000010, %eax;"
+              "movl %eax, %cr4;"
+              
+              "movl %cr0,%eax;"
+              "orl $0x80000001, %eax;"
+              "movl %eax,%cr0;"
+    );
 
 }
