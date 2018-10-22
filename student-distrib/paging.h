@@ -71,5 +71,7 @@ typedef union pt_entry_t {
     } __attribute__ ((packed));
 } pt_entry_t;
 
-extern pte_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
-extern pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
+pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
+pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096)));
+
+#endif  /* _PAGING_H */

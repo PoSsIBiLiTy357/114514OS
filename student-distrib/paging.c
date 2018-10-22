@@ -3,7 +3,7 @@
 #include "paging.h"
 
 
-void pdt_init_kb(int idx){
+void pdt_init_kb(int idx) {
 
        pdt_entry_t pdt_entry;
        pdt_entry.kb.pt_present  = 0;
@@ -18,7 +18,7 @@ void pdt_init_kb(int idx){
        pdt_entry.kb.pt_avail    = 0;
        pdt_entry.kb.pt_base_addr = 0;
 
-       page_directory[idx] = pdt_entry
+       page_directory[idx] = pdt_entry;
 
 }
 
@@ -92,10 +92,10 @@ void paging_init(){
 /* the PSE flag in CR4 is set, both 4-MByte pages and page tables for 4-KByte pages can
 be accessed from the same page directory
 */
-asm(
+// asm(
 
 
 
-);
+// );
 
 }
