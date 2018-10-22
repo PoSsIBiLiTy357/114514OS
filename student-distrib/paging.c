@@ -82,6 +82,8 @@ void paging_init(){
     page_directory[1].mb.pt_present = 1;
     page_directory[1].mb.pt_base_addr = 1;
 
+    printf("PAGE_dir 0 1 OK\n", );
+
     for(i = 2; i < PAGE_ENTRY_SIZE; i++){
         pdt_init_mb(i);
         page_directory[i].mb.pt_base_addr = i;
@@ -98,12 +100,12 @@ void paging_init(){
     page_table[0xB8].page_rw = 1;
     page_table[0xB8].page_cache_da = 1;
 
-
+    printf("PAGE_INIT OK\n", );
 
     __asm__ (
 
               //page_directory address to cr3
-              "leal page_directory,%eax; \n"
+              "leal %0,%eax; \n"
               "movl %eax,%cr3;           \n"
 
               //set PSE(bit4) of cr4 4-MB page enable
