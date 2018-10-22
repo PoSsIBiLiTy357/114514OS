@@ -10,6 +10,9 @@
 #define PIC1 
 #define PIC2
 
+#define MSTR_NUM_IRQS			8
+#define MSTR_IRQ2_MASK			2
+
 
 /* Interrupt masks to determine which interrupts are enabled and disabled */
 uint8_t master_mask; /* IRQs 0-7  */
@@ -18,23 +21,23 @@ uint8_t slave_mask;  /* IRQs 8-15 */
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
 	
-	master_mask=0xFB;  
-	slave_mask=0xFF;
+	master_mask = 0xFB;  
+	slave_mask = 0xFF;
 	
-	outb(ICW1,0x20);  // starts the initialization sequence (in cascade mode)
-	outb(ICW1,0xA0);
+	outb(ICW1, MASTER_8259_PORT);  // starts the initialization sequence (in cascade mode)
+	outb(ICW1, SLAVE_8259_PORT);
 
-	outb(ICW2_MASTER,0x21);      // ICW2: Master PIC vector offset
-	outb(ICW2_SLAVE,0xA1);       // ICW2: Slave PIC vector offset
+	outb(ICW2_MASTER, MASTER_DATA_PORT);      // ICW2: Master PIC vector offset
+	outb(ICW2_SLAVE, SLAVE_DATA_PORT);       // ICW2: Slave PIC vector offset
 
-	outb(ICW3_MASTER,0x21);      // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
-	outb(ICW3_SLAVE,0xA1);       // ICW3: tell Slave PIC its cascade identity (0000 0010)
+	outb(ICW3_MASTER,MASTER_DATA_PORT);      // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+	outb(ICW3_SLAVE,SLAVE_DATA_PORT);       // ICW3: tell Slave PIC its cascade identity (0000 0010)
  
-	outb(ICW4,0x21);
-	outb(ICW4,0xA1);
+	outb(ICW4,MASTER_DATA_PORT);
+	outb(ICW4,SLAVE_DATA_PORT);
 	
-	outb(master_mask, 0x21); 
-    outb(slave_mask, 0xA1);  
+	outb(master_mask, MASTER_DATA_PORT); 
+    outb(slave_mask, SLAVE_DATA_PORT);  
 
 }
 
@@ -44,13 +47,13 @@ void enable_irq(uint32_t irq_num) {
     uint8_t value;
 	
  
-    if(irq_num < 8) {
-        port = 0x21;
+    if(irq_num < MSTR_NUM_IRQS) {
+        port = MASTER_DATA_PORT;
 		value = master_mask & ~(1 << irq_num);
 		master_mask = value;
     } else {
-        port = 0xA1;
-        irq_num -= 8;
+        port = SLAVE_DATA_PORT;
+        irq_num -= MSTR_NUM_IRQS;
 		value = slave_mask & ~(1 << irq_num);
 		slave_mask = value;
     }
@@ -62,25 +65,25 @@ void disable_irq(uint32_t irq_num) {
 	uint16_t port;
     uint8_t value;
  
-    if(irq_num < 8) {
-        port = 0x21;
+    if(irq_num < MSTR_NUM_IRQS) {
+        port = MASTER_DATA_PORT;
 		 value = master_mask | (1 << irq_num);
 		 master_mask = value;
     } else {
-        port = 0xA1;
-        irq_num -= 8;
+        port = SLAVE_DATA_PORT;
+        irq_num -= MSTR_NUM_IRQS;
 		value = slave_mask | (1 << irq_num);
 		slave_mask = value;
     }
-    outb(value,port);  	
+    outb(value, port);  	
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num) {
-	if(irq_num >= 8){
-		irq_num-=8;
-		outb(EOI|irq_num,SLAVE_8259_PORT);
-		outb(EOI|2,MASTER_8259_PORT);
+	if(irq_num >= MSTR_NUM_IRQS){
+		irq_num -= MSTR_NUM_IRQS;
+		outb(EOI | irq_num, SLAVE_8259_PORT);
+		outb(EOI | MSTR_IRQ2_MASK, MASTER_8259_PORT);
 	} 
-	outb(EOI|irq_num,MASTER_8259_PORT);
+	outb(EOI | irq_num, MASTER_8259_PORT);
 }

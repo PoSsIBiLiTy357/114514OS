@@ -5,9 +5,10 @@
 #include "idt.h"
 #include "x86_desc.h"
 
-//#include "interrupt_service_wrapper.h"
 #define SYSTEM_CALL 0x80
 #define KERNAL_SEG 0x0010
+
+
 void exception_0_de(){
 	cli();
 	clear();

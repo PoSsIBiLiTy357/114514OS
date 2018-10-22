@@ -145,15 +145,15 @@ int page_fault_test(){
 */
 void RTC_test() {
 	/* Print the test header only once */
-	if (RTC_ctr == 11) { TEST_HEADER; }
+	if (RTC_ctr == RTC_HEADER_CHK) { TEST_HEADER; }
 
 	/* Prints count of how many interrupts have been hit and increments ctr */
-	if (RTC_ctr < 25 && RTC_ctr >= 10) {
-		printf("Interrupt no. %d\n", (RTC_ctr - 10));
+	if (RTC_ctr < RTC_HEADER_LIM && RTC_ctr >= RTC_START_PRIN) {
+		printf("Interrupt no. %d\n", (RTC_ctr - RTC_START_PRIN));
 	}
 
 	/* Stops counting after 15 interrupts */
-	if (RTC_ctr == 25) {
+	if (RTC_ctr == RTC_HEADER_LIM) {
 		printf("This is the 15th successful interrupt, end of test.");
 	}
 }

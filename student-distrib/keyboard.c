@@ -15,13 +15,11 @@ void init_keyboard(void)
 
 void keyboard_handler(void){
 	cli();
-	//printf("djvfsbdjkvnjkfvnk");
 	send_eoi(1);
 	sti();
 	unsigned char pressed;
 	while ((inb(0x64)&0x01)!=0){
 		pressed=inb(0x60);
-		//clear();
 		printf("%c",scan_code[(int)pressed]);
 	}
 

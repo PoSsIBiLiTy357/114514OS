@@ -36,7 +36,7 @@ void rtc_init() {
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
     prev_A = inb(CMOS_DATA);
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
-    outb((prev_A & RATE_MASK) | DIV_FREQ_2, CMOS_DATA);
+    outb((prev_A & RATE_MASK) | DIV_FREQ_2, CMOS_DATA); /* modifies frequency, needs work */
 
     /* Enabling IRQ 8 */
     outb(DISABLE_NMI | STATUS_REG_B, CMOS_ADDR);        /* Disable NMI in register B    */
@@ -64,8 +64,8 @@ void rtc_int_handler() {
     cli();
 
     /* Clear screen only once and call RTC_tests() defined in tests.c */
-    if (RTC_ctr == 10) { clear(); }
-    if (RTC_ctr++ >= 10) { RTC_test(); }
+    if (RTC_ctr == RTC_START_PRIN) { clear(); }
+    if (RTC_ctr++ >= RTC_START_PRIN) { RTC_test(); }
 
     /* Re-enable interrupts by discarding interrupt mask in register C */
     outb(STATUS_REG_C, CMOS_ADDR);              /* Select register C            */
