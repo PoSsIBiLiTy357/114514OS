@@ -95,15 +95,16 @@ int exception_test(){
 */
 int page_nofault_test(){
     // TEST_HEADER;
-	// int *a = 0xb8000;
+	// int *a = 0x00000;
 	// int b = a;
 	// printf("%d\n", b);
-    // return PASS;
+    // return FAIL;
 	TEST_HEADER;
-	unsigned long *a = (unsigned long*)0xb8000;
-	unsigned long b = (unsigned long)a;
-	printf("%d\n", b);
-    return PASS;
+	unsigned long *a = 0x00000;
+	unsigned long b = *a;
+	b++;
+	printf("%d\n", *a);
+    return FAIL;
 }
 
 
