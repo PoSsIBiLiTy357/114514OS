@@ -8,6 +8,7 @@
 
 #include "lib.h"
 #include "i8259.h"
+#include "tests.h"
 
 #define STATUS_REG_A    0x0A
 #define STATUS_REG_B    0x0B

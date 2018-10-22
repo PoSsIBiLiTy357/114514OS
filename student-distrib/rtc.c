@@ -6,7 +6,7 @@
 
 #include "rtc.h"
 
-int clr_flag = 0;
+int RTC_ctr = 0;
 
 
 /*
@@ -64,8 +64,8 @@ void rtc_int_handler() {
     cli();
 
     /* Clear screen only once and call RTC_tests() defined in tests.c */
-    //if (clr_flag++ == 0) { clear(); }
-    //RTC_test();
+    if (RTC_ctr == 10) { clear(); }
+    if (RTC_ctr++ >= 10) { RTC_test(); }
 
     /* Re-enable interrupts by discarding interrupt mask in register C */
     outb(STATUS_REG_C, CMOS_ADDR);              /* Select register C            */

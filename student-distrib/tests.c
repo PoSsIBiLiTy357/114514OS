@@ -18,8 +18,7 @@ static inline void assertion_failure(){
 }
 
 /* Counter for RTC interrupts */
-static int RTC_ctr = 0;
-extern int clr_flag;
+extern int RTC_ctr;
 
 
 /* Checkpoint 1 tests */
@@ -89,14 +88,12 @@ int page_fault_test(){
 */
 void RTC_test() {
 	/* Print the test header only once */
-	if (clr_flag == 1) { TEST_HEADER; }
+	if (RTC_ctr == 11) { TEST_HEADER; }
 
 	/* Prints count of how many interrupts have been hit and increments ctr */
-	if (RTC_ctr < 25 && RTC_ctr > 10) {
+	if (RTC_ctr < 25 && RTC_ctr >= 10) {
 		printf("Interrupt no. %d\n", (RTC_ctr - 10));
-		//RTC_ctr++;
 	}
-	RTC_ctr++;
 
 	/* Stops counting after 15 interrupts */
 	if (RTC_ctr == 25) {
