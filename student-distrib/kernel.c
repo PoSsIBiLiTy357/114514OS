@@ -10,8 +10,8 @@
 #include "tests.h"
 #include "idt.h"
 #include "keyboard.h"
-
-#define RUN_TESTS   0
+#include "paging.h"
+#define RUN_TESTS   1
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -145,6 +145,7 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
     idt_init();
     lidt(idt_desc_ptr);
+	paging_init();
     init_keyboard();
 
     rtc_init();
