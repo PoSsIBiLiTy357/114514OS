@@ -13,6 +13,9 @@
 #define MSTR_NUM_IRQS			8
 #define MSTR_IRQ2_MASK			2
 
+#define PIC_MSTR_MASK		 0xFB
+#define PIC_SLAV_MASK		 0xFF
+
 
 /* Interrupt masks to determine which interrupts are enabled and disabled */
 uint8_t master_mask; /* IRQs 0-7  */
@@ -21,8 +24,8 @@ uint8_t slave_mask;  /* IRQs 8-15 */
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
 	
-	master_mask = 0xFB;  
-	slave_mask = 0xFF;
+	master_mask = PIC_MSTR_MASK;  
+	slave_mask = PIC_SLAV_MASK;
 	
 	outb(ICW1, MASTER_8259_PORT);  // starts the initialization sequence (in cascade mode)
 	outb(ICW1, SLAVE_8259_PORT);

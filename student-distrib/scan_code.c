@@ -40,12 +40,24 @@
 #define   M		50
 
 
-char scan_code[255];
+/* array to store all scan codes */
+char scan_code[NUM_SCAN_CODES];
 
 
+/*
+* init_scan_code()
+*   DESCRIPTION: Keyboards send data to the computer via a number or
+*		sequence of numbers called scancodes. These scancodes are 
+*		a pre-defined standard for keyboards. This function clears an
+*		array of size 256 and proceeds to map each scan code to a character.
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*/
 void init_scan_code(){
 	int i;
-	for (i=0;i<255;i++){
+	for (i = 0; i < NUM_SCAN_CODES; i++){
 		scan_code[i]=0;
 	}
 	
