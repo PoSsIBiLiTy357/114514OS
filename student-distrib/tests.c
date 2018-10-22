@@ -62,7 +62,9 @@ int idt_test(){
 */
 int exception_de_test(){
 	TEST_HEADER;
-	// int a = 1/0;			/* Uncomment this to run test */
+	int a = 1;			/* Uncomment this to run test */
+	int b = 0;
+	a = a/b;
 	return 1;
 }
 
