@@ -4,13 +4,15 @@
 #include "types.h"
 #include "lib.h"
 
+#define PAGE_ENTRY_SIZE 1024
+#define PT_VIDEO 0Xb8
 
-extern void paging_init();
 
 /* An page descriptor entry (goes into the PDT) */
 typedef union pdt_entry_t {
     uint32_t val;
 
+    /*4KB page descriptor entry*/
     struct kb {
 
         uint32_t pt_present  : 1;
@@ -27,7 +29,7 @@ typedef union pdt_entry_t {
 
     }__attribute__ ((packed)) kb;
 
-
+    /*4MB page descriptor entry*/
     struct mb {
 
         uint32_t pt_present  : 1;
@@ -71,7 +73,21 @@ typedef union pt_entry_t {
     } __attribute__ ((packed));
 } pt_entry_t;
 
+/*initialize 4kb pde */
+void pdt_init_kb(int idx);
 
+/*initialize 4mb pde */
+void pdt_init_mb(int idx);
+
+/*initialize pte */
+void pt_init(int idx);
+
+/*initialize paging for checkpoint 1 */
+void paging_init();
+
+
+pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page table
+pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page directory entry
 
 
 
