@@ -77,3 +77,5 @@ void rtc_int_handler() {
     /* Re-enable other incoming interrupts */
     sti();
 }
+
+/* Thi s is a test */
