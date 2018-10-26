@@ -165,7 +165,7 @@ void RTC_test() {
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
-//	TEST_OUTPUT("page_fault_test", page_fault_test());
+	//TEST_OUTPUT("page_fault_test", page_fault_test());
 	
 	//TEST_OUTPUT("exception_de_test", exception_de_test());
 	//TEST_OUTPUT("exception_test", exception_test());
