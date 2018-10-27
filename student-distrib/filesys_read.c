@@ -4,7 +4,7 @@
 #include "types.h"
 
 #define DENTRY_START_OFFSET 64
-
+#define INODE_START_OFFSET  128
 
 
 void read_filesys_bootblock(){
@@ -14,6 +14,7 @@ void read_filesys_bootblock(){
     num_inodes     = (int32_t *)(bootBlk_addr + NUM_INODE_OFFSET);
     num_dataBlocks = (int32_t *)(bootBlk_addr + NUM_DBLK_OFFSET);
     dentry_start   = (dentry_t *)(bootBlk_addr + DENTRY_START_OFFSET);
+    inode_start   = (dentry_t *)(bootBlk_addr + INODE_START_OFFSET);
 
 }
 
@@ -38,6 +39,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
     char *i_fname;
     for(i = 1; i < num_dentry; i++){
         i_fname = dentry_start[i].fname;
+        if(strlen(fname) != strlen(i_fname)) continue;
         if(strcmp(fname, i_fname)){
             
             memcpy( dentry->fname, dentry_start[i].fname, sizeof(dentry_start[i].fname));
@@ -74,10 +76,49 @@ length bytes starting from position offset in the file with inode number inode a
 read and placed in the buffer. A return value of 0 thus indicates that the end of the file has been reached. */
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
 
-    
+    dentry_t *target_inode;
+
+    if(inode >= num_inodes) return -1;
+
+    target_inode = inode_start[inode];
     
     
 }
 
 
 
+
+
+
+
+int32_t filesys_write()
+{
+    return -1;
+}
+
+int32_t filesys_open()
+{
+    return 0;
+}
+
+int32_t filesys_close()
+{
+    return 0;
+}
+
+int32_t dir_open()
+{
+    //current_dir_read_index = 0;
+    return 0;
+}
+
+int32_t dir_close()
+{
+    //current_dir_read_index = 0;
+    return 0;
+}
+
+int32_t dir_write()
+{
+    return -1;
+}

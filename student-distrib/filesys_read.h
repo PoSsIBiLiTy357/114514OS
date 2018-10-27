@@ -11,6 +11,7 @@ static int32_t num_dentry;
 static int32_t num_inodes;
 static int32_t num_dataBlocks;
 static dentry_t *dentry_start;
+static dentry_t *inode_start;
 
 typedef struct dentry_t{
 
