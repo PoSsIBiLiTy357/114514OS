@@ -1,5 +1,7 @@
 #include <string.h>
 #include "filesys_read.h"
+#include "lib.h"
+#include "types.h"
 
 #define MAX_FILE_NUM 63
 #define NUM_INODE_OFFSET 4
@@ -35,13 +37,16 @@ in the case of the last routine */
  */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
 
+    int i;
     char *i_fname;
     for(i = 0; i < num_entries; i++){
         *i_fname = ((int32_t *)(bootBlk_addr + (i+1)*64));
         if(strcmp(fname, i_fname)){
             
-            
-            memcpy(void* dest, const void* src, uint32_t n)
+            dentry->inode = dir_table[i].inode;
+            dentry->fileType = dir_table[i].fileType;
+            memcpy( dentry->reserved, dir_table[i].reserved, sizeof(dir_table[i].reserved) );
+            memcpy( dentry->fileName, dir_table[i].fileName, sizeof(dir_table[i].fileName) );
 
             return 0;
         }
@@ -53,8 +58,13 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
 
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry){
 
+    if( (index >= num_dir_entry) || (index<0) ) return -1;
 
-
+    dentry->inode = //dir_table[index].inode;
+    dentry->fileType = //dir_table[index].fileType;
+    memcpy( dentry->reserved, /* */, sizeof(dir_table[index].reserved) );
+    memcpy( dentry->fileName, /* */, sizeof(dir_table[index].fileName) );
+    return 0;
 
 }
 
