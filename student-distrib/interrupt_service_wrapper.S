@@ -1,7 +1,7 @@
 #https://wiki.osdev.org/Interrupt_Service_Routines
 
 
-#include "x86_desc.h"
+
 .globl keyboard_handler_asm
 .globl  rtc_handler_asm 
 .align   4
@@ -19,3 +19,4 @@ rtc_handler_asm:
     call rtc_int_handler
     popa
     iret
+    

@@ -6,7 +6,7 @@
 #define KBRD_STATUS_PORT		0x64
 #define KBRD_DATA_PORT			0x60
 
-static caplk_pressd;
+static int caplk_pressd;
 
 
 /* init_keyboard
@@ -50,7 +50,7 @@ void keyboard_handler(void){
 				}
 		}
 		else{
-			if (scan_code[(int)pressed]!=0){
+			if (scan_code[(int)pressed]!=0 ){
 				putc(shift_convert[(int)pressed]);  //get letter
 			}
 		}

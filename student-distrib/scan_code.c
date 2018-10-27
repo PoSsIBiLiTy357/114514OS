@@ -223,13 +223,13 @@ void init_scan_code(){
     scan_code[RSB]	=	']';
 	scan_code[BS] = '\\';
     scan_code[FENHAO]=	';';
-    scan_code[SQ]	=	''';
+    scan_code[SQ]	=	'\'';
     scan_code[COMMA]=	',';
     scan_code[POINT]=	'.';
 	scan_code[SLASH]= '/';
 	scan_code[TAB] = '	';
 	scan_code[ENTER]= '\n';
-	
+	scan_code[SPACE]= ' ';
 	
 	shift_convert[DASH]	= '_';
 	shift_convert[EQUAL]= '+';	
