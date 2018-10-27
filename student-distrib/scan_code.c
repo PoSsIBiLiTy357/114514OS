@@ -11,6 +11,27 @@
 #define   EIGHT     0x09
 #define   NINE      0x0A
 #define   TEN    	0x0B
+#define	  BACKTICK	0x29
+#define	  BS 		0x2B
+#define   SLASH		0x35
+#define   ENTER		0x1C
+
+#define KEYPAD0	82
+#define KEYPAD1	79
+#define KEYPAD2	80
+#define KEYPAD3	81
+#define KEYPAD4	75
+#define KEYPAD5	76
+#define KEYPAD6	77
+#define KEYPAD7	71
+#define KEYPAD8	72
+#define KEYPAD9	73
+#define KEYPADENTER	96
+#define KEYPADPLUS	78
+#define KEYPADMINUS	74
+
+#define KEYPADMUL 0x37
+ 
 
 #define   Q		0x10
 #define   W		0x11
@@ -127,6 +148,7 @@ void init_scan_code(){
 	shift_convert[X]='X';
     shift_convert[C]='C';
 	
+	shift_convert[BACKTICK]= '~';
 	shift_convert[ONE]='!';
 	shift_convert[TWO]='@';
 	shift_convert[THREE]='#';
@@ -167,6 +189,7 @@ void init_scan_code(){
     scan_code[N]='n';
     scan_code[M]='m';
 	
+	scan_code[BACKTICK] = '`';
 	scan_code[ONE]='1';
 	scan_code[TWO]='2';
 	scan_code[THREE]='3';
@@ -178,7 +201,45 @@ void init_scan_code(){
 	scan_code[NINE]='9';
 	scan_code[TEN]='0';
 	
-	scan_code[]=;
+	scan_code[KEYPAD0] = '0';
+	scan_code[KEYPAD1] = '1';
+	scan_code[KEYPAD2] = '2';
+    scan_code[KEYPAD3] = '3';
+    scan_code[KEYPAD4] = '4';
+    scan_code[KEYPAD5] = '5';
+    scan_code[KEYPAD6] = '6';
+    scan_code[KEYPAD7] = '7';
+    scan_code[KEYPAD8] = '8';
+    scan_code[KEYPAD9] = '9';
+	scan_code[KEYPADENTER] = '\n';
+	scan_code[KEYPADPLUS] = '+';
+	scan_code[KEYPADMINUS] = '-';
+	scan_code[KEYPADMUL] = '*';
+
 	
+	scan_code[DASH]	= '-';
+    scan_code[EQUAL]= '=';	
+    scan_code[LSB]	='[';
+    scan_code[RSB]	=	']';
+	scan_code[BS] = '\\';
+    scan_code[FENHAO]=	';';
+    scan_code[SQ]	=	''';
+    scan_code[COMMA]=	',';
+    scan_code[POINT]=	'.';
+	scan_code[SLASH]= '/';
+	scan_code[TAB] = '	';
+	scan_code[ENTER]= '\n';
+	
+	
+	shift_convert[DASH]	= '_';
+	shift_convert[EQUAL]= '+';	
+	shift_convert[LSB]	='{';
+	shift_convert[RSB]	=	'}';
+	shift_convert[BS] = '|';
+	shift_convert[FENHAO]=	':';
+	shift_convert[SQ]	=	'"';
+	shift_convert[COMMA]=	'<';
+	shift_convert[POINT]=	'>';
+	shift_convert[SLASH]= '?';
 	
 }
