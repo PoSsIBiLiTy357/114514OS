@@ -39,7 +39,7 @@ void keyboard_handler(void){
 	unsigned char pressed;
 	while ((inb(KBRD_STATUS_PORT)&0x01)!=0){  // only read from data port when the status is ready
 		pressed=inb(KBRD_DATA_PORT);   //get key code
-		printf("%c",scan_code[(int)pressed]);  //get letter
+		putc(scan_code[(int)pressed]);  //get letter
 	}
 
 }

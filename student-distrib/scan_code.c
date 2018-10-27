@@ -39,8 +39,12 @@
 #define   N		49
 #define   M		50
 
-#define CAPSLOCK	58
-
+#define 	BACKSPACE	14
+#define 	TAB			15
+#define 	LEFTSHIFT	42
+#define 	RIGHTSHIFT	54
+#define 	SPACE		57
+#define 	CAPSLOCK	58
 
 #define 	DASH	12
 #define 	EQUAL	13
@@ -50,6 +54,28 @@
 #define		SQ		0x28
 #define 	COMMA	51
 #define 	POINT	52
+
+#define 	F1             59
+#define 	F2             60
+#define 	F3             61
+#define 	F4             62
+#define 	F5             63
+#define 	F6             64
+#define 	F7             65
+#define 	F8             66
+#define 	F9             67
+#define 	F10            68
+#define 	F11            87
+#define 	F12            88
+
+#define 	PAGEUP			104
+#define 	PAGEDOWN        109
+#define 	HOME            102
+#define 	END             107
+#define 	INSERT          110
+#define 	DELETE          111
+
+
 
 #define NUM_CONVERT 80
 
