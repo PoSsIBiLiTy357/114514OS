@@ -78,4 +78,3 @@ void rtc_int_handler() {
     sti();
 }
 
-/* Thi s is a test */
