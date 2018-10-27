@@ -1,20 +1,19 @@
 #include <string.h>
 #include "filesys_read.h"
+#include "lib.h"
+#include "types.h"
 
-#define MAX_FILE_NUM 63
-#define NUM_INODE_OFFSET 4
-#define NUM_DBLK_OFFSET 8
+#define DENTRY_START_OFFSET 64
 
-static int32_t num_entries;
-static int32_t num_inodes;
-static int32_t num_dataBlocks;
+
 
 void read_filesys_bootblock(){
 
     int i;
-    num_entries =(int32_t *)bootBlk_addr;
-    num_inodes = (int32_t *)(bootBlk_addr + NUM_INODE_OFFSET);
-    num_dataBlocks =(int32_t *)(bootBlk_addr + NUM_DBLK_OFFSET);
+    num_dentry     = (int32_t *)bootBlk_addr;
+    num_inodes     = (int32_t *)(bootBlk_addr + NUM_INODE_OFFSET);
+    num_dataBlocks = (int32_t *)(bootBlk_addr + NUM_DBLK_OFFSET);
+    dentry_start   = (dentry_t *)(bootBlk_addr + DENTRY_START_OFFSET);
 
 }
 
@@ -35,14 +34,17 @@ in the case of the last routine */
  */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
 
+    int i;
     char *i_fname;
-    for(i = 0; i < num_entries; i++){
-        *i_fname = ((int32_t *)(bootBlk_addr + (i+1)*64));
+    for(i = 1; i < num_dentry; i++){
+        i_fname = dentry_start[i].fname;
         if(strcmp(fname, i_fname)){
             
+            memcpy( dentry->fname, dentry_start[i].fname, sizeof(dentry_start[i].fname));
+            dentry->ftype = dentry_start[i].ftype;
+            dentry->inode = dentry_start[i].inode;
+            memcpy( dentry->reserved, dentry_start[i].reserved, sizeof(dentry_start[i].reserved));
             
-            memcpy(void* dest, const void* src, uint32_t n)
-
             return 0;
         }
     }
@@ -53,8 +55,14 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
 
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry){
 
+    if( (index >= num_dentry) || (index < 0) ) return -1;
 
+    memcpy( dentry->fname, dentry_start[index].fname, sizeof(dentry_start[index].fname));
+    dentry->ftype = dentry_start[index].ftype;
+    dentry->inode = dentry_start[index].inode;
+    memcpy( dentry->reserved, dentry_start[index].reserved, sizeof(dentry_start[index].reserved));
 
+    return 0;
 
 }
 
@@ -66,9 +74,10 @@ length bytes starting from position offset in the file with inode number inode a
 read and placed in the buffer. A return value of 0 thus indicates that the end of the file has been reached. */
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
 
-
-
-
+    
 
     
 }
+
+
+

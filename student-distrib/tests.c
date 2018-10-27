@@ -1,6 +1,7 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "filesys_read.h"
 
 #define PASS 1
 #define FAIL 0
@@ -156,6 +157,26 @@ void RTC_test() {
 // add more tests here
 
 /* Checkpoint 2 tests */
+
+void print_allfiles(){
+
+    int i;
+	char name[32];
+    
+    for(i = 0; i < num_dentry; i++){
+        
+        name = dentry_start[i].fname;
+		if(name == NULL) continue;
+        printf("file_name: %s   ", name);
+		printf("file_type: %s\n", dentry_start[i].ftype);
+
+    }
+
+
+
+}
+
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -167,6 +188,7 @@ void launch_tests(){
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
 	//TEST_OUTPUT("page_fault_test", page_fault_test());
 	
+	TEST_OUTPUT("print_allfiles", print_allfiles());
 	//TEST_OUTPUT("exception_de_test", exception_de_test());
 	//TEST_OUTPUT("exception_test", exception_test());
 	
