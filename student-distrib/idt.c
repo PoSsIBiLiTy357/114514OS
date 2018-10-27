@@ -4,7 +4,7 @@
 #include "lib.h"
 #include "idt.h"
 #include "x86_desc.h"
-
+#include "interrupt_service_wrapper.h"
 #define SYSTEM_CALL 0x80
 #define KERNAL_SEG 0x0010
 #define ARCH_DEFINED 32
@@ -430,8 +430,8 @@ void idt_init(){
 	for (i = 20; i < NUM_VEC; i++){                      //we haveall entry other than arch defined are set to user defined general handler
 		SET_IDT_ENTRY(idt[i], exception_user_defined);
 	}
-	SET_IDT_ENTRY(idt[0x21], keyboard_handler);         //set keyboard 0X21 is th keyboard handler, which is PIC+1
-	SET_IDT_ENTRY(idt[0x28], rtc_int_handler);          //set RTC 0X28 is the rtc handler, which is PIC+8
+	SET_IDT_ENTRY(idt[0x21], keyboard_handler_asm);         //set keyboard 0X21 is th keyboard handler, which is PIC+1
+	SET_IDT_ENTRY(idt[0x28], rtc_handler_asm);          //set RTC 0X28 is the rtc handler, which is PIC+8
 	
 	idt[SYSTEM_CALL].reserved3 = 1;		//system call handler is trap gate
 
