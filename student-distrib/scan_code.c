@@ -152,7 +152,7 @@ void init_scan_code(){
 	scan_code[NINE]='9';
 	scan_code[TEN]='0';
 	
-	scan_code[]=;
+	//scan_code[]=;
 	
 	
 }
