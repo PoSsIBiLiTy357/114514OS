@@ -45,7 +45,7 @@ void rtc_init() {
     outb(prev_B | 0x40, CMOS_DATA);                     /* Write prev value and 6th bit */
 
     /* Re-enable other incoming interrupts */
-    sti();
+    //sti();
 }
 
 
@@ -75,6 +75,59 @@ void rtc_int_handler() {
     send_eoi(IRQ_RTC);
 
     /* Re-enable other incoming interrupts */
-    sti();
+    //sti();
 }
 
+
+/*
+* rtc_open
+*   DESCRIPTION: Initializes RTC frequendy to 2 Hz
+*
+*   INPUTS: const uint8_t * filename -- driver file for RTC
+*   OUTPUTS: return value
+*   RETURN VALUE: 0 on success, -1 for invalid filename
+*/
+int32_t rtc_open(const uint8_t * filename) {
+
+}
+
+
+/*
+* rtc_close
+*   DESCRIPTION: Closes passed in file descriptor
+*
+*   INPUTS: int32_t fd -- file descriptor
+*   OUTPUTS: return value
+*   RETURN VALUE: 0 on success, -1 for invalid filename
+*/
+int32_t rtc_close(int32_t fd) {
+
+}
+
+
+/*
+* rtc_read
+*   DESCRIPTION: Blocks until next interrupt
+*
+*   INPUTS: int32_t fd -- file descriptor
+*           void * buf -- ignore this 
+*           int32_t nbytes -- ignore this
+*   OUTPUTS: return 0
+*/
+int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
+
+}
+
+
+/*
+* rtc_write
+*   DESCRIPTION: Changes frequency of RTC
+*
+*   INPUTS: int32_t fd -- file descriptor
+*           void * buf -- contains the new frequency
+*           int32_t bytes -- size of frequency (4 bytes)
+*   OUTPUTS: return 0 on success, -1 on failure
+*/
+int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
+
+}
