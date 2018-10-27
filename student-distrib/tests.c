@@ -163,12 +163,12 @@ void print_allfiles(){
     int i;
 	char name[32];
     
+
     for(i = 0; i < num_dentry; i++){
         
-        name = dentry_start[i].fname;
-		if(name == NULL) continue;
-        printf("file_name: %s   ", name);
-		printf("file_type: %s\n", dentry_start[i].ftype);
+        for(j = 0; j < 32; j++){
+			
+		}
 
     }
 
