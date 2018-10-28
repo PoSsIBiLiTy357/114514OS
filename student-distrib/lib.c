@@ -32,15 +32,11 @@ void put_refresh_line(const  char* buf){
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + j) << 1)) = ' ';
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + j) << 1) + 1) = ATTRIB;     
     }
-    for (i=0;i<strlen(buf);i++){
-        if((buf[i]=='\n'||strlen(buf)>80) && screen_y == NUM_ROWS){ 
-        shift();
-        break;
-        }
-    }
-    screen_x = 0;
-    puts(buf);
 
+    screen_x = 0;
+
+    puts(buf);
+    if (screen_y >= NUM_ROWS-1) shift();
 }
 
 void shift(){
@@ -52,10 +48,10 @@ void shift(){
         }
     }
     for (j=0;j<NUM_COLS;j++){
-        *(uint8_t *)(video_mem + ((NUM_COLS * NUM_ROWS-1 + j) << 1)) = ' ';
-        *(uint8_t *)(video_mem + ((NUM_COLS * NUM_ROWS-1 + j) << 1) + 1) = ATTRIB;     
+        *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS-1) + j) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS-1) + j) << 1) + 1) = ATTRIB;     
     }
-    screen_y = NUM_ROWS -1;
+    screen_y-- ;
 
 }
 /* Standard printf().

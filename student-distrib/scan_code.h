@@ -5,7 +5,7 @@
 #define 	RIGHTSHIFT	54
 #define		LEFTSHIFT_R 0xAA
 #define		RIGHTSHIFT_R 0xB6
-
+#define     BACKSPACE 0x0E
 #define NUM_SCAN_CODES		255
 #define 	CAPSLOCK	58
 #define  NUM_CONVERT 80
