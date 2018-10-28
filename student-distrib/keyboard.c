@@ -59,6 +59,16 @@ void keyboard_handler(void){
 		if(pressed==LEFTSHIFT_R || pressed==RIGHTSHIFT_R){
 			shift_state=0;
 		}
+		if(scan_code[(int)pressed] == '\n'){
+			int i;
+			for(i=0;i<cursor_idx;i++){
+				keyboard_buffer[i]=0;
+			}
+			cursor_idx=0;
+			keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
+			cursor_idx++;
+			keyboard_buffer[cursor_idx]='_';
+		}
 		if(caplk_pressd==0){
 			if(shift_state==0){
 				if (scan_code[(int)pressed]!=0){
@@ -103,6 +113,7 @@ void keyboard_handler(void){
 			}
 		}
 		put_refresh_line(keyboard_buffer);
+		//puts(keyboard_buffer);
 	}
 
 }

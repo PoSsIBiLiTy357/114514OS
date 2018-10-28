@@ -26,10 +26,12 @@ void clear(void) {
 
 void put_refresh_line(const  char* buf){
 
-    int i;
+    int i,j;
 
-    *(uint8_t *)(video_mem + (i << 1)) = ' ';
-    *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+    for (j=0;j<NUM_COLS;j++){
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + j) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + j) << 1) + 1) = ATTRIB;     
+    }
     for (i=0;i<strlen(buf);i++){
         if((buf[i]=='\n'||strlen(buf)>80) && screen_y == NUM_ROWS){ 
         shift();
