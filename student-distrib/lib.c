@@ -24,6 +24,38 @@ void clear(void) {
     }
 }
 
+void put_refresh_line(const  char* buf){
+
+    int i;
+
+    *(uint8_t *)(video_mem + (i << 1)) = ' ';
+    *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+    for (i=0;i<strlen(buf);i++){
+        if((buf[i]='\n'||strlen(buf)>80) && screen_y == NUM_ROWS){ 
+        shift();
+        break;
+        }
+    }
+    screen_x = 0;
+    puts(buf);
+
+}
+
+void shift(){
+    int i,j;
+    for (i = 0; i<NUM_ROWS-1;i++){
+        for (j=0;j<NUM_COLS;j++){
+        *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1)) = *(video_mem + ((NUM_COLS * (i+1) + j) << 1));
+        *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+        }
+    }
+    for (j=0;j<NUM_COLS;j++){
+        *(uint8_t *)(video_mem + ((NUM_COLS * NUM_ROWS-1 + j) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * NUM_ROWS-1 + j) << 1) + 1) = ATTRIB;     
+    }
+    screen_y = NUM_ROWS -1;
+
+}
 /* Standard printf().
  * Only supports the following format strings:
  * %%  - print a literal '%' character
