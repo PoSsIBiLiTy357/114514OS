@@ -31,7 +31,7 @@ void put_refresh_line(const  char* buf){
     *(uint8_t *)(video_mem + (i << 1)) = ' ';
     *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     for (i=0;i<strlen(buf);i++){
-        if((buf[i]='\n'||strlen(buf)>80) && screen_y == NUM_ROWS){ 
+        if((buf[i]=='\n'||strlen(buf)>80) && screen_y == NUM_ROWS){ 
         shift();
         break;
         }
