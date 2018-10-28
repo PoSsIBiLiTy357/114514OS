@@ -160,28 +160,50 @@ int32_t dir_write()
 
 
 
-int print_allfiles(){
-/*
-    int i, j;
+int print_allfile_test(){
+
+    int i;
 
 	clear();
+    printf("***print_file_test***: \n");
+    printf("num_dentry: %d, num_inodes: %d, num_dataBlocks: %d\n", num_dentry,num_inodes,num_dataBlocks);
+
     for(i = 0; i < num_dentry; i++){
         
-		puts("fileName: ");
-        for(j = 0; j < 32; j++){
-			putc(dentry_start[i].fname[j]);
-		}
-		puts("fileType: ");
+        printf("NO: %d fileName: %s, fileType: %d, #inode: %d \n", i, dentry_start[i].fname, dentry_start[i].ftype, dentry_start[i].inode);
 
-		puts(dentry_start[i].ftype);
-
-		putc("\n");
     }
 
 	return 1;
-*/
-    printf("num_inodes: %d /", num_inodes);
-    printf("num_dentry: %d /", num_dentry);
-    printf("num_dataBlocks: %d ", num_dataBlocks);
-    return 1;
 }
+
+
+int read_file_test(int index){
+
+    int i, j, blk_offset, b_offset;
+    dentry_t d;
+    inode_t  inode;
+
+	clear();
+
+    read_dentry_by_index(index, &d);
+    printf("***read_file_test***: \n");
+    printf("d.fname: %s \n", d.fname);
+    printf("d.inode: %d \n", d.inode);
+
+    inode = inode_start[d.inode];
+    printf("length in B: %d\n",inode.length);
+    printf("data block #: %d\n",inode.data_block[0]);
+    blk_offset = inode.length/4096;
+    for(i = 0; i < blk_offset+1; i++){
+        
+        for(j = 0; j < inode.length; j++){
+            if(i != 0) b_offset = 4096*i;
+            putc( datablk(inode.data_block[i])+j - b_offset );
+        }
+
+    }
+
+	return 1;
+}
+
