@@ -7,6 +7,11 @@
 #define KBRD_DATA_PORT			0x60
 
 static int caplk_pressd;
+static int shift_state;
+static int ctrl_state;
+static int cursor_idx;
+
+char keyboard_buffer[128];
 
 
 /* init_keyboard
@@ -22,6 +27,10 @@ void init_keyboard(void)
 	
 	init_scan_code();
 	caplk_pressd=0;
+	shift_state=0;
+	cursor_idx=0;
+	memset(keyboard_buffer,0,sizeof(keyboard_buffer));
+	keyboard_buffer[cursor_idx]='_';
 	enable_irq(1);  //unmask IRQ1 of PIC
 	
 }
@@ -44,21 +53,65 @@ void keyboard_handler(void){
 		if(pressed==CAPSLOCK){
 			caplk_pressd= 1-caplk_pressd; 
 		}
-		if(caplk_pressd==0){
-				if (scan_code[(int)pressed]!=0){
-					putc(scan_code[(int)pressed]);  //get letter
-				}
+		if(pressed==LEFTSHIFT || pressed==RIGHTSHIFT){
+			shift_state=1;
 		}
-		else{
-			if (scan_code[(int)pressed]!=0 ){
-				putc(shift_convert[(int)pressed]);  //get letter
+		if(pressed==LEFTSHIFT_R || pressed==RIGHTSHIFT_R){
+			shift_state=0;
+		}
+		if(caplk_pressd==0){
+			if(shift_state==0){
+				if (scan_code[(int)pressed]!=0){
+					keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
+					cursor_idx++;
+					keyboard_buffer[cursor_idx]='_';
+				}
+			}
+			else{
+				if (scan_code[(int)pressed]!=0){
+					keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
+					cursor_idx++;
+					keyboard_buffer[cursor_idx]='_';
+				}
 			}
 		}
+		else{
+			if (scan_code[(int)pressed]!=0 && scan_code[(int)pressed]>96 &&  scan_code[(int)pressed]<122){
+				if(shift_state==0){
+					keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
+					cursor_idx++;
+					keyboard_buffer[cursor_idx]='_';
+				}
+				else{
+					keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
+					cursor_idx++;
+					keyboard_buffer[cursor_idx]='_';
+				}
+			
+			}
+			else if(scan_code[(int)pressed]!=0) {
+				if(shift_state==0){
+					keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
+					cursor_idx++;
+					keyboard_buffer[cursor_idx]='_';
+				}
+				else{
+					keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
+					cursor_idx++;
+					keyboard_buffer[cursor_idx]='_';
+				}
+			}
+		}
+		put_refresh_line(keyboard_buffer);
 	}
 
 }
 
 int terminal_read(){
+	return 0;
+}
+
+int terminal_write(){
 	return 0;
 }
 

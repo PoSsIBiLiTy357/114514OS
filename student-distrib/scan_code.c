@@ -64,6 +64,8 @@
 #define 	TAB			15
 #define 	LEFTSHIFT	42
 #define 	RIGHTSHIFT	54
+#define		LEFTSHIFT_R 0xAA
+#define		RIGHTSHIFT_R 0xB6
 #define 	SPACE		57
 #define 	CAPSLOCK	58
 
