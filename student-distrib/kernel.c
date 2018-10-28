@@ -18,6 +18,8 @@
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags, bit)   ((flags) & (1 << (bit)))
 
+uint32_t bootBlk_addr;
+
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
 void entry(unsigned long magic, unsigned long addr) {
@@ -148,6 +150,7 @@ void entry(unsigned long magic, unsigned long addr) {
     idt_init();
     lidt(idt_desc_ptr);
 	paging_init();
+    read_filesys_bootblock(bootBlk_addr);
     init_keyboard();
 
     rtc_init();

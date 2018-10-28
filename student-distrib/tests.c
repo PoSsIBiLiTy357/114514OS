@@ -158,24 +158,32 @@ void RTC_test() {
 
 /* Checkpoint 2 tests */
 
-void print_allfiles(){
+/*
+int print_allfiles(){
 
-    int i;
-	char name[32];
-    
+    int i, j;
+	int32_t num_dentry = (int32_t *)bootBlk_addr;
+	dentry_t *dentry_start = (dentry_t *)(bootBlk_addr + DENTRY_START_OFFSET);
 
+
+	clear();
     for(i = 0; i < num_dentry; i++){
         
+		puts("fileName: ");
         for(j = 0; j < 32; j++){
-			
+			putc(dentry_start[i].fname[j]);
 		}
+		puts("fileType: ");
 
+		puts(dentry_start[i].ftype);
+
+		putc("\n");
     }
 
-
+	return PASS;
 
 }
-
+*/
 
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
