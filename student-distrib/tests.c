@@ -441,7 +441,7 @@ void launch_tests(){
 	
 	/* File system tests */
 	//uint8_t fname[] = "frame0.txt";		/* select file name */
-	TEST_OUTPUT("print_allfile_test", print_allfile_test());
+	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
 	//TEST_OUTPUT("read_file_test", read_file_test(fname));
 
 }
