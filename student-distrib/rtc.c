@@ -104,7 +104,7 @@ int32_t rtc_open(const uint8_t * filename) {
     prev_A = inb(CMOS_DATA);
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
     /* sets frequency to 2 Hz */
-    outb((prev_A & RATE_MASK) | FREQ_8_HZ, CMOS_DATA); 
+    outb((prev_A & RATE_MASK) | FREQ_2_HZ, CMOS_DATA); 
 
     return 0;
 }
@@ -154,5 +154,91 @@ int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
 *   OUTPUTS: return 0 on success, -1 on failure
 */
 int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
+    /* Disable other incoming interrupts */
+    cli();
 
+    /* Exit and return -1 if passed in invalid parameters */
+    //if (buf == NULL || nbytes == 0) { return -1; }
+
+    char prev_A;
+
+    /* Initialize frequency and convert to proper rate divisor */
+    //int32_t freq = *(int32_t*) buf;
+    //convert_freq(&freq);
+
+    /* Exit and return -1 if found to be invalid input */
+    //if (freq == -1) { return -1; }
+
+    /* Set clock frequency */
+    outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
+    prev_A = inb(CMOS_DATA);
+    outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
+    /* sets frequency to 2 Hz */
+    outb((prev_A & RATE_MASK) | FREQ_32_HZ, CMOS_DATA); 
+
+    /* Re-enable other incoming interrupts */
+    sti();
+}
+
+
+/*
+* convert_freq
+*   DESCRIPTION: Maps the desired integer frequency input to the RTC
+*       divisor to set the frequency 
+*
+*   INPUTS: int32_t *freq -- desired integer frequency
+*   OUTPUTS: none
+*   RETURN VALUE:none
+*   SIDE EFFECTS: 
+*/
+void convert_freq(int32_t * freq) {
+    int32_t curr_val = *freq;
+    
+    switch (curr_val)
+    {
+        case 2:
+            *freq = FREQ_2_HZ;
+            break;
+
+        case 4:
+            *freq = FREQ_4_HZ;
+            break;
+
+        case 8:
+            *freq = FREQ_8_HZ;
+            break;
+
+        case 16:
+            *freq = FREQ_16_HZ;
+            break;
+
+        case 32:
+            *freq = FREQ_32_HZ;
+            break;
+
+        case 64:
+            *freq = FREQ_64_HZ;
+            break;
+
+        case 128:
+            *freq = FREQ_128_HZ;
+            break;
+
+        case 256:
+            *freq = FREQ_256_HZ;
+            break;
+
+        case 512:
+            *freq = FREQ_512_HZ;
+            break;
+
+        case 1024:
+            *freq = FREQ_1024_HZ;
+            break;    
+
+        /* Error case for when passed in invalid frequency */
+        default:
+            *freq = -1;
+            break;
+    }
 }
