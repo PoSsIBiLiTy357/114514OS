@@ -195,10 +195,12 @@ void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
 	//TEST_OUTPUT("page_fault_test", page_fault_test());
-	
-	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
-	TEST_OUTPUT("read_file_test", read_file_test(10));
 
+
+	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
+	TEST_OUTPUT("read_file_test", read_file_test("frame0.txt"));
+
+	
 	//TEST_OUTPUT("exception_de_test", exception_de_test());
 	//TEST_OUTPUT("exception_test", exception_test());
 	

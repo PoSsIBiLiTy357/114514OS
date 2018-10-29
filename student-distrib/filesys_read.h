@@ -2,7 +2,7 @@
 #include "lib.h"
 
 #define MAX_FILE_NUM 63
-#define MAX_DATABLOCK_NUM 63
+#define MAX_DATABLOCK_NUM 1023
 #define NUM_INODE_OFFSET 4
 #define NUM_DBLK_OFFSET 8
 #define DENTRY_START_OFFSET 64
@@ -34,4 +34,4 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
 
 int print_allfile_test();
-int read_file_test(int index);
+int read_file_test(uint8_t *fname);

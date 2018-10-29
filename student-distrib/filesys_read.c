@@ -17,7 +17,7 @@ void read_filesys_bootblock(uint32_t bootBlk_addr){
     num_dataBlocks = *((int32_t *)(bootBlk_addr + NUM_DBLK_OFFSET));
     dentry_start   = (dentry_t *)(bootBlk_addr + DENTRY_START_OFFSET);
     inode_start    = (inode_t *)(bootBlk_addr + INODE_START_OFFSET);
-    datablk_start  = (uint8_t *)(bootBlk_addr + INODE_START_OFFSET + num_inodes*sizeof(inode_t));
+    datablk_start  = (char *)bootBlk_addr + (num_inodes+1)*DATABLK_SIZE;
     
 }
 
@@ -42,8 +42,8 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
     char *i_fname;
     for(i = 1; i < num_dentry; i++){
         i_fname = dentry_start[i].fname;
-        if(strlen(fname) != strlen(i_fname)) continue;
-        if(strncmp(fname, i_fname, strlen(fname))){
+        if(strlen((uint8_t*)fname) != strlen(i_fname)) continue;
+        if(strncmp((uint8_t*)fname, i_fname, strlen((uint8_t*)fname)) == 0){
             
             memcpy( dentry->fname, dentry_start[i].fname, sizeof(dentry_start[i].fname));
             dentry->ftype = dentry_start[i].ftype;
@@ -81,12 +81,36 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
     //inode_t *target_inode;
     uint8_t *buf_cur;
-    int i, inode_datablk_offset, to_end, ret;
+    int i, inode_datablk_offset, datablk_offset, to_end, ret;
 
+    if(inode == NULL) return -1;
+    if(buf == NULL) return -1;
     if(inode >= num_inodes) return -1;
     //target_inode = inode_start[inode];
     if(offset >= inode_start[inode].length) return 0;
 
+    inode_datablk_offset = offset/4096;
+    datablk_offset = offset%4096;
+
+    for(i = 0; i<length; i++){
+
+        if(datablk_offset == 4096){
+            datablk_offset = 0;
+            inode_datablk_offset += 1;
+        }
+
+        buf[i] = *((uint8_t *)(datablk_start + inode_start[inode].data_block[inode_datablk_offset] * DATABLK_SIZE + datablk_offset));
+
+        datablk_offset += 1;
+    }
+
+
+    return length;
+
+
+
+
+/*
     buf_cur = buf;
 
     if(offset + length < inode_start[inode].length){
@@ -94,8 +118,8 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
         for(i = 0; i < length; i++){
 
             inode_datablk_offset = (offset + i)/4096;
-            memcpy(buf_cur, datablk(inode_start[inode].data_block[inode_datablk_offset]), 1);
-            buf_cur += 4;
+            //memcpy(buf_cur, datablk(inode_start[inode].data_block[inode_datablk_offset]), 1);
+            //buf_cur += 1;
 
         }
 
@@ -107,9 +131,9 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
         for(i = 0; i < to_end; i++){
 
             inode_datablk_offset = (offset + i)/4096;
-            memcpy(buf_cur, datablk(inode_start[inode].data_block[inode_datablk_offset]), 1);
-            buf_cur += 4;
-
+            //memcpy(buf_cur, datablk(inode_start[inode].data_block[inode_datablk_offset]), 1);
+            //buf_cur += 1;
+            buf[i] = *((uint8_t *)(datablk(inode_start[inode].data_block[inode_datablk_offset])));
         }
 
         ret = 0;
@@ -117,13 +141,29 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     }
 
     return ret;
-    
+*/
 }
 
 
 
+int32_t read_f_by_name(uint8_t *fname, int32_t offset, uint8_t *buf, uint32_t length){
+
+    dentry_t dentry;
+    if(read_dentry_by_name(fname, &dentry) == -1){
+        return -1;
+    }
+    return read_data(dentry.inode, offset, buf, length);
+}
 
 
+int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t length){
+
+    dentry_t dentry;
+    if(read_dentry_by_index(index, &dentry) == -1){
+        return -1;
+    }
+    return read_data(dentry.inode, offset, buf, length);
+}
 
 
 int32_t file_write()
@@ -178,32 +218,35 @@ int print_allfile_test(){
 }
 
 
-int read_file_test(int index){
+int read_file_test(uint8_t *fname){
 
-    int i, j, blk_offset, b_offset;
+    int i, j;
     dentry_t d;
     inode_t  inode;
+    uint8_t buf[12800];
+
 
 	clear();
 
-    read_dentry_by_index(index, &d);
+    read_dentry_by_name(fname, &d);
     printf("***read_file_test***: \n");
     printf("d.fname: %s \n", d.fname);
     printf("d.inode: %d \n", d.inode);
 
     inode = inode_start[d.inode];
     printf("length in B: %d\n",inode.length);
-    printf("data block #: %d\n",inode.data_block[0]);
-    blk_offset = inode.length/4096;
-    for(i = 0; i < blk_offset+1; i++){
-        
-        for(j = 0; j < inode.length; j++){
-            if(i != 0) b_offset = 4096*i;
-            putc( datablk(inode.data_block[i])+j - b_offset );
-        }
+    printf("1st data block #: %d\n",inode.data_block[0]);
+    printf("2nd data block #: %d\n",inode.data_block[1]);
+    printf("3rd data block #: %d\n",inode.data_block[2]);
+    
+    memset(buf, 0, sizeof(buf));
 
+    read_f_by_name(fname, 0, buf, 12800);
+    for(i=0; i<12800; i++){
+        if(buf[i] == '\0') break;
+        putc(buf[i]);
     }
-
+    putc('\n');
 	return 1;
 }
 
