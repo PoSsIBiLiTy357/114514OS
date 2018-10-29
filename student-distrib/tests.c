@@ -286,6 +286,60 @@ int RTC_invalid_size_test() {
 }
 
 
+/*
+* RTC_empty_buf_test
+*   DESCRIPTION: This function tests that an empty buffer passed into RTC_write()
+*		will return -1
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*	SIDE EFFECTS : calls RTC_write() with empty buffer
+*/
+int RTC_empty_buf_test() {
+	TEST_HEADER;
+
+	/* Dummy valid file descriptor and filename */
+	int fd;
+	uint32_t * filename;
+
+	if (rtc_write(fd, filename, 4) == -1) 
+		return PASS;
+	return FAIL;
+}
+
+
+/*
+* RTC_base_2_test
+*   DESCRIPTION: This function tests that only base 2 numbers or valid frequencies
+* 		may be passed in.
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*	SIDE EFFECTS : calls RTC_write() with various numbers
+*/
+int RTC_base_2_test() {
+	TEST_HEADER;
+
+	/* Dummy valid file descriptor and filename */
+	int fd;
+	uint32_t filename[1] ;
+	uint32_t test_val[12] = { 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 };
+	int i;
+
+	for (i = 0; i < 12; i++) {
+		filename[0] = test_val[i];
+		if ((rtc_write(fd, filename, 4) == -1) && i > 1) {
+			return FAIL;
+		} else if ((rtc_write(fd, filename, 4) == sizeof(uint32_t)) && i <= 1) {
+			return FAIL;
+		}
+	}
+	return PASS;
+}
+
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -293,10 +347,15 @@ int RTC_invalid_size_test() {
 
 /* Test suite entry point */
 void launch_tests(){
+	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
+	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
+	//TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
 	TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());
 	TEST_OUTPUT("RTC_invalid_size_test", RTC_invalid_size_test());
+	TEST_OUTPUT("RTC_base_2_test", RTC_base_2_test());
+	
 	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
 //	TEST_OUTPUT("page_fault_test", page_fault_test());
 	

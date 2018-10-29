@@ -165,7 +165,7 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
     cli();
 
     /* Exit and return -1 if passed in invalid parameters */
-    if (buf == NULL || nbytes != sizeof(uint32_t)) { return -1; }
+    if (buf == NULL || nbytes != sizeof(uint32_t)) { sti(); return -1; }
 
     char prev_A;
     uint32_t freq, bits, pow2;
@@ -192,7 +192,7 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
     //printf("Frequency after convert: %d\n", freq);
 
     /* Exit and return -1 if found to be invalid input */
-    //if (freq == -1) { return -1; }
+    if (freq == -1) { sti(); return -1; }
 
     /* Set clock frequency */
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
