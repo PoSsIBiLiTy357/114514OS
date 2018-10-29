@@ -21,7 +21,7 @@ typedef struct {
 
 
 typedef struct {
-
+ 
     uint32_t length;
     uint32_t data_block[MAX_DATABLOCK_NUM];
 
@@ -31,7 +31,8 @@ void    read_filesys_bootblock();
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry);
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry);
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
-
+int32_t read_f_by_name(uint8_t *fname, int32_t offset, uint8_t *buf, uint32_t length);
+int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t length);
 
 int print_allfile_test();
 int read_file_test(uint8_t *fname);
