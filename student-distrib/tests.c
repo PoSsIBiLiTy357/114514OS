@@ -157,41 +157,134 @@ void RTC_test() {
 
 /* Checkpoint 2 tests */
 
-int RTC_chkpt2_test() {
+/*
+* RTC_freq_test
+*   DESCRIPTION: This function tests RTC at varying frequencies. Frequencies are
+*		changed by making calls to write() and open()
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*	SIDE EFFECTS : changes RTC frequency
+*/
+int RTC_freq_test() {
 	/* Wait 5 interrupt cycles and clear the screen */
     while (RTC_ctr < 5) {  }
 	clear();
 
-	/* Dummy file descriptor and filename*/
+	/* Dummy file descriptor */
 	int fd;
-	uint8_t filename[2] = {16, 8};
 
-	while (RTC_ctr < 15) {
+	while (RTC_ctr < 10) {
 		printf("Interrupting at 2Hz. Interrupt number: %d\n", RTC_ctr);
 	}
 
-	/* clear screen and open file */
-	// clear();
-	// fd = rtc_open(filename);
-
-	// while (RTC_ctr < 30) {
-	// 	printf("Interrupt at different 2 Hz: %d\n", RTC_ctr);
-	// }
-
-	/* Clear screen and change frequency to 8 Hz */
+	/* Clear screen and change frequency to 16 Hz */
 	clear();
+
+	/* Buffer to store desired frequency */
+	uint32_t filename[1] = {16};
+
 	rtc_write(fd, filename, 4);
-	while (RTC_ctr < 30) {
-		//printf("Interrupt at different 8 Hz: %d\n", RTC_ctr);
+	while (RTC_ctr < 50) {
+		printf("Interrupt at 16Hz due to write(): %d\n", RTC_ctr);
 	}
 
+
+	/* Clear screen and change frequency to 64 Hz */
+	clear();
+
+	/* Buffer to store desired frequency */
+	filename[0] = 64;
+
+	rtc_write(fd, filename, 4);
+	while (RTC_ctr < 200) {
+		printf("Interrupt at 64Hz due to write(): %d\n", RTC_ctr);
+	}
+
+	/* Clear screen and change frequency to 1024 Hz */
+	clear();
+
+	/* Buffer to store desired frequency */
+	filename[0] = 512;
+
+	rtc_write(fd, filename, 4);
+	while (RTC_ctr < 2000) {
+		printf("Interrupt at 512Hz due to write(): %d\n", RTC_ctr);
+	}
+
+	/* Clear screen and change frequency to 1024 Hz */
+	clear();
+
+	/* Buffer to store desired frequency */
+	filename[0] = 1024;
+
+	rtc_write(fd, filename, 4);
+	while (RTC_ctr < 5000) {
+		printf("Interrupt at 1024Hz due to write(): %d\n", RTC_ctr);
+	}
+
+
+	/* Reset frequency to 2Hz with open() */
+	clear();
 	fd = rtc_open(filename);
+	while (RTC_ctr < 5010) {
+		printf("Interrupting back to 2 Hz after open(): %d\n", RTC_ctr);
+	}	
 
 	/* Clear screen once more */
-	//clear();
+	clear();
 	
+	TEST_HEADER;
 	return PASS;
 }
+
+
+/*
+* RTC_valid_size_test
+*   DESCRIPTION: This function tests that a valid integer size (4) can be passed
+*		into RTC_write() and returns the proper size back (4).
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*	SIDE EFFECTS : calls RTC_write() with buffer size 4
+*/
+int RTC_valid_size_test() {
+	TEST_HEADER;
+
+	/* Dummy valid file descriptor and filename */
+	int fd;
+	uint32_t filename[1] = {16};
+
+	if (rtc_write(fd, filename, 4) == sizeof(uint32_t)) 
+		return PASS;
+	return FAIL;
+}
+
+
+/*
+* RTC_invalid_size_test
+*   DESCRIPTION: This function tests that an invalid integer size (5) can be passed
+*		into RTC_write() and returns with error value -1.
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*	SIDE EFFECTS : calls RTC_write() with buffer size 5
+*/
+int RTC_invalid_size_test() {
+	TEST_HEADER;
+
+	/* Dummy valid file descriptor and filename */
+	int fd;
+	uint32_t filename[1] = {16};
+
+	if (rtc_write(fd, filename, 5) == -1) 
+		return PASS;
+	return FAIL;
+}
+
 
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -202,7 +295,9 @@ int RTC_chkpt2_test() {
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
-	TEST_OUTPUT("RTC_chkpt2_test", RTC_chkpt2_test());
+	TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());
+	TEST_OUTPUT("RTC_invalid_size_test", RTC_invalid_size_test());
+	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
 //	TEST_OUTPUT("page_fault_test", page_fault_test());
 	
 	//TEST_OUTPUT("exception_de_test", exception_de_test());

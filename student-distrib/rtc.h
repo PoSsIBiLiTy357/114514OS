@@ -42,6 +42,7 @@ int32_t rtc_open(const uint8_t * filename);
 int32_t rtc_close(int32_t fd);
 
 /* RTC helper functions */
-void convert_freq(int32_t *);
+void convert_freq(uint32_t *);
+int log2_32 (uint32_t value);
 
 #endif /* _RTC_H */

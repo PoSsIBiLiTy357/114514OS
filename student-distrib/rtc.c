@@ -13,6 +13,13 @@ int RTC_ctr = 0;
 /* Flag indicating whether or not RTC has generated an interrupt */
 volatile int RTC_flag = 0;
 
+/* Used for calculating log base 2. Reference in function log2_32() header */
+const int tab32[32] = {
+     0,  9,  1, 10, 13, 21,  2, 29,
+    11, 14, 16, 18, 22, 25,  3, 30,
+     8, 12, 20, 28, 15, 17, 24,  7,
+    19, 27, 23,  6, 26,  5,  4, 31};
+
 /*
 * rtc_init
 *   DESCRIPTION: Initializes the real time clock by initializng the clock frequency. 
@@ -158,16 +165,31 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
     cli();
 
     /* Exit and return -1 if passed in invalid parameters */
-    if (buf == NULL || nbytes == 0) { return -1; }
+    if (buf == NULL || nbytes != sizeof(uint32_t)) { return -1; }
 
     char prev_A;
+    uint32_t freq, bits, pow2;
+    bits = 0;
 
     /* Initialize frequency and convert to proper rate divisor */
-    printf("buf: %d\n", (int32_t*)buf);
-    int32_t freq = *((int32_t*)buf);
-    printf("Frequency before convert: %d\n", freq);
+    //printf("buf: %d\n", (uint32_t*)buf);
+    freq = pow2 = *((uint32_t*)buf);
+    //if (log2_32(freq) % 2 != 0) return -1;
+
+    /* Check that frequency is a power of 2 */
+    while (pow2 != 0) {
+       // printf("%x\n", pow2);
+        if (((pow2 & 0x0001) == 0x0001) ) { 
+            bits++; 
+        }
+        pow2 >>= 1; 
+    }
+    //if (bits != 1) { return -1; }
+    printf("num bits: %d\n", bits);
+
+    //printf("Frequency before convert: %d\n", freq);
     convert_freq(&freq);
-    printf("Frequency after convert: %d\n", freq);
+    //printf("Frequency after convert: %d\n", freq);
 
     /* Exit and return -1 if found to be invalid input */
     //if (freq == -1) { return -1; }
@@ -176,13 +198,15 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
     prev_A = inb(CMOS_DATA);
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
-    /* sets frequency to 2 Hz */
-    outb((prev_A & RATE_MASK) | FREQ_32_HZ, CMOS_DATA); 
+    /* sets frequency to whatever is passed in */
+    // outb((prev_A & RATE_MASK) | FREQ_32_HZ, CMOS_DATA); 
+    outb((prev_A & RATE_MASK) | freq, CMOS_DATA); 
 
     /* Re-enable other incoming interrupts */
     sti();
 
-    return 0;
+    /* Return number of bytes written */
+    return nbytes;
 }
 
 
@@ -196,8 +220,8 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
 *   RETURN VALUE:none
 *   SIDE EFFECTS: 
 */
-void convert_freq(int32_t * freq) {
-    int32_t curr_val = *freq;
+void convert_freq(uint32_t * freq) {
+    uint32_t curr_val = *freq;
     
     switch (curr_val)
     {
@@ -246,4 +270,26 @@ void convert_freq(int32_t * freq) {
             *freq = -1;
             break;
     }
+}
+
+
+/*
+* log2_32
+*   DESCRIPTION: Calculates log base 2 of a given value. Referenced from:
+*       https://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers
+*       by Desmond Hume
+*
+*   INPUTS: uint32_t value -- number to take log base 2 of
+*   OUTPUTS: log base 2 of (value)
+*   RETURN VALUE: integer
+*   SIDE EFFECTS: none
+*/
+int log2_32 (uint32_t value)
+{
+    value |= value >> 1;
+    value |= value >> 2;
+    value |= value >> 4;
+    value |= value >> 8;
+    value |= value >> 16;
+    return tab32[(uint32_t)(value*0x07C4ACDD) >> 27];
 }
