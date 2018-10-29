@@ -432,16 +432,16 @@ void launch_tests(){
 	//TEST_OUTPUT("exception_test", exception_test());
 
 	/* RTC tests */
-	// TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
-	// TEST_OUTPUT("RTC_read_test", RTC_read_test());
-	// TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
-	// TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());
-	// TEST_OUTPUT("RTC_invalid_size_test", RTC_invalid_size_test());
-	// TEST_OUTPUT("RTC_base_2_test", RTC_base_2_test());
+	TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
+	TEST_OUTPUT("RTC_read_test", RTC_read_test());
+	TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
+	TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());
+	TEST_OUTPUT("RTC_invalid_size_test", RTC_invalid_size_test());
+	TEST_OUTPUT("RTC_base_2_test", RTC_base_2_test());
 	
 	/* File system tests */
 	//uint8_t fname[] = "frame0.txt";		/* select file name */
-	TEST_OUTPUT("print_allfile_test", print_allfile_test());
+	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
 	//TEST_OUTPUT("read_file_test", read_file_test(fname));
 
 }
