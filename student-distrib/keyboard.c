@@ -5,15 +5,17 @@
 
 #define KBRD_STATUS_PORT		0x64
 #define KBRD_DATA_PORT			0x60
+#define BUFFER_SIZE		128
+#define LINE_SIZE   80
 
 static int caplk_pressd;
 static int shift_state;
 static int ctrl_state;
 static int cursor_idx;
 static int overline;
-char first[80];
+char first[LINE_SIZE];
 //char second[28];
-char keyboard_buffer[129]; ///leave 1 for _
+char keyboard_buffer[BUFFER_SIZE]; ///leave 1 for _
 
 
 /* init_keyboard
@@ -64,31 +66,32 @@ void keyboard_handler(void){
 				keyboard_buffer[cursor_idx] ='_';
 			}
 			else keyboard_buffer[cursor_idx] ='_';
-			if (strlen(keyboard_buffer)==80) {
+			if (strlen(keyboard_buffer)==LINE_SIZE) {
 				screen_y_change(-1);
 				overline =0;
 			}
 
 		}
 		else{
-			if(pressed==CAPSLOCK){
+			if(pressed==CAPSLOCK){				// record caps lock status
 				caplk_pressd= 1-caplk_pressd; 
 			}
-			if(pressed==LEFTSHIFT || pressed==RIGHTSHIFT){
+			if(pressed==LEFTSHIFT || pressed==RIGHTSHIFT){		/// record shift  status
 				shift_state=1;
 			}
-			if(pressed==LEFTSHIFT_R || pressed==RIGHTSHIFT_R){
+			if(pressed==LEFTSHIFT_R || pressed==RIGHTSHIFT_R){ 		///change status if released
 				shift_state=0;
 			}
-			if(pressed==LEFTCTRL){
+			if(pressed==LEFTCTRL){			/// record control state
 				ctrl_state=1;
 			}
-			if(pressed==LEFTCTRL_R){
+			if(pressed==LEFTCTRL_R){		//change state if released
 				ctrl_state=0;
 			}
-			if(scan_code[(int)pressed]=='l' && ctrl_state==1){
+			if(scan_code[(int)pressed]=='l' && ctrl_state==1){					///clear screen if ctrl+l
 				clear();
-				for(i=0;i<129;i++){					////change to 128 later
+				screen_y_set(0);
+				for(i=0;i<BUFFER_SIZE;i++){					//empty the buffer
 					keyboard_buffer[i]='\0';
 				}
 				cursor_idx=0;
@@ -103,17 +106,17 @@ void keyboard_handler(void){
 				//		cursor_idx++;
 				//		keyboard_buffer[cursor_idx]='_';
 				//	}
-			if(ctrl_state==0){
-				if(caplk_pressd==0){
+			if(ctrl_state==0){				//check ctrl state 
+				if(caplk_pressd==0){		// check cap state
 					if(shift_state==0){
 						if (scan_code[(int)pressed]!=0){
-							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
+							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];			// cap not pressed and shift not pressed case 
 							cursor_idx++;
 							keyboard_buffer[cursor_idx]='_';
 						}	
 					}	
 					else{
-						if (scan_code[(int)pressed]!=0){
+						if (scan_code[(int)pressed]!=0){									// shift pressed case, use shift convert table 
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
 							cursor_idx++;
 							keyboard_buffer[cursor_idx]='_';
@@ -121,20 +124,20 @@ void keyboard_handler(void){
 					}
 				}
 				else{
-					if (scan_code[(int)pressed]!=0 && scan_code[(int)pressed]>96 &&  scan_code[(int)pressed]<122){
+					if (scan_code[(int)pressed]!=0 && scan_code[(int)pressed]>96 &&  scan_code[(int)pressed]<122){  // cap case , only convert letters not numbers and symbols
 						if(shift_state==0){
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
 							cursor_idx++;
 							keyboard_buffer[cursor_idx]='_';
 						}
-						else{
+						else{																//cap case with shift hold down, back to lower case letter 
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
 							cursor_idx++;
 							keyboard_buffer[cursor_idx]='_';
 						}
 				
 					}
-					else if(scan_code[(int)pressed]!=0) {
+					else if(scan_code[(int)pressed]!=0) {		//cap case for non letters 
 						if(shift_state==0){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
 							cursor_idx++;
@@ -150,31 +153,31 @@ void keyboard_handler(void){
 			}
 		}
 		
-		for (i=0;i<80;i++){
+		for (i=0;i<LINE_SIZE;i++){
 			first[i]= keyboard_buffer[i];
 		}
 ///////////////////////////can be put into terminal read
-		if (strlen(keyboard_buffer)<=80){			
+		if (strlen(keyboard_buffer)<=LINE_SIZE){						//print to screen 1 line case 
 			put_refresh_line(keyboard_buffer);
 		}else{
 /*			int i;
-			for (i=0;i<80;i++){
+			for (i=0;i<LINE_SIZE;i++){
 				first[i] = keyboard_buffer[i];
 			}
 			for (i=0;i<27;i++){
-				second[i] = keyboard_buffer[i+80]; 
+				second[i] = keyboard_buffer[i+LINE_SIZE]; 
 			}*/
-			if (overline ==0){
+			if (overline ==0){						//   print to screen 2 line case ; first line 
 				put_refresh_line(first);
 				puts("\n");
 			}
-			put_refresh_line(keyboard_buffer+80);
+			put_refresh_line(keyboard_buffer+LINE_SIZE);			//  print to screen 2 line case ; second line 
 			overline =1;
 		}
-		if(scan_code[(int)pressed] == '\n'){
+		if(scan_code[(int)pressed] == '\n'){					// enter pressed go to next line clear keyboard_buffer
 			overline =0;
 			int i;
-			for(i=0;i<cursor_idx;i++){
+			for(i=0;i<cursor_idx+1;i++){
 				keyboard_buffer[i]='\0';
 			}
 			cursor_idx=0;
@@ -186,15 +189,30 @@ void keyboard_handler(void){
 
 }
 
-int terminal_read(){
-	return 0;
+/* terminal_read
+ * 
+ * return the current keyboard_buffer to whatever caller calls this
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ * 
+ */
+char* terminal_read(){
+	return keyboard_buffer;
 }
 
-int terminal_write(){
-	return 0;
+
+/* terminal_write
+ * 
+ * print input buffer to the screen while clear old stuff on this line 
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: print to screen, send eoi to processor
+ * 
+ */
+int terminal_write(char * buf){
+	put_refresh_line(buf);
 }
 
-int terminal_open(){
-	return 0;
-}
+
 

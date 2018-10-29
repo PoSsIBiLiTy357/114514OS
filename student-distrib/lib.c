@@ -56,7 +56,9 @@ void shift(){
     screen_y-- ;
 
 }
-
+void screen_y_set(int n){
+	screen_y =n;
+}
 void screen_y_change(int n){
     screen_y += n;
 }
