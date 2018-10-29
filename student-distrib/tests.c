@@ -220,15 +220,19 @@ int RTC_freq_test() {
 	filename[0] = 1024;
 
 	rtc_write(fd, filename, 4);
-	while (RTC_ctr < 5000) {
+	while (RTC_ctr < 4000) {
 		printf("Interrupt at 1024Hz due to write(): %d\n", RTC_ctr);
 	}
 
-
+	
 	/* Reset frequency to 2Hz with open() */
 	clear();
-	fd = rtc_open(filename);
-	while (RTC_ctr < 5010) {
+
+	/* Dummy file */
+	const uint8_t * file;
+	
+	fd = rtc_open(file);
+	while (RTC_ctr < 4010) {
 		printf("Interrupting back to 2 Hz after open(): %d\n", RTC_ctr);
 	}	
 
@@ -301,7 +305,7 @@ int RTC_empty_buf_test() {
 
 	/* Dummy valid file descriptor and filename */
 	int fd;
-	uint32_t * filename;
+	uint32_t * filename = NULL;
 
 	if (rtc_write(fd, filename, 4) == -1) 
 		return PASS;
@@ -324,18 +328,30 @@ int RTC_base_2_test() {
 
 	/* Dummy valid file descriptor and filename */
 	int fd;
-	uint32_t filename[1] ;
-	uint32_t test_val[12] = { 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 };
-	int i;
+	int i;	/* Loop index */
+	int retval;
+	uint32_t filename[1];
 
+	/* Array of values to test, all values should pass except the first two (0 and 1) */
+	uint32_t test_val[12] = { 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 };
+	
+	/* Loop through testing each value and calling RTC_write() */
 	for (i = 0; i < 12; i++) {
 		filename[0] = test_val[i];
-		if ((rtc_write(fd, filename, 4) == -1) && i > 1) {
+
+		/* Call rtc_write() */
+		retval = rtc_write(fd, filename, 4);
+
+		if ((retval == -1) && i > 1) {
+			/* Return fail if any of the valid test values are considered invalid */
 			return FAIL;
-		} else if ((rtc_write(fd, filename, 4) == sizeof(uint32_t)) && i <= 1) {
+			/* Return fail if any invalid test values are considered valid */
+		} else if ((retval == sizeof(uint32_t)) && i <= 1) {
 			return FAIL;
 		}
 	}
+
+	/* Return PASS otherwise */
 	return PASS;
 }
 
@@ -347,16 +363,16 @@ int RTC_base_2_test() {
 
 /* Test suite entry point */
 void launch_tests(){
-	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
-	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
-	//TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
+
+	/* RTC tests */
+	TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
+	TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
 	TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());
 	TEST_OUTPUT("RTC_invalid_size_test", RTC_invalid_size_test());
 	TEST_OUTPUT("RTC_base_2_test", RTC_base_2_test());
 	
-	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
 //	TEST_OUTPUT("page_fault_test", page_fault_test());
 	
 	//TEST_OUTPUT("exception_de_test", exception_de_test());

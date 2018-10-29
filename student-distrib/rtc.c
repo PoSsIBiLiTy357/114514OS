@@ -172,24 +172,8 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
     bits = 0;
 
     /* Initialize frequency and convert to proper rate divisor */
-    //printf("buf: %d\n", (uint32_t*)buf);
     freq = pow2 = *((uint32_t*)buf);
-    //if (log2_32(freq) % 2 != 0) return -1;
-
-    /* Check that frequency is a power of 2 */
-    while (pow2 != 0) {
-       // printf("%x\n", pow2);
-        if (((pow2 & 0x0001) == 0x0001) ) { 
-            bits++; 
-        }
-        pow2 >>= 1; 
-    }
-    //if (bits != 1) { return -1; }
-    printf("num bits: %d\n", bits);
-
-    //printf("Frequency before convert: %d\n", freq);
     convert_freq(&freq);
-    //printf("Frequency after convert: %d\n", freq);
 
     /* Exit and return -1 if found to be invalid input */
     if (freq == -1) { sti(); return -1; }
@@ -198,8 +182,8 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
     prev_A = inb(CMOS_DATA);
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
+
     /* sets frequency to whatever is passed in */
-    // outb((prev_A & RATE_MASK) | FREQ_32_HZ, CMOS_DATA); 
     outb((prev_A & RATE_MASK) | freq, CMOS_DATA); 
 
     /* Re-enable other incoming interrupts */
