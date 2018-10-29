@@ -13,13 +13,6 @@ int RTC_ctr = 0;
 /* Flag indicating whether or not RTC has generated an interrupt */
 volatile int RTC_flag = 0;
 
-/* Used for calculating log base 2. Reference in function log2_32() header */
-const int tab32[32] = {
-     0,  9,  1, 10, 13, 21,  2, 29,
-    11, 14, 16, 18, 22, 25,  3, 30,
-     8, 12, 20, 28, 15, 17, 24,  7,
-    19, 27, 23,  6, 26,  5,  4, 31};
-
 /*
 * rtc_init
 *   DESCRIPTION: Initializes the real time clock by initializng the clock frequency. 
@@ -37,9 +30,6 @@ void rtc_init() {
     char prev_A;
     char prev_B;
 
-    /* Disable other incoming interrupts */
-    //cli();
-
     /* Enable RTC to be on IRQ8 on the PIC */
     enable_irq(IRQ_RTC);
 
@@ -47,16 +37,13 @@ void rtc_init() {
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
     prev_A = inb(CMOS_DATA);
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
-    outb((prev_A & RATE_MASK) | FREQ_2_HZ, CMOS_DATA); /* modifies frequency, needs work */
+    outb((prev_A & RATE_MASK) | FREQ_2_HZ, CMOS_DATA);
 
     /* Enabling IRQ 8 */
     outb(DISABLE_NMI | STATUS_REG_B, CMOS_ADDR);        /* Disable NMI in register B    */
     prev_B = inb(CMOS_DATA);                            /* read current value in reg B  */
     outb(DISABLE_NMI | STATUS_REG_B, CMOS_ADDR);        /* Set index again              */
-    outb(prev_B | 0x40, CMOS_DATA);                     /* Write prev value and 6th bit */
-
-    /* Re-enable other incoming interrupts */
-    //sti();
+    outb(prev_B | BIT_6, CMOS_DATA);                    /* Write prev value and 6th bit */
 }
 
 
@@ -256,24 +243,3 @@ void convert_freq(uint32_t * freq) {
     }
 }
 
-
-/*
-* log2_32
-*   DESCRIPTION: Calculates log base 2 of a given value. Referenced from:
-*       https://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers
-*       by Desmond Hume
-*
-*   INPUTS: uint32_t value -- number to take log base 2 of
-*   OUTPUTS: log base 2 of (value)
-*   RETURN VALUE: integer
-*   SIDE EFFECTS: none
-*/
-int log2_32 (uint32_t value)
-{
-    value |= value >> 1;
-    value |= value >> 2;
-    value |= value >> 4;
-    value |= value >> 8;
-    value |= value >> 16;
-    return tab32[(uint32_t)(value*0x07C4ACDD) >> 27];
-}

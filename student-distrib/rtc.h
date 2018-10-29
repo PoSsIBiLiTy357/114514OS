@@ -18,6 +18,7 @@
 #define CMOS_ADDR       0x70
 #define CMOS_DATA       0x71
 #define DISABLE_NMI     0x80
+#define BIT_6           0x40
 
 #define RATE_MASK       0xF0
 #define FREQ_2_HZ       0x0F
@@ -43,6 +44,6 @@ int32_t rtc_close(int32_t fd);
 
 /* RTC helper functions */
 void convert_freq(uint32_t *);
-int log2_32 (uint32_t value);
+
 
 #endif /* _RTC_H */

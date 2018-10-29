@@ -230,7 +230,7 @@ int RTC_freq_test() {
 
 	/* Dummy file */
 	const uint8_t * file;
-	
+
 	fd = rtc_open(file);
 	while (RTC_ctr < 4010) {
 		printf("Interrupting back to 2 Hz after open(): %d\n", RTC_ctr);
@@ -345,13 +345,51 @@ int RTC_base_2_test() {
 		if ((retval == -1) && i > 1) {
 			/* Return fail if any of the valid test values are considered invalid */
 			return FAIL;
-			/* Return fail if any invalid test values are considered valid */
 		} else if ((retval == sizeof(uint32_t)) && i <= 1) {
+			/* Return fail if any invalid test values are considered valid */
 			return FAIL;
 		}
 	}
 
 	/* Return PASS otherwise */
+	return PASS;
+}
+
+
+/*
+* RTC_read_test
+*   DESCRIPTION: This function tests the rtc_read function blocks until next
+*		interrupt
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*	SIDE EFFECTS : calls RTC_write() with various numbers
+*/
+int RTC_read_test() {
+	TEST_HEADER;
+
+	/* Dummy valid file descriptor and filename */
+	int fd;
+	uint32_t filename[1] = {2};
+
+	/* Reset RTC_ctr */
+	RTC_ctr = 0;
+
+	/* Wait 5 clock cycles then clear screen */
+	while (RTC_ctr < 5) {}
+	clear();
+
+	while (RTC_ctr < 20) {
+		printf("read_test() interrupt count: %d\n", RTC_ctr);
+		if (RTC_ctr == 10 || RTC_ctr == 15) {
+			rtc_read(fd, filename, 4);
+		}
+	}
+
+	/* Clear screen */
+	clear();
+
 	return PASS;
 }
 
@@ -368,6 +406,7 @@ void launch_tests(){
 
 	/* RTC tests */
 	TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
+	TEST_OUTPUT("RTC_read_test", RTC_read_test());
 	TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
 	TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());
 	TEST_OUTPUT("RTC_invalid_size_test", RTC_invalid_size_test());
