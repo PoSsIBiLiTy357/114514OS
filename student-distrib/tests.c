@@ -402,28 +402,25 @@ int RTC_read_test() {
 
 /* Test suite entry point */
 void launch_tests(){
-	uint8_t fname[] = "fish";
-
+	/* Checkpoint 1 tests */
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
-
-	/* RTC tests */
-	TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
-	TEST_OUTPUT("RTC_read_test", RTC_read_test());
-	TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
-	TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());
-	TEST_OUTPUT("RTC_invalid_size_test", RTC_invalid_size_test());
-	TEST_OUTPUT("RTC_base_2_test", RTC_base_2_test());
-	
-//	TEST_OUTPUT("page_fault_test", page_fault_test());
 	//TEST_OUTPUT("page_fault_test", page_fault_test());
-
-	TEST_OUTPUT("print_allfile_test", print_allfile_test());
-	TEST_OUTPUT("read_file_test", read_file_test(fname));
-
-	
+	//TEST_OUTPUT("page_fault_test", page_fault_test());
 	//TEST_OUTPUT("exception_de_test", exception_de_test());
 	//TEST_OUTPUT("exception_test", exception_test());
+
+	/* RTC tests */
+	// TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
+	// TEST_OUTPUT("RTC_read_test", RTC_read_test());
+	// TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
+	// TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());
+	// TEST_OUTPUT("RTC_invalid_size_test", RTC_invalid_size_test());
+	// TEST_OUTPUT("RTC_base_2_test", RTC_base_2_test());
 	
-	// launch your tests here
+	/* File system tests */
+	//uint8_t fname[] = "frame0.txt";		/* select file name */
+	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
+	//TEST_OUTPUT("read_file_test", read_file_test(fname));
+
 }
