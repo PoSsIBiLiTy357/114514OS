@@ -164,7 +164,7 @@ int RTC_chkpt2_test() {
 
 	/* Dummy file descriptor and filename*/
 	int fd;
-	const uint8_t filename[1] = {16};
+	uint8_t filename[2] = {16, 8};
 
 	while (RTC_ctr < 15) {
 		printf("Interrupting at 2Hz. Interrupt number: %d\n", RTC_ctr);
