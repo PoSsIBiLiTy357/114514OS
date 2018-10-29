@@ -11,11 +11,14 @@
 #include "idt.h"
 #include "keyboard.h"
 #include "paging.h"
+#include "filesys_read.h"
 #define RUN_TESTS   1
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags, bit)   ((flags) & (1 << (bit)))
+
+uint32_t bootBlk_addr;
 
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
@@ -56,6 +59,7 @@ void entry(unsigned long magic, unsigned long addr) {
         module_t* mod = (module_t*)mbi->mods_addr;
         while (mod_count < mbi->mods_count) {
             printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
+            bootBlk_addr = mod->mod_start; //load file-sys starting addr(simple since only install one filesystem: mods_count = 1)
             printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
             printf("First few bytes of module:\n");
             for (i = 0; i < 16; i++) {
@@ -146,6 +150,7 @@ void entry(unsigned long magic, unsigned long addr) {
     idt_init();
     lidt(idt_desc_ptr);
 	paging_init();
+    read_filesys_bootblock(bootBlk_addr);
     init_keyboard();
 
     rtc_init();
