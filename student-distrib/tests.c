@@ -86,7 +86,7 @@ int exception_test(){
 
 
 /*
-* page_fault_test()
+* page_nofault_test()
 *   DESCRIPTION: This is a positive test case that should pass. This tests
 *		page faults by attempting to dereference valid memory at address
 *		0xb8000 (this is where video memory is stored). Page fault should not
