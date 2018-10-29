@@ -54,6 +54,7 @@ void keyboard_handler(void){
 	cli();
 	send_eoi(1);   // protected send of eoi
 	unsigned char pressed;
+	int i;
 	while ((inb(KBRD_STATUS_PORT)&0x01)!=0){  // only read from data port when the status is ready
 		pressed=inb(KBRD_DATA_PORT);   //get key code
 		if(strlen(keyboard_buffer)>0 && pressed ==BACKSPACE){
@@ -79,6 +80,19 @@ void keyboard_handler(void){
 			if(pressed==LEFTSHIFT_R || pressed==RIGHTSHIFT_R){
 				shift_state=0;
 			}
+			if(pressed==LEFTCTRL){
+				ctrl_state=1;
+			}
+			if(pressed==LEFTCTRL_R){
+				ctrl_state=0;
+			}
+			if(scan_code[(int)pressed]=='l' && ctrl_state==1){
+				clear();
+				for(i=0;i<129;i++){					////change to 128 later
+					keyboard_buffer[i]='\0';
+				}
+				cursor_idx=0;
+			}
 				//	if(scan_code[(int)pressed] == '\n'){
 				//		int i;
 				//		for(i=0;i<cursor_idx;i++){
@@ -89,7 +103,7 @@ void keyboard_handler(void){
 				//		cursor_idx++;
 				//		keyboard_buffer[cursor_idx]='_';
 				//	}
-			
+			if(ctrl_state==0){
 				if(caplk_pressd==0){
 					if(shift_state==0){
 						if (scan_code[(int)pressed]!=0){
@@ -134,7 +148,8 @@ void keyboard_handler(void){
 						}	
 					}
 			}
-		int i;
+		}
+		
 		for (i=0;i<80;i++){
 			first[i]= keyboard_buffer[i];
 		}
