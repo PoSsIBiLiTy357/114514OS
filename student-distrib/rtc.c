@@ -158,13 +158,16 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
     cli();
 
     /* Exit and return -1 if passed in invalid parameters */
-    //if (buf == NULL || nbytes == 0) { return -1; }
+    if (buf == NULL || nbytes == 0) { return -1; }
 
     char prev_A;
 
     /* Initialize frequency and convert to proper rate divisor */
-    //int32_t freq = *(int32_t*) buf;
-    //convert_freq(&freq);
+    printf("buf: %d\n", (int32_t*)buf);
+    int32_t freq = *((int32_t*)buf);
+    printf("Frequency before convert: %d\n", freq);
+    convert_freq(&freq);
+    printf("Frequency after convert: %d\n", freq);
 
     /* Exit and return -1 if found to be invalid input */
     //if (freq == -1) { return -1; }
@@ -178,6 +181,8 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
 
     /* Re-enable other incoming interrupts */
     sti();
+
+    return 0;
 }
 
 

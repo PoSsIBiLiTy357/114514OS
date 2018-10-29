@@ -164,31 +164,31 @@ int RTC_chkpt2_test() {
 
 	/* Dummy file descriptor and filename*/
 	int fd;
-	const uint8_t * filename = (uint8_t *)"";
+	const uint8_t filename[1] = {16};
 
 	while (RTC_ctr < 15) {
 		printf("Interrupting at 2Hz. Interrupt number: %d\n", RTC_ctr);
 	}
 
 	/* clear screen and open file */
-	clear();
-	fd = rtc_open(filename);
+	// clear();
+	// fd = rtc_open(filename);
 
-	while (RTC_ctr < 30) {
-		printf("Interrupt at different 2 Hz: %d\n", RTC_ctr);
-	}
+	// while (RTC_ctr < 30) {
+	// 	printf("Interrupt at different 2 Hz: %d\n", RTC_ctr);
+	// }
 
 	/* Clear screen and change frequency to 8 Hz */
 	clear();
-	rtc_write(fd, 10, 4);
-	while (RTC_ctr < 60) {
-		printf("Interrupt at different 8 Hz: %d\n", RTC_ctr);
+	rtc_write(fd, filename, 4);
+	while (RTC_ctr < 30) {
+		//printf("Interrupt at different 8 Hz: %d\n", RTC_ctr);
 	}
 
 	fd = rtc_open(filename);
 
 	/* Clear screen once more */
-	clear();
+	//clear();
 	
 	return PASS;
 }
