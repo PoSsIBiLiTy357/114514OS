@@ -1,5 +1,6 @@
 /* rtc.c - C file for RTC device. Contains functions for RTC
- *  initialization and interrupt handling.
+ *  initialization and interrupt handling. Heavy influence from:
+ *  https://wiki.osdev.org/RTC
  *  Author: Andrew Chen
  *  Date: 10/20/18 
  */
@@ -8,6 +9,9 @@
 
 /* Counter for how many times interrupt handler is reached */
 int RTC_ctr = 0;
+
+/* Flag indicating whether or not RTC has generated an interrupt */
+volatile int RTC_flag = 0;
 
 /*
 * rtc_init
@@ -27,7 +31,7 @@ void rtc_init() {
     char prev_B;
 
     /* Disable other incoming interrupts */
-    cli();
+    //cli();
 
     /* Enable RTC to be on IRQ8 on the PIC */
     enable_irq(IRQ_RTC);
@@ -36,7 +40,7 @@ void rtc_init() {
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
     prev_A = inb(CMOS_DATA);
     outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
-    outb((prev_A & RATE_MASK) | DIV_FREQ_2, CMOS_DATA); /* modifies frequency, needs work */
+    outb((prev_A & RATE_MASK) | FREQ_2_HZ, CMOS_DATA); /* modifies frequency, needs work */
 
     /* Enabling IRQ 8 */
     outb(DISABLE_NMI | STATUS_REG_B, CMOS_ADDR);        /* Disable NMI in register B    */
@@ -64,8 +68,13 @@ void rtc_int_handler() {
     cli();
 
     /* Clear screen only once and call RTC_tests() defined in tests.c */
-    if (RTC_ctr == RTC_START_PRIN) { clear(); }
-    if (RTC_ctr++ >= RTC_START_PRIN) { RTC_test(); }
+    //if (RTC_ctr == RTC_START_PRIN) { clear(); }
+    //if (RTC_ctr++ >= RTC_START_PRIN) { RTC_test(); }
+
+    RTC_ctr++;
+
+    /* Set interrupt flag */
+    RTC_flag = 1;
 
     /* Re-enable interrupts by discarding interrupt mask in register C */
     outb(STATUS_REG_C, CMOS_ADDR);              /* Select register C            */
@@ -75,7 +84,7 @@ void rtc_int_handler() {
     send_eoi(IRQ_RTC);
 
     /* Re-enable other incoming interrupts */
-    //sti();
+    sti();
 }
 
 
@@ -88,7 +97,16 @@ void rtc_int_handler() {
 *   RETURN VALUE: 0 on success, -1 for invalid filename
 */
 int32_t rtc_open(const uint8_t * filename) {
+    char prev_A;
 
+    /* Set clock frequency */
+    outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
+    prev_A = inb(CMOS_DATA);
+    outb(DISABLE_NMI | STATUS_REG_A, CMOS_ADDR);
+    /* sets frequency to 2 Hz */
+    outb((prev_A & RATE_MASK) | FREQ_8_HZ, CMOS_DATA); 
+
+    return 0;
 }
 
 
@@ -101,7 +119,8 @@ int32_t rtc_open(const uint8_t * filename) {
 *   RETURN VALUE: 0 on success, -1 for invalid filename
 */
 int32_t rtc_close(int32_t fd) {
-
+    /* Ummm.... I'm not sure what I should do here tbh. A-choo. Excuse me. */
+    return 0;
 }
 
 
@@ -115,7 +134,13 @@ int32_t rtc_close(int32_t fd) {
 *   OUTPUTS: return 0
 */
 int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes) {
+    /* Block and wait for interrupt to be generated */
+    while (!RTC_flag) {}
 
+    /* Clear interrupt flag */
+    RTC_flag = 0;
+
+    return 0;
 }
 
 

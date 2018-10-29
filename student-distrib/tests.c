@@ -156,6 +156,32 @@ void RTC_test() {
 // add more tests here
 
 /* Checkpoint 2 tests */
+
+int RTC_chkpt2_test() {
+	/* Wait 5 interrupt cycles and clear the screen */
+    while (RTC_ctr < 5) {  }
+	clear();
+
+	/* Dummy file descriptor and filename*/
+	int fd;
+	const uint8_t * filename = "";
+
+	while (RTC_ctr < 15) {
+		printf("Interrupting at 2Hz. Interrupt number: %d\n", RTC_ctr);
+	}
+
+	fd = rtc_open(filename);
+
+	while (RTC_ctr < 30) {
+		printf("Interrupt at different rate (after open() is called). Interrupt number: %d\n", RTC_ctr);
+	}
+
+	/* Clear screen once more */
+	clear();
+	
+	return PASS;
+}
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -165,6 +191,7 @@ void RTC_test() {
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
+	TEST_OUTPUT("RTC_chkpt2_test", RTC_chkpt2_test());
 //	TEST_OUTPUT("page_fault_test", page_fault_test());
 	
 	//TEST_OUTPUT("exception_de_test", exception_de_test());

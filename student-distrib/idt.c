@@ -431,7 +431,8 @@ void idt_init(){
 		SET_IDT_ENTRY(idt[i], exception_user_defined);
 	}
 	SET_IDT_ENTRY(idt[0x21], keyboard_handler);         //set keyboard 0X21 is th keyboard handler, which is PIC+1
-	SET_IDT_ENTRY(idt[0x28], rtc_int_handler);          //set RTC 0X28 is the rtc handler, which is PIC+8
+	//SET_IDT_ENTRY(idt[0x28], rtc_int_handler);          //set RTC 0X28 is the rtc handler, which is PIC+8'
+	SET_IDT_ENTRY(idt[0x28], rtc_handler_asm);
 	
 	idt[SYSTEM_CALL].reserved3 = 1;		//system call handler is trap gate
 

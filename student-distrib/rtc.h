@@ -20,11 +20,22 @@
 #define DISABLE_NMI     0x80
 
 #define RATE_MASK       0xF0
-#define DIV_FREQ_2      0x0F
+#define FREQ_2_HZ       0x0F
+#define FREQ_4_HZ       0x0E
+#define FREQ_8_HZ       0x0D
+#define FREQ_16_HZ      0x0C
+#define FREQ_32_HZ      0x0B
+#define FREQ_64_HZ      0x0A
+#define FREQ_128_HZ     0x02
+#define FREQ_256_HZ     0x01
+#define FREQ_512_HZ     0x07
+#define FREQ_1024_HZ    0x06
 
+/* RTC initialization and interrupt handler routines */
 void rtc_init();
 void rtc_int_handler();
 
+/* RTC system calls */
 int32_t rtc_read(int32_t fd, void * buf, int32_t nbytes);
 int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes);
 int32_t rtc_open(const uint8_t * filename);
