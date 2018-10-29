@@ -63,7 +63,11 @@ void keyboard_handler(void){
 				keyboard_buffer[cursor_idx] ='_';
 			}
 			else keyboard_buffer[cursor_idx] ='_';
-			if (strlen(keyboard_buffer)==80) screen_y_change(-1);
+			if (strlen(keyboard_buffer)==80) {
+				screen_y_change(-1);
+				overline =0;
+			}
+
 		}
 		else{
 			if(pressed==CAPSLOCK){
@@ -135,7 +139,7 @@ void keyboard_handler(void){
 			first[i]= keyboard_buffer[i];
 		}
 ///////////////////////////can be put into terminal read
-		if (strlen(keyboard_buffer)<=80){
+		if (strlen(keyboard_buffer)<=80){			
 			put_refresh_line(keyboard_buffer);
 		}else{
 /*			int i;

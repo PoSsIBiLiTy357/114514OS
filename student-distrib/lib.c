@@ -39,6 +39,8 @@ void put_refresh_line(const  char* buf){
     if (screen_y >= NUM_ROWS-1) shift();
 }
 
+
+
 void shift(){
     int i,j;
     for (i = 0; i<NUM_ROWS-1;i++){
