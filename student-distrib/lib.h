@@ -26,6 +26,7 @@ int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
 //////////////////////////////////////////
 void put_refresh_line(const char* buf);
 void shift();
+void screen_y_change(int n);
 //////////////////////////////////////////
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);

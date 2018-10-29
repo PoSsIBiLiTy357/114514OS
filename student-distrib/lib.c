@@ -54,6 +54,10 @@ void shift(){
     screen_y-- ;
 
 }
+
+void screen_y_change(int n){
+    screen_y += n;
+}
 /* Standard printf().
  * Only supports the following format strings:
  * %%  - print a literal '%' character

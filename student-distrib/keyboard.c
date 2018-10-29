@@ -10,7 +10,9 @@ static int caplk_pressd;
 static int shift_state;
 static int ctrl_state;
 static int cursor_idx;
-
+static int overline;
+char first[80];
+//char second[28];
 char keyboard_buffer[129]; ///leave 1 for _
 
 
@@ -29,7 +31,10 @@ void init_keyboard(void)
 	caplk_pressd=0;
 	shift_state=0;
 	cursor_idx=0;
-	memset(keyboard_buffer,0,sizeof(keyboard_buffer));
+	overline =0;
+	memset(first,'\0',sizeof(first));
+	//memset(second,'\0',sizeof(second));
+	memset(keyboard_buffer,'\0',sizeof(keyboard_buffer));
 
 	keyboard_buffer[cursor_idx]='_';
 	enable_irq(1);  //unmask IRQ1 of PIC
@@ -58,6 +63,7 @@ void keyboard_handler(void){
 				keyboard_buffer[cursor_idx] ='_';
 			}
 			else keyboard_buffer[cursor_idx] ='_';
+			if (strlen(keyboard_buffer)==80) screen_y_change(-1);
 		}
 		else{
 			if(pressed==CAPSLOCK){
@@ -124,15 +130,35 @@ void keyboard_handler(void){
 						}	
 					}
 			}
-		put_refresh_line(keyboard_buffer);
+		int i;
+		for (i=0;i<80;i++){
+			first[i]= keyboard_buffer[i];
+		}
+///////////////////////////can be put into terminal read
+		if (strlen(keyboard_buffer)<=80){
+			put_refresh_line(keyboard_buffer);
+		}else{
+/*			int i;
+			for (i=0;i<80;i++){
+				first[i] = keyboard_buffer[i];
+			}
+			for (i=0;i<27;i++){
+				second[i] = keyboard_buffer[i+80]; 
+			}*/
+			if (overline ==0){
+				put_refresh_line(first);
+				puts("\n");
+			}
+			put_refresh_line(keyboard_buffer+80);
+			overline =1;
+		}
 		if(scan_code[(int)pressed] == '\n'){
+			overline =0;
 			int i;
 			for(i=0;i<cursor_idx;i++){
-				keyboard_buffer[i]=0;
+				keyboard_buffer[i]='\0';
 			}
 			cursor_idx=0;
-			//keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
-			//cursor_idx++;
 			keyboard_buffer[cursor_idx]='_';
 		}
 
