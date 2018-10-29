@@ -193,47 +193,46 @@ int32_t rtc_write(int32_t fd, const void * buf, int32_t nbytes) {
 *   SIDE EFFECTS: 
 */
 void convert_freq(uint32_t * freq) {
-    uint32_t curr_val = *freq;
-    
-    switch (curr_val)
+    /* Test input frequency against all possible valid frequencies */
+    switch (*freq)
     {
-        case 2:
+        case VAL_2_HZ:
             *freq = FREQ_2_HZ;
             break;
 
-        case 4:
+        case VAL_4_HZ:
             *freq = FREQ_4_HZ;
             break;
 
-        case 8:
+        case VAL_8_HZ:
             *freq = FREQ_8_HZ;
             break;
 
-        case 16:
+        case VAL_16_HZ:
             *freq = FREQ_16_HZ;
             break;
 
-        case 32:
+        case VAL_32_HZ:
             *freq = FREQ_32_HZ;
             break;
 
-        case 64:
+        case VAL_64_HZ:
             *freq = FREQ_64_HZ;
             break;
 
-        case 128:
+        case VAL_128_HZ:
             *freq = FREQ_128_HZ;
             break;
 
-        case 256:
+        case VAL_256_HZ:
             *freq = FREQ_256_HZ;
             break;
 
-        case 512:
+        case VAL_512_HZ:
             *freq = FREQ_512_HZ;
             break;
 
-        case 1024:
+        case VAL_1024_HZ:
             *freq = FREQ_1024_HZ;
             break;    
 

@@ -10,16 +10,19 @@
 #include "i8259.h"
 #include "tests.h"
 
+/* RTC status registers */
 #define STATUS_REG_A    0x0A
 #define STATUS_REG_B    0x0B
 #define STATUS_REG_C    0x0C
 
+/* RTC init ports and other macros */
 #define IRQ_RTC            8
 #define CMOS_ADDR       0x70
 #define CMOS_DATA       0x71
 #define DISABLE_NMI     0x80
 #define BIT_6           0x40
 
+/* calculated frequency change */
 #define RATE_MASK       0xF0
 #define FREQ_2_HZ       0x0F
 #define FREQ_4_HZ       0x0E
@@ -31,6 +34,19 @@
 #define FREQ_256_HZ     0x01
 #define FREQ_512_HZ     0x07
 #define FREQ_1024_HZ    0x06
+
+/* Macros for possible input frequencies */
+#define VAL_2_HZ          2
+#define VAL_4_HZ          4
+#define VAL_8_HZ          8
+#define VAL_16_HZ        16
+#define VAL_32_HZ        32
+#define VAL_64_HZ        64
+#define VAL_128_HZ      128
+#define VAL_256_HZ      256
+#define VAL_512_HZ      512
+#define VAL_1024_HZ    1024
+
 
 /* RTC initialization and interrupt handler routines */
 void rtc_init();

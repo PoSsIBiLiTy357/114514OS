@@ -21,8 +21,9 @@ static inline void assertion_failure(){
 /* Counter for RTC interrupts declared in RTC.c */
 extern int RTC_ctr;
 
-
-/* Checkpoint 1 tests */
+/*****************************************************************************/
+/*						 Checkpoint 1 tests									 */
+/*****************************************************************************/
 
 /* IDT Test - Example
  * 
@@ -156,7 +157,9 @@ void RTC_test() {
 
 // add more tests here
 
-/* Checkpoint 2 tests */
+/*****************************************************************************/
+/*						 Checkpoint 2 tests									 */
+/*****************************************************************************/
 
 /*
 * RTC_freq_test
@@ -170,13 +173,13 @@ void RTC_test() {
 */
 int RTC_freq_test() {
 	/* Wait 5 interrupt cycles and clear the screen */
-    while (RTC_ctr < 5) {  }
+    while (RTC_ctr < TICK_DELAY) {  }
 	clear();
 
 	/* Dummy file descriptor */
 	int fd;
 
-	while (RTC_ctr < 10) {
+	while (RTC_ctr < INIT_UPPER_BND) {
 		printf("Interrupting at 2Hz. Interrupt number: %d\n", RTC_ctr);
 	}
 
@@ -184,10 +187,10 @@ int RTC_freq_test() {
 	clear();
 
 	/* Buffer to store desired frequency */
-	uint32_t filename[1] = {16};
+	uint32_t filename[1] = {VAL_16_HZ};
 
-	rtc_write(fd, filename, 4);
-	while (RTC_ctr < 50) {
+	rtc_write(fd, filename, NUM_VALID_BYTES);
+	while (RTC_ctr < SIXTEEN_UPPER_BND) {
 		printf("Interrupt at 16Hz due to write(): %d\n", RTC_ctr);
 	}
 
@@ -196,10 +199,10 @@ int RTC_freq_test() {
 	clear();
 
 	/* Buffer to store desired frequency */
-	filename[0] = 64;
+	filename[0] = VAL_64_HZ;
 
-	rtc_write(fd, filename, 4);
-	while (RTC_ctr < 200) {
+	rtc_write(fd, filename, NUM_VALID_BYTES);
+	while (RTC_ctr < SIXTYFOUR_UPPER_BND) {
 		printf("Interrupt at 64Hz due to write(): %d\n", RTC_ctr);
 	}
 
@@ -207,10 +210,10 @@ int RTC_freq_test() {
 	clear();
 
 	/* Buffer to store desired frequency */
-	filename[0] = 512;
+	filename[0] = VAL_512_HZ;
 
-	rtc_write(fd, filename, 4);
-	while (RTC_ctr < 2000) {
+	rtc_write(fd, filename, NUM_VALID_BYTES);
+	while (RTC_ctr < FIVETWELVE_UPPER_BND) {
 		printf("Interrupt at 512Hz due to write(): %d\n", RTC_ctr);
 	}
 
@@ -218,10 +221,10 @@ int RTC_freq_test() {
 	clear();
 
 	/* Buffer to store desired frequency */
-	filename[0] = 1024;
+	filename[0] = VAL_1024_HZ;
 
-	rtc_write(fd, filename, 4);
-	while (RTC_ctr < 4000) {
+	rtc_write(fd, filename, NUM_VALID_BYTES);
+	while (RTC_ctr < MAX_FREQ_UPPER_BND) {
 		printf("Interrupt at 1024Hz due to write(): %d\n", RTC_ctr);
 	}
 
@@ -233,7 +236,7 @@ int RTC_freq_test() {
 	const uint8_t * file;
 
 	fd = rtc_open(file);
-	while (RTC_ctr < 4010) {
+	while (RTC_ctr < OPEN_UPPER_BND) {
 		printf("Interrupting back to 2 Hz after open(): %d\n", RTC_ctr);
 	}	
 
@@ -260,9 +263,10 @@ int RTC_valid_size_test() {
 
 	/* Dummy valid file descriptor and filename */
 	int fd;
-	uint32_t filename[1] = {16};
-
-	if (rtc_write(fd, filename, 4) == sizeof(uint32_t)) 
+	uint32_t filename[1] = {VAL_16_HZ};
+	
+	/* Check rtc_write return value */
+	if (rtc_write(fd, filename, NUM_VALID_BYTES) == sizeof(uint32_t)) 
 		return PASS;
 	return FAIL;
 }
@@ -283,8 +287,9 @@ int RTC_invalid_size_test() {
 
 	/* Dummy valid file descriptor and filename */
 	int fd;
-	uint32_t filename[1] = {16};
+	uint32_t filename[1] = {VAL_16_HZ};
 
+	/* Call rtc_write with invalid nbytes size 5 */
 	if (rtc_write(fd, filename, 5) == -1) 
 		return PASS;
 	return FAIL;
@@ -308,7 +313,8 @@ int RTC_empty_buf_test() {
 	int fd;
 	uint32_t * filename = NULL;
 
-	if (rtc_write(fd, filename, 4) == -1) 
+	/* Check rtc_write return value */
+	if (rtc_write(fd, filename, NUM_VALID_BYTES) == -1) 
 		return PASS;
 	return FAIL;
 }
@@ -334,14 +340,14 @@ int RTC_base_2_test() {
 	uint32_t filename[1];
 
 	/* Array of values to test, all values should pass except the first two (0 and 1) */
-	uint32_t test_val[12] = { 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 };
+	uint32_t test_val[NUM_FREQ_TESTS] = { 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 };
 	
 	/* Loop through testing each value and calling RTC_write() */
-	for (i = 0; i < 12; i++) {
+	for (i = 0; i < NUM_FREQ_TESTS; i++) {
 		filename[0] = test_val[i];
 
 		/* Call rtc_write() */
-		retval = rtc_write(fd, filename, 4);
+		retval = rtc_write(fd, filename, NUM_VALID_BYTES);
 
 		if ((retval == -1) && i > 1) {
 			/* Return fail if any of the valid test values are considered invalid */
@@ -372,19 +378,23 @@ int RTC_read_test() {
 
 	/* Dummy valid file descriptor and filename */
 	int fd;
-	uint32_t filename[1] = {2};
+	uint32_t filename[1] = {VAL_2_HZ};
 
 	/* Reset RTC_ctr */
 	RTC_ctr = 0;
 
 	/* Wait 5 clock cycles then clear screen */
-	while (RTC_ctr < 5) {}
+	while (RTC_ctr < TICK_DELAY) {}
 	clear();
 
-	while (RTC_ctr < 20) {
+	/* Loop thru counting up for 15 ticks */
+	while (RTC_ctr < READ_UPPER_BND) {
 		printf("read_test() interrupt count: %d\n", RTC_ctr);
-		if (RTC_ctr == 10 || RTC_ctr == 15) {
-			rtc_read(fd, filename, 4);
+
+		/* Call read() to block on tick number 10 and 15 */
+		if (RTC_ctr == BLOCK_CASE_10 || RTC_ctr == BLOCK_CASE_15) {
+			printf("BLOCKING");
+			rtc_read(fd, filename, NUM_VALID_BYTES);
 		}
 	}
 
@@ -395,9 +405,20 @@ int RTC_read_test() {
 }
 
 
-/* Checkpoint 3 tests */
-/* Checkpoint 4 tests */
-/* Checkpoint 5 tests */
+/*****************************************************************************/
+/*						 Checkpoint 3 tests									 */
+/*****************************************************************************/
+// coming soon!
+
+/*****************************************************************************/
+/*						 Checkpoint 4 tests									 */
+/*****************************************************************************/
+// coming kinda soon.
+
+/*****************************************************************************/
+/*						 Checkpoint 5 tests									 */
+/*****************************************************************************/
+// bleh.....
 
 
 /* Test suite entry point */
@@ -420,7 +441,7 @@ void launch_tests(){
 	
 	/* File system tests */
 	//uint8_t fname[] = "frame0.txt";		/* select file name */
-	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
+	TEST_OUTPUT("print_allfile_test", print_allfile_test());
 	//TEST_OUTPUT("read_file_test", read_file_test(fname));
 
 }
