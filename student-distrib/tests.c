@@ -158,7 +158,6 @@ void RTC_test() {
 
 /* Checkpoint 2 tests */
 
-<<<<<<< HEAD
 /*
 * RTC_freq_test
 *   DESCRIPTION: This function tests RTC at varying frequencies. Frequencies are
@@ -394,8 +393,6 @@ int RTC_read_test() {
 
 	return PASS;
 }
-=======
->>>>>>> master
 
 
 /* Checkpoint 3 tests */
@@ -409,7 +406,6 @@ void launch_tests(){
 
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
-<<<<<<< HEAD
 
 	/* RTC tests */
 	TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
@@ -420,13 +416,11 @@ void launch_tests(){
 	TEST_OUTPUT("RTC_base_2_test", RTC_base_2_test());
 	
 //	TEST_OUTPUT("page_fault_test", page_fault_test());
-=======
 	//TEST_OUTPUT("page_fault_test", page_fault_test());
 
 	TEST_OUTPUT("print_allfile_test", print_allfile_test());
 	TEST_OUTPUT("read_file_test", read_file_test(fname));
 
->>>>>>> master
 	
 	//TEST_OUTPUT("exception_de_test", exception_de_test());
 	//TEST_OUTPUT("exception_test", exception_test());

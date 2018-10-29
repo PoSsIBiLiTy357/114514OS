@@ -63,7 +63,6 @@ void rtc_int_handler() {
     cli();
 
     /* Clear screen only once and call RTC_tests() defined in tests.c */
-<<<<<<< HEAD
     //if (RTC_ctr == RTC_START_PRIN) { clear(); }
     //if (RTC_ctr++ >= RTC_START_PRIN) { RTC_test(); }
 
@@ -71,10 +70,6 @@ void rtc_int_handler() {
 
     /* Set interrupt flag */
     RTC_flag = 1;
-=======
- //   if (RTC_ctr == RTC_START_PRIN) { clear(); }
- //   if (RTC_ctr++ >= RTC_START_PRIN) { RTC_test(); }
->>>>>>> master
 
     /* Re-enable interrupts by discarding interrupt mask in register C */
     outb(STATUS_REG_C, CMOS_ADDR);              /* Select register C            */
