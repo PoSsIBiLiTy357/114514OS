@@ -42,7 +42,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
     char *i_fname;
     for(i = 1; i < num_dentry; i++){
         i_fname = dentry_start[i].fname;
-        if(strlen((uint8_t*)fname) != strlen(i_fname)) continue;
+        //if(strlen((uint8_t*)fname) != strlen(i_fname)) continue;
         if(strncmp((uint8_t*)fname, i_fname, strlen((uint8_t*)fname)) == 0){
             
             memcpy( dentry->fname, dentry_start[i].fname, sizeof(dentry_start[i].fname));
@@ -223,7 +223,7 @@ int read_file_test(uint8_t *fname){
     int i, j;
     dentry_t d;
     inode_t  inode;
-    uint8_t buf[12800];
+    uint8_t buf[38000];
 
 
 	clear();
@@ -238,14 +238,23 @@ int read_file_test(uint8_t *fname){
     printf("1st data block #: %d\n",inode.data_block[0]);
     printf("2nd data block #: %d\n",inode.data_block[1]);
     printf("3rd data block #: %d\n",inode.data_block[2]);
-    
+    printf("4th data block #: %d\n",inode.data_block[3]);
+    printf("5th data block #: %d\n",inode.data_block[4]);
+    printf("6th data block #: %d\n",inode.data_block[5]);
+    printf("7th data block #: %d\n",inode.data_block[6]);
+    printf("8th data block #: %d\n",inode.data_block[7]);
+    printf("9th data block #: %d\n",inode.data_block[8]);
+    printf("10th data block #: %d\n",inode.data_block[9]);
+    printf("11th data block #: %d\n",inode.data_block[10]);
+
     memset(buf, 0, sizeof(buf));
 
-    read_f_by_name(fname, 0, buf, 12800);
-    for(i=0; i<12800; i++){
-        if(buf[i] == '\0') break;
+    read_f_by_name(fname, 0, buf, 38000);
+    for(i=0; i<inode.length; i++){
+        //if(buf[i] == '\0') break;
         putc(buf[i]);
     }
+
     putc('\n');
 	return 1;
 }
