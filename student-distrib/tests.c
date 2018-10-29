@@ -158,32 +158,7 @@ void RTC_test() {
 
 /* Checkpoint 2 tests */
 
-/*
-int print_allfiles(){
 
-    int i, j;
-	int32_t num_dentry = (int32_t *)bootBlk_addr;
-	dentry_t *dentry_start = (dentry_t *)(bootBlk_addr + DENTRY_START_OFFSET);
-
-
-	clear();
-    for(i = 0; i < num_dentry; i++){
-        
-		puts("fileName: ");
-        for(j = 0; j < 32; j++){
-			putc(dentry_start[i].fname[j]);
-		}
-		puts("fileType: ");
-
-		puts(dentry_start[i].ftype);
-
-		putc("\n");
-    }
-
-	return PASS;
-
-}
-*/
 
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -192,19 +167,14 @@ int print_allfiles(){
 
 /* Test suite entry point */
 void launch_tests(){
-	int i;
+	uint8_t fname[] = "fish";
 
 	TEST_OUTPUT("idt_test", idt_test());
 	TEST_OUTPUT("page_nofault_test", page_nofault_test());
 	//TEST_OUTPUT("page_fault_test", page_fault_test());
 
-
-	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
-	TEST_OUTPUT("read_file_test", read_file_test("fish"));
-	//TEST_OUTPUT("read_file_test", read_file_test("testprint"));
-	//TEST_OUTPUT("read_file_test", read_file_test("verylargetextwithverylongname.tx"));
-	//TEST_OUTPUT("read_file_test", read_file_test("sigtest"));
-	//pf: 1.fish
+	TEST_OUTPUT("print_allfile_test", print_allfile_test());
+	TEST_OUTPUT("read_file_test", read_file_test(fname));
 
 	
 	//TEST_OUTPUT("exception_de_test", exception_de_test());
