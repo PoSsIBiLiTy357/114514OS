@@ -13,9 +13,9 @@ static int shift_state;
 static int ctrl_state;
 static int cursor_idx;
 static int overline;
-char first[LINE_SIZE];
+static char first[LINE_SIZE];
 //char second[28];
-char keyboard_buffer[BUFFER_SIZE]; ///leave 1 for _
+static char keyboard_buffer[BUFFER_SIZE]; ///leave 1 for _
 
 
 /* init_keyboard
@@ -54,7 +54,7 @@ void init_keyboard(void)
  */
 void keyboard_handler(void){
 	cli();
-	send_eoi(1);   // protected send of eoi
+	send_eoi(1);  // protected send of eoi
 	unsigned char pressed;
 	int i;
 	while ((inb(KBRD_STATUS_PORT)&0x01)!=0){  // only read from data port when the status is ready
@@ -111,15 +111,19 @@ void keyboard_handler(void){
 					if(shift_state==0){
 						if (scan_code[(int)pressed]!=0){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];			// cap not pressed and shift not pressed case 
-							cursor_idx++;
-							keyboard_buffer[cursor_idx]='_';
+							if (cursor_idx < 127) {
+								cursor_idx++;
+								keyboard_buffer[cursor_idx] = '_';
+							}
 						}	
 					}	
 					else{
 						if (scan_code[(int)pressed]!=0){									// shift pressed case, use shift convert table 
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
-							cursor_idx++;
-							keyboard_buffer[cursor_idx]='_';
+							if (cursor_idx < 127) {
+								cursor_idx++;
+								keyboard_buffer[cursor_idx] = '_';
+							}
 						}
 					}
 				}
@@ -127,26 +131,34 @@ void keyboard_handler(void){
 					if (scan_code[(int)pressed]!=0 && scan_code[(int)pressed]>96 &&  scan_code[(int)pressed]<122){  // cap case , only convert letters not numbers and symbols
 						if(shift_state==0){
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
-							cursor_idx++;
-							keyboard_buffer[cursor_idx]='_';
+							if (cursor_idx < 127) {
+								cursor_idx++;
+								keyboard_buffer[cursor_idx] = '_';
+							}
 						}
 						else{																//cap case with shift hold down, back to lower case letter 
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
-							cursor_idx++;
-							keyboard_buffer[cursor_idx]='_';
+							if (cursor_idx < 127) {
+								cursor_idx++;
+								keyboard_buffer[cursor_idx] = '_';
+							}
 						}
 				
 					}
 					else if(scan_code[(int)pressed]!=0) {		//cap case for non letters 
 						if(shift_state==0){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
-							cursor_idx++;
-							keyboard_buffer[cursor_idx]='_';
+							if (cursor_idx < 127) {
+								cursor_idx++;
+								keyboard_buffer[cursor_idx] = '_';
+							}
 						}
 						else{
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
-							cursor_idx++;
-							keyboard_buffer[cursor_idx]='_';
+							if (cursor_idx < 127) {
+								cursor_idx++;
+								keyboard_buffer[cursor_idx] = '_';
+							}
 							}
 						}	
 					}
@@ -186,7 +198,8 @@ void keyboard_handler(void){
 
 		//puts(keyboard_buffer);
 	}
-
+	
+	sti();
 }
 
 /* terminal_read
@@ -212,6 +225,7 @@ char* terminal_read(){
  */
 int terminal_write(char * buf){
 	put_refresh_line(buf);
+	return 0;
 }
 
 

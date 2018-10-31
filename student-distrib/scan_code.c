@@ -60,7 +60,7 @@
 #define   N		49
 #define   M		50
 
-#define 	BACKSPACE	14
+
 #define 	TAB			15
 #define 	SPACE		57
 #define 	CAPSLOCK	58

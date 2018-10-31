@@ -26,7 +26,7 @@ void clear(void) {
 
 void put_refresh_line(const  char* buf){
 
-    int i,j;
+    int j;
 
     for (j=0;j<NUM_COLS;j++){
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + j) << 1)) = ' ';
@@ -192,7 +192,7 @@ format_char_switch:
  *   Inputs: int_8* s = pointer to a string of characters
  *   Return Value: Number of bytes written
  *    Function: Output a string to the console */
-int32_t puts(int8_t* s) {
+int32_t puts(const int8_t* s) {
     register int32_t index = 0;
     while (s[index] != '\0') {
         putc(s[index]);
@@ -205,7 +205,7 @@ int32_t puts(int8_t* s) {
  * Inputs: uint_8* c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
-void putc(uint8_t c) {
+void putc(const uint8_t c) {
     if(c == '\n' || c == '\r') {
         screen_y++;
         screen_x = 0;
