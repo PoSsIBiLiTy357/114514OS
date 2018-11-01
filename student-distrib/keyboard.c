@@ -5,7 +5,7 @@
 
 #define KBRD_STATUS_PORT		0x64
 #define KBRD_DATA_PORT			0x60
-#define BUFFER_SIZE		128
+#define BUFFER_SIZE		129
 #define LINE_SIZE   80
 
 static int caplk_pressd;
@@ -14,7 +14,7 @@ static int ctrl_state;
 static int cursor_idx;
 static int overline;
 static char first[LINE_SIZE];
-//char second[28];
+static char second[48];
 static char keyboard_buffer[BUFFER_SIZE]; ///leave 1 for _
 
 
@@ -106,12 +106,15 @@ void keyboard_handler(void){
 				//		cursor_idx++;
 				//		keyboard_buffer[cursor_idx]='_';
 				//	}
+			if (strlen(keyboard_buffer) == 128 && scan_code[(int)pressed] != '\n') {
+				continue;
+			}
 			if(ctrl_state==0){				//check ctrl state 
 				if(caplk_pressd==0){		// check cap state
 					if(shift_state==0){
 						if (scan_code[(int)pressed]!=0){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];			// cap not pressed and shift not pressed case 
-							if (cursor_idx < 127) {
+							if (cursor_idx < 128) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
@@ -120,7 +123,7 @@ void keyboard_handler(void){
 					else{
 						if (scan_code[(int)pressed]!=0){									// shift pressed case, use shift convert table 
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
-							if (cursor_idx < 127) {
+							if (cursor_idx < 128) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
@@ -131,14 +134,14 @@ void keyboard_handler(void){
 					if (scan_code[(int)pressed]!=0 && scan_code[(int)pressed]>96 &&  scan_code[(int)pressed]<122){  // cap case , only convert letters not numbers and symbols
 						if(shift_state==0){
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
-							if (cursor_idx < 127) {
+							if (cursor_idx < 128) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
 						}
 						else{																//cap case with shift hold down, back to lower case letter 
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
-							if (cursor_idx < 127) {
+							if (cursor_idx < 128) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
@@ -148,14 +151,14 @@ void keyboard_handler(void){
 					else if(scan_code[(int)pressed]!=0) {		//cap case for non letters 
 						if(shift_state==0){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
-							if (cursor_idx < 127) {
+							if (cursor_idx < 128) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
 						}
 						else{
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
-							if (cursor_idx < 127) {
+							if (cursor_idx < 128) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
@@ -167,6 +170,9 @@ void keyboard_handler(void){
 		
 		for (i=0;i<LINE_SIZE;i++){
 			first[i]= keyboard_buffer[i];
+		}
+		for (i = 0; i < 48; i++) {
+			second[i] = keyboard_buffer[i+80];
 		}
 ///////////////////////////can be put into terminal read
 		if (strlen(keyboard_buffer)<=LINE_SIZE){						//print to screen 1 line case 
@@ -183,7 +189,7 @@ void keyboard_handler(void){
 				put_refresh_line(first);
 				puts("\n");
 			}
-			put_refresh_line(keyboard_buffer+LINE_SIZE);			//  print to screen 2 line case ; second line 
+			put_refresh_line(second);			//  print to screen 2 line case ; second line 
 			overline =1;
 		}
 		if(scan_code[(int)pressed] == '\n'){					// enter pressed go to next line clear keyboard_buffer
@@ -192,7 +198,7 @@ void keyboard_handler(void){
 			for(i=0;i<cursor_idx+1;i++){
 				keyboard_buffer[i]='\0';
 			}
-			cursor_idx=0;
+			cursor_idx= 0;
 			keyboard_buffer[cursor_idx]='_';
 		}
 
