@@ -47,11 +47,14 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
 
     int i;
     uint8_t *i_fname;
+    //loop through all dentries
     for(i = 1; i < num_dentry; i++){
         i_fname = dentry_start[i].fname;
-        //if(strlen((uint8_t*)fname) != strlen(i_fname)) continue;
+
+        //compare current i_fname with input fname
         if(strncmp((int8_t*)fname, (int8_t *)i_fname, strlen((int8_t*)fname)) == 0){
             
+            //copy desire dentry info into input dentry
             memcpy( dentry->fname, dentry_start[i].fname, sizeof(dentry_start[i].fname));
             dentry->ftype = dentry_start[i].ftype;
             dentry->inode = dentry_start[i].inode;
@@ -78,8 +81,10 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
  */
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry){
 
+    //invalid input index check
     if( (index >= num_dentry) || (index < 0) ) return -1;
 
+    //copy desire dentry info into input dentry
     memcpy( dentry->fname, dentry_start[index].fname, sizeof(dentry_start[index].fname));
     dentry->ftype = dentry_start[index].ftype;
     dentry->inode = dentry_start[index].inode;
@@ -104,16 +109,19 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
     int i, inode_datablk_offset, datablk_offset;
 
+    //invalid input checks
     if(inode == NULL) return -1;
     if(buf == NULL) return -1;
     if(inode >= num_inodes) return -1;
+    //return 0 if offset reach end 
     if(offset >= inode_start[inode].length) return 0;
 
     inode_datablk_offset = offset / DATABLK_SIZE;
     datablk_offset = offset % DATABLK_SIZE;
-
+    //fill buf with desired length
     for(i = 0; i<length; i++){
 
+        //reset index when finish 1 datablock and points to next
         if(datablk_offset == DATABLK_SIZE){
             datablk_offset = 0;
             inode_datablk_offset += 1;
@@ -285,6 +293,7 @@ int print_allfile_test(){
         
         //printf("NO: %d fileName: %s, fileType: %d, #inode: %d \n", i, dentry_start[i].fname, dentry_start[i].ftype, dentry_start[i].inode); print :)
 
+        //print one by one enforce 32 name length 
         printf("dentry NO.%d: ", i);
         for(j = 0; j < 32; j++){
             putc(dentry_start[i].fname[j]);

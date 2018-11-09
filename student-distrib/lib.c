@@ -24,6 +24,64 @@ void clear(void) {
     }
 }
 
+/* void put_refresh_line(const  char* buf);
+ * Inputs: buf
+ * Return Value: none
+ * Function: keep refreshing lines and print out new strings */
+void put_refresh_line(const  char* buf){
+
+    int j;
+
+    for (j=0;j<NUM_COLS;j++){
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + j) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + j) << 1) + 1) = ATTRIB;     
+    }
+
+    screen_x = 0;
+
+    puts(buf);
+    if (screen_y >= NUM_ROWS-1) shift();
+}
+
+
+/* void clear(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: scroll screen */
+void shift(){
+    int i,j;
+    for (i = 0; i<NUM_ROWS-1;i++){
+        for (j=0;j<NUM_COLS;j++){
+        *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1)) = *(video_mem + ((NUM_COLS * (i+1) + j) << 1));
+        *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+        }
+    }
+    for (j=0;j<NUM_COLS;j++){
+        *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS-1) + j) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS-1) + j) << 1) + 1) = ATTRIB;     
+    }
+    screen_y-- ;
+
+}
+/* void clear(void);
+ * Inputs: n -- col number
+ * Return Value: none
+ * Function: set screen_y to specific line number */
+void screen_y_set(int n){
+	screen_y =n;
+}
+
+/* void clear(void);
+ * Inputs: n -- col number
+ * Return Value: none
+ * Function: chenge screen_y  */
+void screen_y_change(int n){
+    screen_y += n;
+}
+
+int get_screen_y() {
+	return screen_y;
+}
 /* Standard printf().
  * Only supports the following format strings:
  * %%  - print a literal '%' character
@@ -154,7 +212,7 @@ format_char_switch:
  *   Inputs: int_8* s = pointer to a string of characters
  *   Return Value: Number of bytes written
  *    Function: Output a string to the console */
-int32_t puts(int8_t* s) {
+int32_t puts(const int8_t* s) {
     register int32_t index = 0;
     while (s[index] != '\0') {
         putc(s[index]);
@@ -167,7 +225,7 @@ int32_t puts(int8_t* s) {
  * Inputs: uint_8* c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
-void putc(uint8_t c) {
+void putc(const uint8_t c) {
     if(c == '\n' || c == '\r') {
         screen_y++;
         screen_x = 0;

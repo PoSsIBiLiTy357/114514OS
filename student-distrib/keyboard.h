@@ -7,3 +7,7 @@ extern void init_keyboard(void);
 
 /* keyboard handler body function */
 extern void keyboard_handler(void);
+
+extern char* terminal_read();
+
+extern int terminal_write(char * buf);

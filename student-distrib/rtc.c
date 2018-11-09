@@ -1,4 +1,3 @@
-
 /* rtc.c - C file for RTC device. Contains functions for RTC
  *  initialization and interrupt handling. Heavy influence from:
  *  https://wiki.osdev.org/RTC
@@ -45,8 +44,8 @@ void rtc_init() {
     prev_B = inb(CMOS_DATA);                            /* read current value in reg B  */
     outb(DISABLE_NMI | STATUS_REG_B, CMOS_ADDR);        /* Set index again              */
     outb(prev_B | BIT_6, CMOS_DATA);                    /* Write prev value and 6th bit */
-
-    /* initialize interrupt flag */
+    
+    /* Set RTC_flag */
     RTC_flag = 0;
 }
 
