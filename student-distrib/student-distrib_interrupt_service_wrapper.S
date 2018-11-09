@@ -63,5 +63,7 @@ syscall_asm:
     addl $4,%esp
     iret
 
+from_syscall:
+
 sys_call_table:
 .long open, read, write, close, execute, halt, getargs

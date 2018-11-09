@@ -435,5 +435,5 @@ void idt_init(){
 	SET_IDT_ENTRY(idt[0x28], rtc_handler_asm);          //set RTC 0X28 is the rtc handler, which is PIC+8
 	
 	idt[SYSTEM_CALL].reserved3 = 1;		//system call handler is trap gate
-
+	SET_IDT_ENTRY(idt(SYSTEM_CALL),syscall_asm); //set 0x80 to be assembly linkage of syscall
 }
