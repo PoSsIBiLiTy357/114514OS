@@ -2,7 +2,7 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "filesys_read.h"
-
+#include "keyboard.h"
 #define PASS 1
 #define FAIL 0
 
@@ -443,5 +443,5 @@ void launch_tests(){
 	//uint8_t fname[] = "frame0.txt";		/* select file name */
 	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
 	//TEST_OUTPUT("read_file_test", read_file_test(fname));
-
+	//terminal_write("qwertyuiop[]\asdfghjkl;'zxcvbnm,./bfgdhfdgfdgfdgfdjkgfodjglkfjdlkgkfjkdglkjflkdjklgjklfjlkdjlgjfkdjgofiejdgprokepokpofkld;lgjhfl;djhn;lfmblc;lkfl;dk;lrfkpoerkpogkd;lkfl;gk12323432543267687686786565");
 }

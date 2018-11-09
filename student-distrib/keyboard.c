@@ -230,7 +230,29 @@ char* terminal_read(){
  * 
  */
 int terminal_write(char * buf){
-	put_refresh_line(buf);
+
+
+	int full_col = strlen(buf) / 80;
+	int remainder = strlen(buf) % 80;
+	int i,j;
+	char one_line[80];
+	for (i = 0; i < full_col; i++) {
+		for (j = 0; j < 80; j++) {
+			one_line[j] = buf[j + 80 * i];
+		}
+		put_refresh_line(one_line);
+		puts("\n");
+
+	}
+	for (j = 0; j < 80; j++) {
+		one_line[j] = '\0';
+	}
+	one_line[80] = '\n';
+	for (j = 0; j < remainder; j++) {
+		one_line[j] = buf[80 * full_col + j];
+	}
+	put_refresh_line(one_line);
+
 	return 0;
 }
 

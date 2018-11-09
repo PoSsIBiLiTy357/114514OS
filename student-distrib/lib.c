@@ -24,6 +24,10 @@ void clear(void) {
     }
 }
 
+/* void put_refresh_line(const  char* buf);
+ * Inputs: buf
+ * Return Value: none
+ * Function: keep refreshing lines and print out new strings */
 void put_refresh_line(const  char* buf){
 
     int j;
@@ -40,7 +44,10 @@ void put_refresh_line(const  char* buf){
 }
 
 
-
+/* void clear(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: scroll screen */
 void shift(){
     int i,j;
     for (i = 0; i<NUM_ROWS-1;i++){
@@ -56,11 +63,24 @@ void shift(){
     screen_y-- ;
 
 }
+/* void clear(void);
+ * Inputs: n -- col number
+ * Return Value: none
+ * Function: set screen_y to specific line number */
 void screen_y_set(int n){
 	screen_y =n;
 }
+
+/* void clear(void);
+ * Inputs: n -- col number
+ * Return Value: none
+ * Function: chenge screen_y  */
 void screen_y_change(int n){
     screen_y += n;
+}
+
+int get_screen_y() {
+	return screen_y;
 }
 /* Standard printf().
  * Only supports the following format strings:

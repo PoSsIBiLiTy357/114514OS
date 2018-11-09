@@ -28,6 +28,7 @@ void put_refresh_line(const char* buf);
 void shift();
 void screen_y_change(int n);
 void screen_y_set(int n);
+int get_screen_y();
 //////////////////////////////////////////
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);
