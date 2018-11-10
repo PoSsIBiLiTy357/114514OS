@@ -18,13 +18,6 @@ typedef struct file_desc_t {
     int32_t inode,file_pos,flags;
 } file_desc_t;
 
-
-
-
-
-
-
-
 typedef struct pcb_t{
     int32_t *parent;
     int32_t parent_esp;
@@ -33,6 +26,8 @@ typedef struct pcb_t{
     char bitmap[FDESC_SIZE];
     int32_t pid;
 } pcb_t;
+
+
 
 /* System calls */
 int32_t halt(uint8_t status);

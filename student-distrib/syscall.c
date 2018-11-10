@@ -3,7 +3,7 @@
 #define MAGIC_7F        0x7F
 #define MAGIC_E         0x45
 #define MAGIC_L         0x4C
-#define MAGIC_F        0x46
+#define MAGIC_F         0x46
 
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
 
@@ -16,6 +16,7 @@ int32_t halt(uint8_t status){
 * execute
 *   DESCRIPTION: Executes a user level progam by and hands processor
 *           off to the new program until it terminates.
+*   NOTE: does not take args into account, need to work on this...
 *
 *   INPUTS: uint8_t * command - first string is filename followed by args to
 *               be interpreted by getargs()
@@ -24,8 +25,9 @@ int32_t halt(uint8_t status){
 *	SIDE EFFECTS : Switches processor to user mode to run given user program
 */
 int32_t execute(const uint8_t * command){
-    uint8_t inFile[CMD_LIMIT];
+    uint8_t inFile[CMD_LIMIT];  /* name of executable file */
 
+    /* Ensure the given command is a valid executable file */
     if (verify_file(command, inFile) == -1) { return -1; }
 
     return 0;
