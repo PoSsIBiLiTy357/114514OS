@@ -432,7 +432,7 @@ void launch_tests(){
 	//TEST_OUTPUT("exception_test", exception_test());
 
 	/* RTC tests */
-	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
+	TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
 	// TEST_OUTPUT("RTC_read_test", RTC_read_test());
 	// TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
 	// TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());

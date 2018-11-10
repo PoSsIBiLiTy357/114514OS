@@ -6,14 +6,7 @@
 
 #include "lib.h"
 
-typedef struct pcb_t{
-    int32_t *parent;
-    int32_t parent_esp;
-    int32_t parent_ebp;
-    file_desc_t file_array[FDESC_SIZE];
-    char bitmap[FDESC_SIZE];
-    int32_t pid;
-} pcb_t;
+
 
 
 
@@ -26,6 +19,15 @@ typedef struct file_desc_t {
     int (*write)(int32_t,int32_t, int8_t* , int32_t);///////*********possible bug change to uint ***********//////////////////////////
     int32_t inode,file_pos,flags;
 } file_desc_t;
+
+typedef struct pcb_t{
+    int32_t *parent;
+    int32_t parent_esp;
+    int32_t parent_ebp;
+    file_desc_t file_array[FDESC_SIZE];
+    char bitmap[FDESC_SIZE];
+    int32_t pid;
+} pcb_t;
 
 int32_t halt(uint8_t status);
 int32_t execute(const uint8_t * command);
