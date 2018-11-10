@@ -26,10 +26,10 @@ int32_t halt(uint8_t status){
 */
 int32_t execute(const uint8_t * command){
     uint8_t inFile[CMD_LIMIT];  /* name of executable file           */
-    uint32_t * v_addr;          /* virtual addr of first instruction */
+    uint32_t v_addr;            /* virtual addr of first instruction */
 
     /* Ensure the given command is a valid executable file */
-    if (verify_file(command, inFile, v_addr) == -1) { return -1; }
+    if (verify_file(command, inFile, &v_addr) == -1) { return -1; }
 
     return 0;
 }
@@ -74,6 +74,8 @@ int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_
 
     /* Retrieve address for first instruction from bytes 24-27 */
     read_f_by_name(inFile, 24, addrBuf, 4);
+
+    /* Convert from string to integer address */
     v_addr = 0;
     for (j = 0; j < 4; j++) {
         v_addr += (addrBuf[j] << (8 * j));
