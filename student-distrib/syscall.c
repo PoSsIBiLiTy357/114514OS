@@ -31,6 +31,9 @@ int32_t execute(const uint8_t * command){
     /* Ensure the given command is a valid executable file */
     if (verify_file(command, inFile, &v_addr) == -1) { return -1; }
 
+    //TODO
+
+
     return 0;
 }
 
@@ -46,7 +49,8 @@ int32_t execute(const uint8_t * command){
 *           uint8_t inFile[CMD_LIMIt] - buffer to hold the name of the file
 *   OUTPUTS: 0 or -1
 *   RETURN VALUE: 0 on success, -1 on failure
-*	SIDE EFFECTS : places command filename into inFile buffer
+*	SIDE EFFECTS : places command filename into inFile buffer and starting
+                   user address into v_addr
 */
 int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_addr) {
     int i, j;
