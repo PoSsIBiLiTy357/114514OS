@@ -1,5 +1,6 @@
 #https://wiki.osdev.org/Interrupt_Service_Routines
-#include "student-distrib_interrupt_service_wrapper.h"
+#define ASM 1
+#include "x86_desc.h"
 
 #define SYSCALL_NUM 7
 
@@ -63,7 +64,7 @@ syscall_asm:
     addl $4,%esp
     iret
 
-from_syscall:
+
 
 sys_call_table:
 .long open, read, write, close, execute, halt, getargs
