@@ -1,16 +1,31 @@
 #ifndef _SYSCALL_H
 #define _SYSCALL_H
 
+#define FDESC_SIZE 8
+
+
 #include "lib.h"
+
+typedef struct pcb_t{
+    int32_t *parent;
+    int32_t parent_esp;
+    int32_t parent_ebp;
+    file_desc_t file_array[FDESC_SIZE];
+    char bitmap[FDESC_SIZE];
+    int32_t pid;
+} pcb_t;
+
+
 
 /* Initialization struct for device referenced from: */
 /* https://stackoverflow.com/questions/9932212/jump-table-examples-in-c */
-typedef struct device { 
-    int (*open)(const uint8_t *);
-    int (*close)(int32_t);
-    int (*read)(int32_t, void * , int32_t);
-    int (*write)(int32_t, const void * , int32_t);
-} device_t;
+typedef struct file_desc_t { 
+    int (*open)(int32_t,int32_t, int8_t* , int32_t); ///////*********possible bug change to uint ***********//////////////////////////
+    int (*close)(int32_t,int32_t, int8_t* , int32_t); ///////*********possible bug change to uint ***********//////////////////////////
+    int (*read)(int32_t,int32_t, int8_t* , int32_t);///////*********possible bug change to uint ***********//////////////////////////
+    int (*write)(int32_t,int32_t, int8_t* , int32_t);///////*********possible bug change to uint ***********//////////////////////////
+    int32_t inode,file_pos,flags;
+} file_desc_t;
 
 int32_t halt(uint8_t status);
 int32_t execute(const uint8_t * command);

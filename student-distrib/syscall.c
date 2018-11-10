@@ -2,6 +2,7 @@
 #include "rtc.h"
 
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
+
 int32_t halt(uint8_t status){
     return 0;
 }
