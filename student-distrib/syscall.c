@@ -25,10 +25,11 @@ int32_t halt(uint8_t status){
 *	SIDE EFFECTS : Switches processor to user mode to run given user program
 */
 int32_t execute(const uint8_t * command){
-    uint8_t inFile[CMD_LIMIT];  /* name of executable file */
+    uint8_t inFile[CMD_LIMIT];  /* name of executable file           */
+    uint32_t * v_addr;          /* virtual addr of first instruction */
 
     /* Ensure the given command is a valid executable file */
-    if (verify_file(command, inFile) == -1) { return -1; }
+    if (verify_file(command, inFile, v_addr) == -1) { return -1; }
 
     return 0;
 }
@@ -47,16 +48,17 @@ int32_t execute(const uint8_t * command){
 *   RETURN VALUE: 0 on success, -1 on failure
 *	SIDE EFFECTS : places command filename into inFile buffer
 */
-int8_t verify_file(const uint8_t * command, uint8_t inFile[CMD_LIMIT]) {
-    int i;
+int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_addr) {
+    int i, j;
+    uint8_t addrBuf[4];
 
     /* Make sure passed in ptr is not a nullptr */
-    if (command == NULL) { return -1; }
+    if (cmd == NULL) { return -1; }
 
     /* Retrieve file name */
-    for (i = 0; i < strlen((char *)command); i++) { 
-        if (command[i] == ' ') break;
-        inFile[i] = command[i];
+    for (i = 0; i < strlen((char *)cmd); i++) { 
+        if (cmd[i] == ' ') break;
+        inFile[i] = cmd[i];
     }
     inFile[i] = '\0';   /* Add sentinel to end of filename */
 
@@ -69,6 +71,13 @@ int8_t verify_file(const uint8_t * command, uint8_t inFile[CMD_LIMIT]) {
     char magicBuf[4] = {MAGIC_7F, MAGIC_E, MAGIC_L, MAGIC_F};
     read_f_by_name(inFile, 0, (uint8_t *)fileBuf, 4);
     if (strncmp(fileBuf, magicBuf, 4)) { return -1; }
+
+    /* Retrieve address for first instruction from bytes 24-27 */
+    read_f_by_name(inFile, 24, addrBuf, 4);
+    v_addr = 0;
+    for (j = 0; j < 4; j++) {
+        v_addr += (addrBuf[j] << (8 * j));
+    }
 
     return 0;
 }

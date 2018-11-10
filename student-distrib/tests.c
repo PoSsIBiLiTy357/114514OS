@@ -425,13 +425,15 @@ int exec_valid_file_test() {
 	int i;
 	char * cmd[2] = {"shell", "testprint"};	/* valid filenames */
 	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t * dummy_addr;
 
 	/* Make sure each execute returns 0 for these valid files */
 	for (i = 0; i < 2; i++) {
-		if (verify_file((uint8_t *)cmd[i], dummyBuffer) != 0) {
+		if (verify_file((uint8_t *)cmd[i], dummyBuffer, dummy_addr) != 0) {
 			return FAIL;
 		}
 	}
+	printf("v_addr: %x\n" dummy_addr);
 
 	return PASS;
 }
@@ -452,11 +454,13 @@ int exec_invalid_file_test() {
 
 	uint8_t cmd[10] = "114514OS";	/* Invalid filename */
 	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t * dummy_addr;
 
 	/* Make sure verify_file returns -1 since we passed an invalid file */
-	if (verify_file(cmd, dummyBuffer) == -1) {
+	if (verify_file(cmd, dummyBuffer, dummy_addr) == -1) {
 		return PASS;
 	}
+	printf("v_addr: %x\n" dummy_addr);
 
 	return FAIL;
 }
@@ -477,11 +481,13 @@ int exec_null_file_test() {
 
 	uint8_t * cmd = NULL;
 	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t * dummy_addr;
 
 	/* Make sure verify_file returns -1 since we passed an invalid file */
-	if (verify_file(cmd, dummyBuffer) == -1) {
+	if (verify_file(cmd, dummyBuffer, dummy_addr) == -1) {
 		return PASS;
 	}
+	printf("v_addr: %x\n" dummy_addr);
 
 	return FAIL;
 }

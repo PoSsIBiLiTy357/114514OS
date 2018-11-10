@@ -42,6 +42,6 @@ int32_t set_handler(int32_t signum, void * handler_address);
 int32_t sigreturn(void);
 
 /* Helper functions */
-int8_t verify_file(const uint8_t * command, uint8_t inFile[CMD_LIMIT]);
+int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_addr);
 
 #endif  /* _SYSCALL_H  */
