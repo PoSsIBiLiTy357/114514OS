@@ -47,3 +47,6 @@ int32_t write_dir();
 //test functions
 int print_allfile_test();
 int read_file_test(uint8_t *fname);
+
+////wrappers
+

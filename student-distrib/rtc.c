@@ -245,3 +245,21 @@ void convert_freq(uint32_t * freq) {
     }
 }
 
+int rtc_read_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    int fd;
+    return rtc_read(fd,buf,count);
+}
+
+int rtc_write_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    int fd;
+    return rtc_write(fd,buf,count);
+}
+int rtc_open_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
+    const uint8_t * file;
+    return rtc_open(file);
+}
+
+int rtc_close_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
+    int fd;
+    return rtc_close(fd);
+}

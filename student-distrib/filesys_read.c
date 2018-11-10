@@ -143,7 +143,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  *     OUTPUTS: -1 when failed, 0 or length when success; fill buf with desire data
  *     RETURN VALUE: 0, -1 , length
  */
-int32_t read_f_by_name(uint8_t *fname, int32_t offset, uint8_t *buf, uint32_t length){
+int32_t read_f_by_name(uint8_t *fname, uint32_t offset, uint8_t *buf, uint32_t length){
 
     dentry_t dentry;
     if(read_dentry_by_name(fname, &dentry) == -1){
@@ -175,13 +175,13 @@ int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t l
  *     OUTPUTS: -1 when failed, 0 or length when success; fill buf with desire data
  *     RETURN VALUE: 0, -1 , length
  */
-int32_t read_f(uint8_t *fname, int32_t offset, uint8_t *buf, uint32_t length){
+int32_t read_f(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t length){
 
-    dentry_t dentry;
-    if(read_dentry_by_name(fname, &dentry) == -1){
-        return -1;
-    }
-    return read_data(dentry.inode, offset, buf, length);
+   // dentry_t dentry;
+   // if(read_dentry_by_name(fname, &dentry) == -1){
+   //     return -1;
+   // }
+    return read_data(inode, offset, buf, length);
 }
 
 /*
@@ -355,3 +355,34 @@ int read_file_test(uint8_t *fname){
 	return 1;
 }
 
+int read_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return read_dir(buf);
+}
+
+int write_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return write_dir();
+}
+
+int open_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return open_dir();
+}
+
+int close_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return close_dir();
+}
+
+int read_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return read_f(uint8_t *fname, offset, buf,  count);
+}
+
+int write_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return write_f();
+}
+
+int open_f_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
+    return open_f();
+}
+
+int close_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return close_f();
+}
