@@ -412,7 +412,8 @@ int RTC_read_test() {
 /*
 * exec_valid_file_test
 *   DESCRIPTION: This function tests execute() can handle valid files by testing
-*		the helper function verify_file() (which execute uses to validate inputs).
+*		the helper function verify_file() (which execute uses to validate inputs)
+*		returns 0 when given valid inputs.
 *
 *   INPUTS: valid files
 *   OUTPUTS: PASS or FAIL
@@ -439,7 +440,8 @@ int exec_valid_file_test() {
 /*
 * exec_invalid_file_test
 *   DESCRIPTION: This function tests execute() will return -1 by testing its
-*		helper funciton verify_file() (which execute uses to validate inputs).
+*		helper funciton verify_file() (which execute uses to validate inputs)
+*		given an invalid input.
 *
 *   INPUTS: invalid files
 *   OUTPUTS: PASS or FAIL
@@ -449,6 +451,31 @@ int exec_invalid_file_test() {
 	TEST_HEADER;
 
 	uint8_t cmd[10] = "114514OS";	/* Invalid filename */
+	uint8_t dummyBuffer[CMD_LIMIT];
+
+	/* Make sure verify_file returns -1 since we passed an invalid file */
+	if (verify_file(cmd, dummyBuffer) == -1) {
+		return PASS;
+	}
+
+	return FAIL;
+}
+
+
+/*
+* exec_null_file_test
+*   DESCRIPTION: This function tests execute() will return -1 by testing its
+*		helper funciton verify_file() (which execute uses to validate inputs)
+*		given NULL as an argument.
+*
+*   INPUTS: invalid files
+*   OUTPUTS: PASS or FAIL
+*   RETURN VALUE: PASS if execute returns -1 (we want verify_file to return a fail)
+*/
+int exec_null_file_test() {
+	TEST_HEADER;
+
+	uint8_t * cmd = NULL;
 	uint8_t dummyBuffer[CMD_LIMIT];
 
 	/* Make sure verify_file returns -1 since we passed an invalid file */
@@ -497,5 +524,6 @@ void launch_tests(){
 	/* System calls tests */
 	TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
 	TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
+	TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
 
 }
