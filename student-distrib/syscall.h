@@ -1,10 +1,12 @@
 #ifndef _SYSCALL_H
 #define _SYSCALL_H
 
+#include "lib.h"
+#include "rtc.h"
+#include "filesys_read.h"
+
 #define FDESC_SIZE 8
 
-
-#include "lib.h"
 /* Initialization struct for device referenced from: */
 /* https://stackoverflow.com/questions/9932212/jump-table-examples-in-c */
 typedef struct file_desc_t { 
