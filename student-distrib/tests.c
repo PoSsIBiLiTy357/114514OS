@@ -408,7 +408,56 @@ int RTC_read_test() {
 /*****************************************************************************/
 /*						 Checkpoint 3 tests									 */
 /*****************************************************************************/
-// coming soon!
+
+/*
+* exec_valid_file_test
+*   DESCRIPTION: This function tests execute() can handle valid files by testing
+*		the helper function verify_file() (which execute uses to validate inputs).
+*
+*   INPUTS: valid files
+*   OUTPUTS: PASS or FAIL
+*   RETURN VALUE: PASS if execute returns 0 (we want verify_file to return 0)
+*/
+int exec_valid_file_test() {
+	TEST_HEADER;
+
+	int i;
+	char * cmd[2] = {"shell", "testprint"};	/* valid filenames */
+	uint8_t dummyBuffer[CMD_LIMIT];
+
+	/* Make sure each execute returns 0 for these valid files */
+	for (i = 0; i < 2; i++) {
+		if (verify_file((uint8_t *)cmd[i], dummyBuffer) != 0) {
+			return FAIL;
+		}
+	}
+
+	return PASS;
+}
+
+
+/*
+* exec_invalid_file_test
+*   DESCRIPTION: This function tests execute() will return -1 by testing its
+*		helper funciton verify_file() (which execute uses to validate inputs).
+*
+*   INPUTS: invalid files
+*   OUTPUTS: PASS or FAIL
+*   RETURN VALUE: PASS if execute returns -1 (we want verify_file to return a fail)
+*/
+int exec_invalid_file_test() {
+	TEST_HEADER;
+
+	uint8_t cmd[10] = "114514OS";	/* Invalid filename */
+	uint8_t dummyBuffer[CMD_LIMIT];
+
+	/* Make sure verify_file returns -1 since we passed an invalid file */
+	if (verify_file(cmd, dummyBuffer) == -1) {
+		return PASS;
+	}
+
+	return FAIL;
+}
 
 /*****************************************************************************/
 /*						 Checkpoint 4 tests									 */
@@ -432,7 +481,7 @@ void launch_tests(){
 	//TEST_OUTPUT("exception_test", exception_test());
 
 	/* RTC tests */
-	TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
+	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
 	// TEST_OUTPUT("RTC_read_test", RTC_read_test());
 	// TEST_OUTPUT("RTC_empty_buf_test", RTC_empty_buf_test());
 	// TEST_OUTPUT("RTC_valid_size_test", RTC_valid_size_test());
@@ -444,4 +493,9 @@ void launch_tests(){
 	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
 	//TEST_OUTPUT("read_file_test", read_file_test(fname));
 	//terminal_write("qwertyuiop[]\asdfghjkl;'zxcvbnm,./bfgdhfdgfdgfdgfdjkgfodjglkfjdlkgkfjkdglkjflkdjklgjklfjlkdjlgjfkdjgofiejdgprokepokpofkld;lgjhfl;djhn;lfmblc;lkfl;dk;lrfkpoerkpogkd;lkfl;gk12323432543267687686786565");
+
+	/* System calls tests */
+	TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
+	TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
+
 }

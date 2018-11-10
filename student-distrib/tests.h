@@ -19,6 +19,7 @@
 #define BLOCK_CASE_15           15
 
 #include "rtc.h"
+#include "syscall.h"
 
 // test launcher
 void launch_tests();
