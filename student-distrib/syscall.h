@@ -5,11 +5,6 @@
 
 
 #include "lib.h"
-
-
-
-
-
 /* Initialization struct for device referenced from: */
 /* https://stackoverflow.com/questions/9932212/jump-table-examples-in-c */
 typedef struct file_desc_t { 
@@ -19,6 +14,13 @@ typedef struct file_desc_t {
     int (*write)(int32_t,int32_t, int8_t* , int32_t);///////*********possible bug change to uint ***********//////////////////////////
     int32_t inode,file_pos,flags;
 } file_desc_t;
+
+
+
+
+
+
+
 
 typedef struct pcb_t{
     int32_t *parent;

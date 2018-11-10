@@ -17,6 +17,7 @@ int32_t write(int32_t fd, const void * buf, int32_t nbytes){
     return 0;
 }
 int32_t open(const uint8_t * filename){
+    
     return 0;
 }
 int32_t close(int32_t fd){
