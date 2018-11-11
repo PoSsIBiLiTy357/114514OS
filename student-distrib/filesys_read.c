@@ -1,7 +1,4 @@
 #include "filesys_read.h"
-#include "lib.h"
-#include "types.h"
-#include "x86_desc.h"
 
 static int32_t num_dentry;
 static int32_t num_inodes;
@@ -375,7 +372,7 @@ int close_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t cou
 }
 
 int read_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return read_f(uint8_t *fname, offset, buf,  count);
+    return read_f(inode, offset, buf,  count);
 }
 
 int write_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
