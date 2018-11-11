@@ -421,7 +421,7 @@ int RTC_read_test() {
 */
 int exec_valid_file_test() {
 	TEST_HEADER;
-	clear();
+
 	int i;
 	char * cmd[2] = {"shell", "testprint"};	/* valid filenames */
 	uint8_t dummyBuffer[CMD_LIMIT];
@@ -429,11 +429,19 @@ int exec_valid_file_test() {
 
 	/* Make sure each execute returns 0 for these valid files */
 	for (i = 0; i < 2; i++) {
-		if (verify_file((uint8_t *)cmd[i], dummyBuffer, &dummy_addr) != 0) {
-			printf("starting v_addr: %x\n", dummy_addr);
+		/* return 0 test */
+		if (verify_file((uint8_t *)cmd[i], dummyBuffer, &dummy_addr) != 0) {		
+			return FAIL;
+		}
+
+		/* Ensure dummyBuffer gets populated with the right file name */
+		if (strncmp((char *)dummyBuffer, cmd[i], sizeof(cmd[i])) != 0) {
 			return FAIL;
 		}
 	}
+
+	/* Print starting virtual address from bytes 24-27 */
+	printf("starting v_addr: %x\n", dummy_addr);
 
 	return PASS;
 }
@@ -458,7 +466,9 @@ int exec_invalid_file_test() {
 
 	/* Make sure verify_file returns -1 since we passed an invalid file */
 	if (verify_file(cmd, dummyBuffer, &dummy_addr) == -1) {
+		/* Print starting virtual address from bytes 24-27 */
 		printf("starting v_addr: %x\n", dummy_addr);
+
 		return PASS;
 	}
 
@@ -485,7 +495,9 @@ int exec_null_file_test() {
 
 	/* Make sure verify_file returns -1 since we passed an invalid file */
 	if (verify_file(cmd, dummyBuffer, &dummy_addr) == -1) {
+		/* Print starting virtual address from bytes 24-27 */
 		printf("starting v_addr: %x\n", dummy_addr);
+		
 		return PASS;
 	}
 
