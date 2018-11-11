@@ -138,10 +138,10 @@ void paging_init(int pid){
     page_directory[1].mb.pt_base_addr = 1;
 
     pdt_init_mb(program_pageIdx);
-    page_directory[program_pageIdx].pt_present = 1;
-    page_directory[program_pageIdx].pt_size = 1;
-    page_directory[program_pageIdx].pt_us = 1;
-    page_directory[program_pageIdx].pt_base_addr = (pid*_4MB_) + _8MB_;
+    page_directory[program_pageIdx].mb.pt_present = 1;
+    page_directory[program_pageIdx].mb.pt_size = 1;
+    page_directory[program_pageIdx].mb.pt_us = 1;
+    page_directory[program_pageIdx].mb.pt_base_addr = (pid*_4MB_) + _8MB_;
 
     printf("PAGE_INIT OK\n");
 

@@ -121,6 +121,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     //fill buf with desired length
     for(i = 0; i<length; i++){
 
+        if(i >= inode_start[inode].length) return 0;
         //reset index when finish 1 datablock and points to next
         if(datablk_offset == DATABLK_SIZE){
             datablk_offset = 0;
@@ -175,8 +176,9 @@ int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t l
  *     OUTPUTS: -1 when failed, 0 or length when success; fill buf with desire data
  *     RETURN VALUE: 0, -1 , length
  */
-int32_t read_f(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t length){
-    return read_data(inode, offset, buf, length);
+int32_t read_f(uint32_t inode, uint8_t *buf){
+    int length = PROGRAM_MAX_SIZE;
+    return read_data(inode, 0, buf, length);
 }
 
 /*

@@ -12,6 +12,7 @@
 #define START_ADDR        24
 #define ADDR_OFFSET        8
 
+
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
 
 int32_t halt(uint8_t status){
@@ -34,18 +35,25 @@ int32_t halt(uint8_t status){
 int32_t execute(const uint8_t * command){
     uint8_t inFile[CMD_LIMIT];  /* name of executable file           */
     uint32_t v_addr;            /* virtual addr of first instruction */
-
+    dentry_t d;
+    int pid;
+    //u parse/check
     /* Ensure the given command is a valid executable file */
     if (verify_file(command, inFile, &v_addr) == -1) { return -1; }
-
+    pid=get_pid();
     //u Paging
     paging_init(pid);
 
     //u User-level Program Loader
-    read_f_by_name(inode, 0, buf, length)
+
+
+    read_dentry_by_name(inFile, d);
+    read_f(d.inode, (uint8_t)0x08048000);
     
     //u Create PCB
-
+    
+    proc_state[pid]=1;
+    pcb_init(pid);
 
     //u Context Switch 
 
