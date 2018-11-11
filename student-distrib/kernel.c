@@ -149,7 +149,7 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
     idt_init();
     lidt(idt_desc_ptr);
-	paging_init();
+	paging_init(0);
     read_filesys_bootblock(bootBlk_addr);
     init_keyboard();
 

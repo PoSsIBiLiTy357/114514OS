@@ -1,5 +1,7 @@
 #include "syscall.h"
 #include "rtc.h"
+#include "paging.h"
+#include "filesys_read.h"
 
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
 
@@ -8,6 +10,31 @@ int32_t halt(uint8_t status){
 }
 
 int32_t execute(const uint8_t * command){
+
+
+//u Parse
+
+
+
+
+//u Executable check
+    //check ELF magic constant
+    
+    //find 1st instruction addr
+
+
+//u Paging
+    paging_init(pid);
+
+//u User-level Program Loader
+    read_f_by_name(inode, 0, buf, length)
+    
+//u Create PCB
+
+
+//u Context Switch 
+
+
     return 0;
 }
 int32_t read(int32_t fd, void * buf, int32_t nbytes){

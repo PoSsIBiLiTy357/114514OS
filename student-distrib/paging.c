@@ -3,6 +3,9 @@
 #include "paging.h"
 #include "x86_desc.h"
 #define ASM 1
+#define _4MB_ 1024*4
+#define _8MB_ 1024*8
+#define program_pageIdx 32
 
 /*
  *void pdt_init_kb(int idx)
@@ -97,7 +100,7 @@ void pt_init(int idx){
  *      3.Mark Video Mem present
  *      4.Set CR0, CR4 registers properly
  */
-void paging_init(){
+void paging_init(int pid){
 
     int i;
 
@@ -134,6 +137,11 @@ void paging_init(){
     page_directory[1].mb.pt_present = 1;
     page_directory[1].mb.pt_base_addr = 1;
 
+    pdt_init_mb(program_pageIdx);
+    page_directory[program_pageIdx].pt_present = 1;
+    page_directory[program_pageIdx].pt_size = 1;
+    page_directory[program_pageIdx].pt_us = 1;
+    page_directory[program_pageIdx].pt_base_addr = (pid*_4MB_) + _8MB_;
 
     printf("PAGE_INIT OK\n");
 
@@ -155,3 +163,4 @@ void paging_init(){
         );   
  
 }
+

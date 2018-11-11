@@ -83,7 +83,7 @@ void pdt_init_mb(int idx);
 void pt_init(int idx);
 
 /*initialize paging for checkpoint 1 */
-void paging_init();
+void paging_init(int pid);
 
 
 pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page table

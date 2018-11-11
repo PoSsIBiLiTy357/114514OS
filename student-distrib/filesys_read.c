@@ -169,19 +169,14 @@ int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t l
 }
 
 /*
- * int32_t read_f(uint8_t *fname, int32_t offset, uint8_t *buf, uint32_t length)
+ * int32_t read_f(int32_t inode, int32_t offset, uint8_t *buf, uint32_t length)
  *     DESCRIPTION: read file by given name and fill up buf 
- *     INPUTS: uint8_t *fname, int32_t offset, uint8_t *buf, uint32_t length
+ *     INPUTS: int32_t inode, int32_t offset, uint8_t *buf, uint32_t length
  *     OUTPUTS: -1 when failed, 0 or length when success; fill buf with desire data
  *     RETURN VALUE: 0, -1 , length
  */
-int32_t read_f(uint8_t *fname, int32_t offset, uint8_t *buf, uint32_t length){
-
-    dentry_t dentry;
-    if(read_dentry_by_name(fname, &dentry) == -1){
-        return -1;
-    }
-    return read_data(dentry.inode, offset, buf, length);
+int32_t read_f(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t length){
+    return read_data(inode, offset, buf, length);
 }
 
 /*
@@ -273,7 +268,9 @@ int32_t write_dir(){
     return -1;
 }
 
-/////////////TESTs///////////////
+
+
+//////////////////////////////////////////////////////T   E   S   T s////////////////////////////////////////////////////////////
 
 /*
  * int print_allfile_test()
