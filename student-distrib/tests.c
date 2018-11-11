@@ -408,7 +408,101 @@ int RTC_read_test() {
 /*****************************************************************************/
 /*						 Checkpoint 3 tests									 */
 /*****************************************************************************/
-// coming soon!
+
+/*
+* exec_valid_file_test
+*   DESCRIPTION: This function tests execute() can handle valid files by testing
+*		the helper function verify_file() (which execute uses to validate inputs)
+*		returns 0 when given valid inputs.
+*
+*   INPUTS: valid files
+*   OUTPUTS: PASS or FAIL
+*   RETURN VALUE: PASS if execute returns 0 (we want verify_file to return 0)
+*/
+int exec_valid_file_test() {
+	TEST_HEADER;
+
+	int i;
+	char * cmd[2] = {"shell", "testprint"};	/* valid filenames */
+	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t dummy_addr;
+
+	/* Make sure each execute returns 0 for these valid files */
+	for (i = 0; i < 2; i++) {
+		/* return 0 test */
+		if (verify_file((uint8_t *)cmd[i], dummyBuffer, &dummy_addr) != 0) {		
+			return FAIL;
+		}
+
+		/* Ensure dummyBuffer gets populated with the right file name */
+		if (strncmp((char *)dummyBuffer, cmd[i], sizeof(cmd[i])) != 0) {
+			return FAIL;
+		}
+	}
+
+	/* Print starting virtual address from bytes 24-27 */
+	printf("starting v_addr: %x\n", dummy_addr);
+
+	return PASS;
+}
+
+
+/*
+* exec_invalid_file_test
+*   DESCRIPTION: This function tests execute() will return -1 by testing its
+*		helper funciton verify_file() (which execute uses to validate inputs)
+*		given an invalid input.
+*
+*   INPUTS: invalid files
+*   OUTPUTS: PASS or FAIL
+*   RETURN VALUE: PASS if execute returns -1 (we want verify_file to return a fail)
+*/
+int exec_invalid_file_test() {
+	TEST_HEADER;
+
+	uint8_t cmd[10] = "114514OS";	/* Invalid filename */
+	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t dummy_addr;
+
+	/* Make sure verify_file returns -1 since we passed an invalid file */
+	if (verify_file(cmd, dummyBuffer, &dummy_addr) == -1) {
+		/* Print starting virtual address from bytes 24-27 */
+		printf("starting v_addr: %x\n", dummy_addr);
+
+		return PASS;
+	}
+
+	return FAIL;
+}
+
+
+/*
+* exec_null_file_test
+*   DESCRIPTION: This function tests execute() will return -1 by testing its
+*		helper funciton verify_file() (which execute uses to validate inputs)
+*		given NULL as an argument.
+*
+*   INPUTS: invalid files
+*   OUTPUTS: PASS or FAIL
+*   RETURN VALUE: PASS if execute returns -1 (we want verify_file to return a fail)
+*/
+int exec_null_file_test() {
+	TEST_HEADER;
+
+	uint8_t * cmd = NULL;
+	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t dummy_addr;
+
+	/* Make sure verify_file returns -1 since we passed an invalid file */
+	if (verify_file(cmd, dummyBuffer, &dummy_addr) == -1) {
+		/* Print starting virtual address from bytes 24-27 */
+		printf("starting v_addr: %x\n", dummy_addr);
+		
+		return PASS;
+	}
+
+	return FAIL;
+}
 
 /*****************************************************************************/
 /*						 Checkpoint 4 tests									 */
@@ -444,4 +538,10 @@ void launch_tests(){
 	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
 	//TEST_OUTPUT("read_file_test", read_file_test(fname));
 	//terminal_write("qwertyuiop[]\asdfghjkl;'zxcvbnm,./bfgdhfdgfdgfdgfdjkgfodjglkfjdlkgkfjkdglkjflkdjklgjklfjlkdjlgjfkdjgofiejdgprokepokpofkld;lgjhfl;djhn;lfmblc;lkfl;dk;lrfkpoerkpogkd;lkfl;gk12323432543267687686786565");
+
+	/* System calls tests */
+	TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
+	TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
+	TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
+
 }
