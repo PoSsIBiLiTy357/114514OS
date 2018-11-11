@@ -4,6 +4,8 @@
 #include "lib.h"
 #include "rtc.h"
 #include "filesys_read.h"
+#include "keyboard.h"
+#include "paging.h"
 
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
@@ -29,7 +31,7 @@ typedef struct file_desc_t {
     int (*read)(uint32_t,uint32_t, uint8_t* , uint32_t);///////*********possible bug change to uint ***********//////////////////////////
     int (*write)(uint32_t,uint32_t, uint8_t* , uint32_t);///////*********possible bug change to uint ***********//////////////////////////
 
-    int32_t inode,file_pos,flags;
+    int32_t inode, file_pos, flag;
 } file_desc_t;
 
 typedef struct pcb_t{

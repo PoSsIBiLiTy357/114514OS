@@ -1,7 +1,4 @@
 #include "syscall.h"
-#include "keyboard.h"
-#include "paging.h"
-#include "filesys_read.h"
 
 #define MAGIC_7F        0x7F
 #define MAGIC_E         0x45
@@ -18,25 +15,25 @@
 #define KSTACK_BOT 0x800000-0x2000
 
 
-static int curr=0;
+static int curr = 0;
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
-int proc_state[PROC_NUM]={0,0,0,0,0,0};
+int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
 
 
 void pcb_init(int pid){
     int i;
     curr = pid;
     
-    pcb_t* pcb=KSTACK_BOT-PCB_SIZE*pid;
+    pcb_t* pcb= (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
     pcb->pid=pid;
-    pcb->file_array[0].read=terminal_read_warp;///init stdin and stdout
+    pcb->file_array[0].read=terminal_read_warp;///init stdin and stdout     /* compiler error */
     pcb->file_array[0].write=NULL;
     pcb->file_array[0].open=NULL;
     pcb->file_array[0].close=NULL;
     pcb->file_array[0].flags=1;
 
     pcb->file_array[1].read=NULL;
-    pcb->file_array[1].write=terminal_write_warp;
+    pcb->file_array[1].write=terminal_write_warp;                           /* compiler error */
     pcb->file_array[1].open=NULL;
     pcb->file_array[1].close=NULL;
     pcb->file_array[1].flags=1;
@@ -48,7 +45,7 @@ void pcb_init(int pid){
         pcb->parent=NULL;
     }
     else{
-        pcb->parent=KSTACK_BOT-PCB_SIZE*pid+PCB_SIZE;
+        pcb->parent = (int32_t *)(KSTACK_BOT - PCB_SIZE * pid + PCB_SIZE);
     }
 }
 
@@ -115,8 +112,8 @@ int32_t execute(const uint8_t * command){
 */
 
 
-    tss.esp0=KSTACK_BOT+PCB_SIZE-PCB_SIZE*curr-4;
-    pcb_t* pcb=KSTACK_BOT-PCB_SIZE*curr;
+    tss.esp0 = KSTACK_BOT + PCB_SIZE - PCB_SIZE * curr - 4;
+    pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
     asm volatile(
         "cli
          movl %%ebp,%0;
@@ -194,24 +191,27 @@ int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_
         v_addr += (addrBuf[j] << (ADDR_OFFSET * j));
     }
 
+    return 0;
+}
+
 
 int32_t read(int32_t fd, void * buf, int32_t nbytes){
     if (fd>= FDESC_SIZE) return -1;
-    pcb_t * temp_pcb (pcb_t*) KSTACK_BOT-curr*PCB_SIZE;
-    int offset = pcb->file_array[fd].file_pos;
-    int inode = pcb->file_array[fd].inode;
-    int count = pcb->file_array[fd].read(inode,offset,buf,nbytes);
+    pcb_t * temp_pcb = (pcb_t*) KSTACK_BOT-curr*PCB_SIZE;
+    int offset = temp_pcb->file_array[fd].file_pos;
+    int inode = temp_pcb->file_array[fd].inode;
+    int count = temp_pcb->file_array[fd].read(inode,offset,buf,nbytes);
     if (count<0) return -1;
-    pcb->file_array[fd].file_pos += count;
+    temp_pcb->file_array[fd].file_pos += count;
     return count;
     
 }
 int32_t write(int32_t fd, const void * buf, int32_t nbytes){
     
     if (fd >= FDESC_SIZE) return -1;
-    pcb_t * temp_pcb (pcb_t*) KSTACK_BOT-curr*PCB_SIZE;
-    int inode = pcb->file_array[fd].inode;
-    int count = pcb->file_array[fd].write(inode,0,buf,nbytes);
+    pcb_t * temp_pcb = (pcb_t*) KSTACK_BOT-curr*PCB_SIZE;
+    int inode = temp_pcb->file_array[fd].inode;
+    int count = temp_pcb->file_array[fd].write(inode, 0, (uint8_t *)buf, nbytes);
     if (count <0) return -1;
     return count;
 }
@@ -259,7 +259,7 @@ int32_t close(int32_t fd){
     if (fd>=FDESC_SIZE) return -1;
     pcb_t * temp_pcb;
     int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
-    temp_pcb = (pct_t *) temp_pcb_addr;
+    temp_pcb = (pcb_t *) temp_pcb_addr;
     temp_pcb->file_array[fd].flag =0;
     return 0;
 
