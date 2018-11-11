@@ -5,6 +5,10 @@
 #define MAGIC_L         0x4C
 #define MAGIC_F         0x46
 
+#define BYTE_LEN           4
+#define START_ADDR        24
+#define ADDR_OFFSET        8
+
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
 
 int32_t halt(uint8_t status){
@@ -54,7 +58,7 @@ int32_t execute(const uint8_t * command){
 */
 int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_addr) {
     int i, j;
-    uint8_t addrBuf[4];
+    uint8_t addrBuf[BYTE_LEN];
 
     /* Make sure passed in ptr is not a nullptr */
     if (cmd == NULL) { return -1; }
@@ -71,18 +75,18 @@ int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_
     if (read_dentry_by_name(inFile, &dentry_buf) == -1) { return -1; }
 
     /* Check to make sure file is an executable by checking for magic number */
-    char fileBuf[4]; /* Buffer to hold binary text */
-    char magicBuf[4] = {MAGIC_7F, MAGIC_E, MAGIC_L, MAGIC_F};
-    read_f_by_name(inFile, 0, (uint8_t *)fileBuf, 4);
-    if (strncmp(fileBuf, magicBuf, 4)) { return -1; }
+    char fileBuf[BYTE_LEN]; /* Buffer to hold binary text */
+    char magicBuf[BYTE_LEN] = {MAGIC_7F, MAGIC_E, MAGIC_L, MAGIC_F};
+    read_f_by_name(inFile, 0, (uint8_t *)fileBuf, BYTE_LEN);
+    if (strncmp(fileBuf, magicBuf, BYTE_LEN)) { return -1; }
 
     /* Retrieve address for first instruction from bytes 24-27 */
-    read_f_by_name(inFile, 24, addrBuf, 4);
+    read_f_by_name(inFile, START_ADDR, addrBuf, BYTE_LEN);
 
     /* Convert from string to integer address */
     v_addr = 0;
-    for (j = 0; j < 4; j++) {
-        v_addr += (addrBuf[j] << (8 * j));
+    for (j = 0; j < BYTE_LEN; j++) {
+        v_addr += (addrBuf[j] << (ADDR_OFFSET * j));
     }
 
     return 0;
