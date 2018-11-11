@@ -63,10 +63,24 @@ int32_t execute(const uint8_t * command){
     return 0;
 }
 int32_t read(int32_t fd, void * buf, int32_t nbytes){
-    return 0;
+    if (fd>= FDESC_SIZE) return -1;
+    pcb_t * temp_pcb (pcb_t*) KSTACK_BOT-curr*PCB_SIZE;
+    int offset = pcb->file_array[fd].file_pos;
+    int inode = pcb->file_array[fd].inode;
+    int count = pcb->file_array[fd].read(inode,offset,buf,nbytes);
+    if (count<0) return -1;
+    pcb->file_array[fd].file_pos += count;
+    return count;
+    
 }
 int32_t write(int32_t fd, const void * buf, int32_t nbytes){
-    return 0;
+    
+    if (fd >= FDESC_SIZE) return -1;
+    pcb_t * temp_pcb (pcb_t*) KSTACK_BOT-curr*PCB_SIZE;
+    int inode = pcb->file_array[fd].inode;
+    int count = pcb->file_array[fd].write(inode,0,buf,nbytes);
+    if (count <0) return -1;
+    return count;
 }
 int32_t open(const uint8_t * filename){
     
