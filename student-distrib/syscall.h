@@ -8,13 +8,27 @@
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
 
+
+/*typedef struct func_pointer{
+    int (*open)(int32_t,int32_t, int8_t* , int32_t); 
+    int (*close)(int32_t,int32_t, int8_t* , int32_t); 
+    int (*read)(int32_t,int32_t, int8_t* , int32_t);
+    int (*write)(int32_t,int32_t, int8_t* , int32_t);
+
+
+} func_pointer;
+*/
+
+
 /* Initialization struct for device referenced from: */
 /* https://stackoverflow.com/questions/9932212/jump-table-examples-in-c */
 typedef struct file_desc_t { 
-    int (*open)(int32_t,int32_t, int8_t* , int32_t); ///////*********possible bug change to uint ***********//////////////////////////
-    int (*close)(int32_t,int32_t, int8_t* , int32_t); ///////*********possible bug change to uint ***********//////////////////////////
-    int (*read)(int32_t,int32_t, int8_t* , int32_t);///////*********possible bug change to uint ***********//////////////////////////
-    int (*write)(int32_t,int32_t, int8_t* , int32_t);///////*********possible bug change to uint ***********//////////////////////////
+    //func_pointer * pointer;
+    int (*open)(uint32_t,uint32_t, uint8_t* , uint32_t); ///////*********possible bug change to uint ***********//////////////////////////
+    int (*close)(uint32_t,uint32_t, uint8_t* , uint32_t); ///////*********possible bug change to uint ***********//////////////////////////
+    int (*read)(uint32_t,uint32_t, uint8_t* , uint32_t);///////*********possible bug change to uint ***********//////////////////////////
+    int (*write)(uint32_t,uint32_t, uint8_t* , uint32_t);///////*********possible bug change to uint ***********//////////////////////////
+
     int32_t inode,file_pos,flags;
 } file_desc_t;
 
