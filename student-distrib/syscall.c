@@ -1,8 +1,9 @@
 #include "syscall.h"
 #include "rtc.h"
 #include "filesys_read.h"
+#include "keyboard.h"
 
-static
+static int curr=0;
 
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
 
@@ -57,8 +58,15 @@ int32_t open(const uint8_t * filename){
     return 0;
 
 }
+
 int32_t close(int32_t fd){
+    if (fd>=FDESC_SIZE) return -1;
+    pcb_t * temp_pcb;
+    int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
+    temp_pcb = (pct_t *) temp_pcb_addr;
+    temp_pcb->file_array[fd].flag =0;
     return 0;
+
 }
 int32_t getargs(uint8_t * buf, int32_t nbytes){
     return 0;
