@@ -26,20 +26,20 @@ void pcb_init(int pid){
     
     pcb_t* pcb= (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
     pcb->pid=pid;
-    pcb->file_array[0].read=terminal_read_warp;///init stdin and stdout     /* compiler error */
+    pcb->file_array[0].read = terminal_read_wrap;///init stdin and stdout     /* compiler error */
     pcb->file_array[0].write=NULL;
     pcb->file_array[0].open=NULL;
     pcb->file_array[0].close=NULL;
-    pcb->file_array[0].flags=1;
+    pcb->file_array[0].flag=1;
 
     pcb->file_array[1].read=NULL;
-    pcb->file_array[1].write=terminal_write_warp;                           /* compiler error */
+    pcb->file_array[1].write= terminal_write_wrap;                           /* compiler error */
     pcb->file_array[1].open=NULL;
     pcb->file_array[1].close=NULL;
-    pcb->file_array[1].flags=1;
+    pcb->file_array[1].flag=1;
 
     for(i=2;i<FDESC_SIZE;i++){
-        pcb->file_array[i].flags=0;
+        pcb->file_array[i].flag=0;
     }
     if(pid==0){
         pcb->parent=NULL;
@@ -115,31 +115,31 @@ int32_t execute(const uint8_t * command){
     tss.esp0 = KSTACK_BOT + PCB_SIZE - PCB_SIZE * curr - 4;
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
     asm volatile(
-        "cli
-         movl %%ebp,%0;
-         movl %%esp,%1;
-         movl %2,%%ebp;
-         movl %2,%%esp;
-         movw $USER_DS,%%ax;
-         movw %%ax,%%ds;
-         movw %%ax,%%es;
-         movw %%ax,%%fs;
-         movw %%ax,%%gs;
-         movl %%esp,%%eax;
-         pushl $USER_DS;
-         pushl $0x083FFFFC;
-         pushf;
-         popl %%eax;
-         orl $0x200,%%eax;
-         pushl %%eax;
-         pushl $USER_CS;
-         pushl %3;
-         iret;"
-         :"=r" (pcb->parent_ebp),
-          "=r" (pcb->parent_esp)
-         :"r"  (tss.esp0),
-          "r"  (v_addr)
-         :"memory","cc");////////////////////////////////////////////////////////////change here if something went fuck
+        "cli"
+         "movl %%ebp,%0"
+         "movl %%esp,%1"
+         "movl %2,%%ebp"
+         "movl %2,%%esp"
+         "movw $USER_DS,%%ax"
+         "movw %%ax,%%ds"
+         "movw %%ax,%%es"
+         "movw %%ax,%%fs"
+         "movw %%ax,%%gs"
+         "movl %%esp,%%eax"
+         "pushl $USER_DS"
+         "pushl $0x083FFFFC"
+         "pushf"
+         "popl %%eax"
+         "orl $0x200,%%eax"
+         "pushl %%eax"
+         "pushl $USER_CS"
+         "pushl %3"
+         "iret"
+         :"=r" (pcb->parent_ebp)
+         :"=r" (pcb->parent_esp)
+         :"r"  (tss.esp0)
+         : "r"  (v_addr)
+         :/*"memory",*/"cc");////////////////////////////////////////////////////////////change here if something went fuck
     return 0;
 }
 

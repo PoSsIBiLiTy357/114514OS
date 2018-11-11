@@ -216,8 +216,8 @@ void keyboard_handler(void){
  * Side Effects: None
  * 
  */
-char* terminal_read(){
-	return keyboard_buffer;
+int terminal_read(char* buf){////////////////////////////need change
+	return 0;
 }
 
 
@@ -229,7 +229,7 @@ char* terminal_read(){
  * Side Effects: print to screen, send eoi to processor
  * 
  */
-int terminal_write(char * buf){
+int terminal_write(char * buf){//////////////////////////////need change
 
 
 	int full_col = strlen(buf) / 80;
@@ -256,5 +256,10 @@ int terminal_write(char * buf){
 	return 0;
 }
 
+int terminal_write_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count) {
+	return terminal_write(buf);
+}
 
-
+int terminal_read_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count) {
+	return terminal_read(buf);
+}
