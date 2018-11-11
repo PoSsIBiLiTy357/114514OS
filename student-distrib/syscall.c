@@ -6,10 +6,12 @@
 
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
 int proc_state[PROC_NUM]={0,0,0,0,0,0};
-
+static int curr=0;
 
 void pcb_init(int pid){
     int i;
+    curr = pid;
+    
     pcb_t* pcb=KSTACK_BOT-PCB_SIZE*pid;
     pcb->pid=pid;
     pcb->file_array[0].read=terminal_read_warp;///init stdin and stdout
