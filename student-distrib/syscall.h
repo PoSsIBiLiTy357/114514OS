@@ -3,6 +3,7 @@
 
 #define FDESC_SIZE 8
 
+
 #include "lib.h"
 
 /*typedef struct func_pointer{
@@ -24,6 +25,7 @@ typedef struct file_desc_t {
     int (*close)(uint32_t,uint32_t, uint8_t* , uint32_t); ///////*********possible bug change to uint ***********//////////////////////////
     int (*read)(uint32_t,uint32_t, uint8_t* , uint32_t);///////*********possible bug change to uint ***********//////////////////////////
     int (*write)(uint32_t,uint32_t, uint8_t* , uint32_t);///////*********possible bug change to uint ***********//////////////////////////
+
     int32_t inode,file_pos,flags;
 } file_desc_t;
 

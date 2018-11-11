@@ -67,4 +67,4 @@ syscall_asm:
 
 
 sys_call_table:
-.long open, read, write, close, execute, halt, getargs
+.long halt, execute, read, write,open, close, getargs
