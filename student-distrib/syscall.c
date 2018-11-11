@@ -1,12 +1,16 @@
 #include "syscall.h"
 #include "rtc.h"
+#include "filesys_read.h"
+#include "keyboard.h"
 #define PROC_NUM 6
 #define PCB_SIZE 0x2000
 #define KSTACK_BOT 0x800000-0x2000
 
+
+static int curr=0;
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
 int proc_state[PROC_NUM]={0,0,0,0,0,0};
-static int curr=0;
+
 
 void pcb_init(int pid){
     int i;
@@ -47,6 +51,9 @@ int get_pid(){
     return -1;
 }
 
+
+//device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
+
 int32_t halt(uint8_t status){
     return 0;
 }
@@ -63,10 +70,52 @@ int32_t write(int32_t fd, const void * buf, int32_t nbytes){
 }
 int32_t open(const uint8_t * filename){
     
+    pcb_t pcb_t;
+    dentry_t temp_dentry;
+    int i;
+    if (read_dentry_by_name(filename, &temp_dentry) ==-1) return -1; // if the filename does not exist, return -1
+    for (i = 0; i <FDESC_SIZE;i++){
+        if (pcb_t.bitmap[FDESC_SIZE]==0){
+            pcb_t.bitmap[FDESC_SIZE]=1;
+            break;
+        } 
+    }
+    if (i==FDESC_SIZE) return -1; //if no descriptors are free, return -1
+    
+    if(temp_dentry.ftype == 0){
+        pcb_t.file_array[i].read = rtc_read_wrapper;
+        pcb_t.file_array[i].write = rtc_write_wrapper;
+        pcb_t.file_array[i].open = rtc_open_wrapper;
+        pcb_t.file_array[i].close = rtc_close_wrapper;
+    }
+    
+    if (temp_dentry.ftype == 1){
+        pcb_t.file_array[i].read = read_dir_wrapper;
+        pcb_t.file_array[i].write = write_dir_wrapper;
+        pcb_t.file_array[i].open = open_dir_wrapper;
+        pcb_t.file_array[i].close = close_dir_wrapper;        
+    }
+    if (temp_dentry.ftype ==2){
+        pcb_t.file_array[i].read = read_f_wrapper;
+        pcb_t.file_array[i].write = write_f_wrapper;
+        pcb_t.file_array[i].open = open_f_wrapper;
+        pcb_t.file_array[i].close = close_f_wrapper;           
+    }
+    pcb_t.file_array[i].inode = temp_dentry.inode;
+    pcb_t.file_array[i].flag =1; // file in use 
+    pcb_t.file_array[i].file_pos = 0;
     return 0;
+
 }
+
 int32_t close(int32_t fd){
+    if (fd>=FDESC_SIZE) return -1;
+    pcb_t * temp_pcb;
+    int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
+    temp_pcb = (pct_t *) temp_pcb_addr;
+    temp_pcb->file_array[fd].flag =0;
     return 0;
+
 }
 int32_t getargs(uint8_t * buf, int32_t nbytes){
     return 0;
