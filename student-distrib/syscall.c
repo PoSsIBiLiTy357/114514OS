@@ -32,6 +32,7 @@ int32_t halt(uint8_t status){
 *   RETURN VALUE: 0 on success, -1 on failure
 *	SIDE EFFECTS : Switches processor to user mode to run given user program
 */
+
 int32_t execute(const uint8_t * command){
     uint8_t inFile[CMD_LIMIT];  /* name of executable file           */
     uint32_t v_addr;            /* virtual addr of first instruction */
@@ -39,6 +40,8 @@ int32_t execute(const uint8_t * command){
     int pid;
     //u parse/check
     /* Ensure the given command is a valid executable file */
+
+    /*
     if (verify_file(command, inFile, &v_addr) == -1) { return -1; }
     pid=get_pid();
     //u Paging
@@ -57,7 +60,7 @@ int32_t execute(const uint8_t * command){
 
     //u Context Switch 
 
-
+*/
 
 
     return 0;
