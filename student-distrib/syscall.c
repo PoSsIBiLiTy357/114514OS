@@ -112,24 +112,22 @@ int get_pid(){
 *   OUTPUTS: 0 if successful,
 */
 int32_t halt(uint8_t status){
-int32_t i;
+    int32_t i;
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    if(cur_pcb->parent != NULL){
 
+    /* Check if this is the first process or a child of a process */
+    if (cur_pcb->parent != NULL) {
         pcb_t *par_pcb = (pcb_t *)(cur_pcb->parent);
+
         //restore parent data 
         proc_state[cur_pcb->pid] = 0;
         curr = par_pcb->pid;
 
-        //////////////////////may wrong////////////////////////
-        tss.esp0 = cur_pcb->parent_esp;                     ///
-        //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      ///
-        ///////////////////////////////////////////////////////
-
-      
+        /* Update the tss.esp0 */
+        tss.esp0 = cur_pcb->parent_esp;                     
+        //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      
 
         //restore parent paging (cr3)
-
         pid_page_map(par_pcb->pid);
 
         //close any relevant FDs 
@@ -142,7 +140,7 @@ int32_t i;
                 cur_pcb->bitmap[i]=0;
             }
 
-          asm volatile(
+            asm volatile(
                 "movl   %0, %%esp   ;"
                 "movl   %1, %%ebp   ;"
                 "movl   %2, %%eax   ;"
@@ -157,12 +155,11 @@ int32_t i;
         ); 
 
         }
-    }else{
 
-
+    } else {
+        /* Update processor state and tss.esp0 */
         proc_state[cur_pcb->pid] = 0;
         tss.esp0 = cur_pcb->parent_esp;  
-       
 
         //close any relevant FDs 
         for(i = 0; i < FDESC_SIZE; i++){
