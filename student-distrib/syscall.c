@@ -9,6 +9,7 @@
 #define START_ADDR        24
 #define ADDR_OFFSET        8
 
+#define KSTACK_START        0x800000
 #define PROGRAM_IMAGE_ADDR  0x8048000
 #define PROC_NUM            6
 #define PCB_SIZE            0x2000
@@ -19,6 +20,8 @@
 #define FILE_RTC            0
 #define FILE_DIR            1
 #define FILE_REG            2
+
+#define MEM_FENCE           BYTE_LEN
 
 
 /* Current PID */
@@ -202,7 +205,8 @@ int32_t execute(const uint8_t * command){
 
     /* Upate TSS ss0 and esp0 */
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
+    //tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
+    tss.esp0 = KSTACK_BOT - (PCB_SIZE * pid) - MEM_FENCE;
 
     /* IRET setup and context switch */
     asm volatile(
