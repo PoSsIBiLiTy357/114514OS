@@ -13,7 +13,7 @@
 #define PROC_NUM 6
 #define PCB_SIZE 0x2000
 #define KSTACK_BOT 0x800000-0x2000
-
+#define ASM 1
 
 static int curr = 0;
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
@@ -114,32 +114,64 @@ int32_t execute(const uint8_t * command){
 
     tss.esp0 = KSTACK_BOT + PCB_SIZE - PCB_SIZE * curr - 4;
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    asm volatile(
-        "cli"
-         "movl %%ebp,%0"
-         "movl %%esp,%1"
-         "movl %2,%%ebp"
-         "movl %2,%%esp"
-         "movw $USER_DS,%%ax"
-         "movw %%ax,%%ds"
-         "movw %%ax,%%es"
-         "movw %%ax,%%fs"
-         "movw %%ax,%%gs"
-         "movl %%esp,%%eax"
-         "pushl $USER_DS"
-         "pushl $0x083FFFFC"
-         "pushf"
-         "popl %%eax"
-         "orl $0x200,%%eax"
-         "pushl %%eax"
-         "pushl $USER_CS"
-         "pushl %3"
-         "iret"
-         :"=r" (pcb->parent_ebp)
-         :"=r" (pcb->parent_esp)
-         :"r"  (tss.esp0)
-         : "r"  (v_addr)
-         :/*"memory",*/"cc");////////////////////////////////////////////////////////////change here if something went fuck
+  /* __asm__ volatile(
+        "cli
+        movl %%ebp,%0  \n 
+         movl %%esp,%1   \n
+         movl %2,%%ebp   \n
+         movl %2,%%esp   \n
+         movw $USER_DS,%%ax \n   
+         movw %%ax,%%ds   \n
+         movw %%ax,%%es   \n
+         movw %%ax,%%fs   \n
+         movw %%ax,%%gs   \n
+         movl %%esp,%%eax   \n
+         pushl $USER_DS   \n
+         pushl $0x083FFFFC  \n 
+         pushf   \n
+         popl %%eax   \n
+         orl $0x200,%%eax  \n 
+         pushl %%eax   \n
+         pushl $USER_CS  \n 
+         pushl %3   \n
+         iret  \n
+         "
+
+         :"=r"((pcb->parent_ebp)), ((pcb->parent_esp))        ///output
+         :"r"((tss.esp0)),((v_addr))                                //input 
+         :"%eax"                                           //clobeberd reg
+         );*/////////////////////////////////////////////////////////////change here if something went fuck
+     
+     
+	/* Saving the current ESP and EBP into the PCB struct */
+	asm volatile("			\n\
+				movl %%ebp, %%eax 	\n\
+				movl %%esp, %%ebx 	\n\
+			"
+			:"=a"(pcb->parent_ebp), "=b"(pcb->parent_esp));
+
+        asm volatile(
+                 "cli;"
+                 "mov $0x2B, %%ax;"
+                 "mov %%ax, %%ds;"
+                 "movl $0x83FFFFC, %%eax;"
+                 "pushl $0x2B;"
+                 "pushl %%eax;"
+                 "pushfl;"
+                 "popl %%edx;"
+                 "orl $0x200, %%edx;"
+                 "pushl %%edx;"
+                 "pushl $0x23;"
+                 "pushl %0;"
+                 "iret;"
+                 "RETURN_FROM_IRET:;"
+                 "LEAVE;"
+                 "RET;"
+                 :	/* no outputs */
+                 :"r"(v_addr)	/* input */
+                 :"%edx","%eax"	/* clobbered register */
+                 );
+
     return 0;
 }
 
