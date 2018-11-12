@@ -63,6 +63,69 @@ int get_pid(){
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
 
 int32_t halt(uint8_t status){
+
+    pcb_t *cur_pcb = KSTACK_BOT - PCB_SIZE * curr;
+    pcb_t *par_pcb = cur_pcb->parent;
+
+    //if curr is shell----restart shell
+
+
+    //restore parent data 
+    proc_state[cur_pcb->pid] = 0;
+    curr = par_pcb->pid;
+
+    //////////////////////may wrong////////////////////////
+    tss.esp0 = cur_pcb->parent_esp;                     ///
+    //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      ///
+    ///////////////////////////////////////////////////////
+
+    __asm__ (
+
+            "movl %0, %esp;"
+            "movl %1, %ebp;"
+            :  /* no outputs */
+            : (),()/* input */
+            :  /* clobbered register */
+        ); 
+
+
+    
+    //restore parent paging (cr3)
+    __asm__ (
+            //page_directory address to cr3
+            "movl %0, %%cr3           \n"
+            //set PSE(bit4) of cr4 4-MB page enable
+            "movl %%cr4, %%ebx        \n"
+            "orl $0x00000010, %%ebx   \n"
+            "movl %%ebx, %%cr4        \n"
+
+            //set PG(bit31) and protection(bit0) of cr0
+            "movl %%cr0, %%ebx        \n"
+            "orl $0x80000001, %%ebx   \n"
+            "movl %%ebx, %%cr0"
+            : /* no output */
+            : "a"((&process[[par_pcb->pid]))
+            : "%ebx"
+        ); 
+
+
+    //close any relevant FDs 
+
+
+
+    //jmp to execute return
+        __asm__ (
+
+                 "jmp RETURN_FROM_IRET;"
+
+                 :	/* no outputs */
+                 :  /* input */
+                 :  /* clobbered register */
+                 );    
+
+
+
+
     return 0;
 }
 
