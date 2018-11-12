@@ -91,8 +91,9 @@ int32_t execute(const uint8_t * command){
     
     if (verify_file(command, inFile, &v_addr) == -1) { return -1; }
 
-    /*
+    //fetch a proccess id that is not in use 
     pid=get_pid();
+    proc_state[pid]=1;
     //u Paging
     paging_init(pid);
 
@@ -103,13 +104,11 @@ int32_t execute(const uint8_t * command){
     read_f(d.inode, (uint8_t)0x08048000);
     
     //u Create PCB
-    
-    proc_state[pid]=1;
     pcb_init(pid);
 
     //u Context Switch 
 
-*/
+
 
 
     tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;
