@@ -7,6 +7,7 @@
 #include "keyboard.h"
 #include "paging.h"
 
+#define KSTACK_BOT          0x7fe000
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
 
@@ -30,7 +31,6 @@ typedef struct file_desc_t {
     int (*close)(uint32_t,uint32_t, uint8_t* , uint32_t); ///////*********possible bug change to uint ***********//////////////////////////
     int (*read)(uint32_t,uint32_t, uint8_t* , uint32_t);///////*********possible bug change to uint ***********//////////////////////////
     int (*write)(uint32_t,uint32_t, uint8_t* , uint32_t);///////*********possible bug change to uint ***********//////////////////////////
-
     int32_t inode, file_pos, flag;
 } file_desc_t;
 
@@ -39,7 +39,7 @@ typedef struct pcb_t{
     int32_t parent_esp;
     int32_t parent_ebp;
     file_desc_t file_array[FDESC_SIZE];
-    char bitmap[FDESC_SIZE];
+    int32_t bitmap[FDESC_SIZE];
     int32_t pid;
 } pcb_t;
 

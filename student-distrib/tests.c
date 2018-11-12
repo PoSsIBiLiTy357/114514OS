@@ -510,6 +510,71 @@ int exec_null_file_test() {
 	return FAIL;
 }
 
+
+/*
+* print_open_file_test
+*	Simple test that prints all the PCB contents after opening a file (shell).
+*
+*   INPUTS: valid file shell
+*   OUTPUTS: PASS
+*   RETURN VALUE: PASS
+*/
+int print_open_file_test() {
+	TEST_HEADER;
+	int i;
+	int32_t output = 0;
+
+	pcb_t * pcb_shell;
+	pcb_shell = (pcb_t *)(KSTACK_BOT);
+
+	printf("pcb_shell struct before open:\n");
+	printf("*parent: 0x%x\n", pcb_shell->parent);
+	printf("parent_esp: %d\n", pcb_shell->parent_esp);
+	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
+
+	printf("file_array: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("0x%x, ",pcb_shell->file_array[i]);
+	}
+	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
+
+	printf("bitmap: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("%d, ",pcb_shell->bitmap[i]);
+	}
+	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
+
+	printf("pid: %d\n\n", pcb_shell->pid);
+
+	output = open((uint8_t *)"shell");
+	printf("open(shell) returned: %d\n\n", output);
+
+	
+
+	printf("pcb_shell struct after open:\n");
+	printf("*parent: 0x%x\n", pcb_shell->parent);
+	printf("parent_esp: %d\n", pcb_shell->parent_esp);
+	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
+
+	printf("file_array: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("0x%x, ",pcb_shell->file_array[i]);
+	}
+	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
+
+	printf("bitmap: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("%d, ",pcb_shell->bitmap[i]);
+	}
+	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
+
+	printf("pid: %d\n", pcb_shell->pid);
+
+	return PASS;
+}
+
 /*****************************************************************************/
 /*						 Checkpoint 4 tests									 */
 /*****************************************************************************/
@@ -518,7 +583,7 @@ int exec_null_file_test() {
 /*****************************************************************************/
 /*						 Checkpoint 5 tests									 */
 /*****************************************************************************/
-// bleh.....
+// bleh..... wo chow
 
 int page_nofault_test_b5(){
 	TEST_HEADER;
@@ -571,6 +636,8 @@ void launch_tests(){
 	//TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
 	//TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
 	//TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
+	clear();
+	TEST_OUTPUT("print_open_file_test()", print_open_file_test());
 
 	/*terminal test*/
 	//check_terminal_write();

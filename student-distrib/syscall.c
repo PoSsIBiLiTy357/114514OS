@@ -13,7 +13,6 @@
 #define PROGRAM_IMAGE_ADDR  0x8048000
 #define PROC_NUM            6
 #define PCB_SIZE            0x2000
-#define KSTACK_BOT          0x7fe000
 #define ASM                 1
 #define RESERV_FILES        2
 
@@ -349,6 +348,7 @@ int32_t write(int32_t fd, const void * buf, int32_t nbytes){
 *
 *   INPUTS: const uint8_t * filename
 *   OUTPUTS: file index
+*   RETURN VALUE: file index or -1 on failure
 */
 int32_t open(const uint8_t * filename){
     pcb_t * pcb;
@@ -356,14 +356,14 @@ int32_t open(const uint8_t * filename){
     int i;
 
     /* initialize PCB to the bottom of kernel stack offest by 8MB * curr PID */
-     pcb = (pcb_t *)(KSTACK_BOT - (PCB_SIZE * curr));
+    pcb = (pcb_t *)(KSTACK_BOT - (PCB_SIZE * curr));
 
     /* If the filename does not exist, return -1 */
     if (read_dentry_by_name(filename, &temp_dentry) ==-1) return -1; 
     
     for (i = 0; i < FDESC_SIZE; i++) {
-        if (pcb->bitmap[FDESC_SIZE] == 0) {
-            pcb->bitmap[FDESC_SIZE] = 1;
+        if (pcb->bitmap[i] == 0) {
+            pcb->bitmap[i] = 1;
             break;
         } 
     }
@@ -398,7 +398,7 @@ int32_t open(const uint8_t * filename){
     pcb->file_array[i].flag = 1; // file in use 
     pcb->file_array[i].file_pos = 0;
 
-    return 0;
+    return i;
 
 }
 
@@ -421,6 +421,7 @@ int32_t close(int32_t fd){
     //int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
     temp_pcb = (pcb_t *) temp_pcb_addr;
     temp_pcb->file_array[fd].flag = 0;
+    temp_pcb->bitmap[fd] = 0;
    
     return 0;
 }
