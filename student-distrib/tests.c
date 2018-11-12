@@ -511,6 +511,27 @@ int exec_null_file_test() {
 }
 
 
+int page_nofault_test_b5(){
+	TEST_HEADER;
+
+	clear();
+
+	int *a = (int *)0x8048000;
+
+	pid_page_map(0);
+	*a = 5;
+
+	pid_page_map(1);
+	*a = 6;
+
+	pid_page_map(0);
+	
+
+	printf("%d\n", *a);
+    return PASS;
+}
+
+
 /*
 * print_open_file_test
 *	Simple test that prints all the PCB contents after opening a file (shell).
@@ -527,49 +548,36 @@ int print_open_file_test() {
 	pcb_t * pcb_shell;
 	pcb_shell = (pcb_t *)(KSTACK_BOT);
 
+	/* Print PC before open */
 	printf("pcb_shell struct before open:\n");
-	printf("*parent: 0x%x\n", pcb_shell->parent);
-	printf("parent_esp: %d\n", pcb_shell->parent_esp);
-	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
-
 	printf("file_array: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("0x%x, ",pcb_shell->file_array[i]);
 	}
 	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
-
 	printf("bitmap: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
 	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
-
 	printf("pid: %d\n\n", pcb_shell->pid);
 
+	/* Open the shell file */
 	fd = open((uint8_t *)"shell");
 	printf("open(shell) returned: %d\n\n", fd);
 
-	
-
+	/* Print PCB after open */
 	printf("pcb_shell struct after open:\n");
-	printf("*parent: 0x%x\n", pcb_shell->parent);
-	printf("parent_esp: %d\n", pcb_shell->parent_esp);
-	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
-
 	printf("file_array: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("0x%x, ",pcb_shell->file_array[i]);
 	}
 	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
-
 	printf("bitmap: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
 	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
-
 	printf("pid: %d\n", pcb_shell->pid);
 
 	return PASS;
@@ -579,7 +587,7 @@ int print_open_file_test() {
 /*
 * print_open_file_test
 *	Simple test that prints all the PCB contents after opening a file and
-* 	then printing PCB contents after closing flie to show open and close
+* 	then printing PCB contents after closing file to show open and close
 *	update the bitmap fields.
 *
 *   INPUTS: valid file shell
@@ -601,23 +609,16 @@ int open_then_close_test() {
 
 	/* Print the PCB struct after opening the file */
 	printf("pcb_shell struct after open:\n");
-	printf("*parent: 0x%x\n", pcb_shell->parent);
-	printf("parent_esp: %d\n", pcb_shell->parent_esp);
-	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
-
 	printf("file_array: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("0x%x, ",pcb_shell->file_array[i]);
 	}
 	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
-
 	printf("bitmap: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
 	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
-
 	printf("pid: %d\n\n", pcb_shell->pid);
 
 	/* Close the file shell */
@@ -626,29 +627,32 @@ int open_then_close_test() {
 
 	/* Print the PCB struct after closing the file */
 	printf("pcb_shell struct after close:\n");
-	printf("*parent: 0x%x\n", pcb_shell->parent);
-	printf("parent_esp: %d\n", pcb_shell->parent_esp);
-	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
-
 	printf("file_array: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("0x%x, ",pcb_shell->file_array[i]);
 	}
 	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
-
 	printf("bitmap: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
 	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
-
 	printf("pid: %d\n\n", pcb_shell->pid);
 
 	return PASS;
 }
 
 
+/*
+* print_open_file_test
+*	Simple test that prints all the PCB contents after opening two files and
+* 	then printing PCB contents after closing a file to show open and close
+*	update the bitmap fields.
+*
+*   INPUTS: valid file shell
+*   OUTPUTS: PASS
+*   RETURN VALUE: PASS
+*/
 int open_open_close_test() {
 	TEST_HEADER;
 
@@ -660,7 +664,7 @@ int open_open_close_test() {
 
 	/* Open the file shell */
 	fd1 = open((uint8_t *)"shell");
-	printf("open(shell) returned: %d\n\n", fd1);
+	printf("open(shell) returned: %d\n", fd1);
 
 	/* Open the file fish */
 	fd2 = open((uint8_t *)"fish");
@@ -668,16 +672,11 @@ int open_open_close_test() {
 
 	/* Print the PCB struct after opening the file */
 	printf("pcb_shell struct after open:\n");
-	printf("*parent: 0x%x\n", pcb_shell->parent);
-	printf("parent_esp: %d\n", pcb_shell->parent_esp);
-	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
-
 	printf("file_array: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("0x%x, ",pcb_shell->file_array[i]);
 	}
 	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
 
 	printf("bitmap: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
@@ -689,20 +688,15 @@ int open_open_close_test() {
 
 	/* Close the file shell */
 	close_output = close(fd1);
-	printf("close(fd) returned: %d\n\n", close_output);
+	printf("close(fd1) (fd1 = shell's fd) returned: %d\n\n", close_output);
 
 	/* Print the PCB struct after closing the file */
 	printf("pcb_shell struct after close:\n");
-	printf("*parent: 0x%x\n", pcb_shell->parent);
-	printf("parent_esp: %d\n", pcb_shell->parent_esp);
-	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
-
 	printf("file_array: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("0x%x, ",pcb_shell->file_array[i]);
 	}
 	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
 
 	printf("bitmap: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
@@ -715,6 +709,63 @@ int open_open_close_test() {
 	return PASS;
 }
 
+
+/*
+* open_file_max
+*	Makes sure open() exits and returns -1 when file capacity has
+*	has already been reached 
+*
+*   INPUTS: valid file (shell)
+*   OUTPUTS: PASS if return -1, FAIL otherwise
+*   RETURN VALUE: PASS, FAIL
+*/
+int open_file_max_test() {
+	TEST_HEADER;
+
+	int i;
+	int32_t output;
+
+	pcb_t * pcb_shell;
+	pcb_shell = (pcb_t *)(KSTACK_BOT);
+	
+	/* Open max number of files (six) */
+	for (i = 0; i < FDESC_SIZE; i++) {
+		output = open((uint8_t *)"shell");
+	}
+
+	/* Show all files are occupied */
+	printf("pcb_shell struct after six opens:\n");
+	printf("file_array: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("0x%x, ",pcb_shell->file_array[i]);
+	}
+	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+
+	printf("bitmap: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("%d, ",pcb_shell->bitmap[i]);
+	}
+	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
+
+	/* Open one more file above max number */
+	output = open((uint8_t *)"shell");
+
+	/* Make sure that output returne -1 when trying to open last file */
+	if (output == -1) { 
+		return PASS; 
+	} else {
+		return FAIL;
+	}
+}
+
+
+
+
+// maybe user for later...
+//printf("*parent: 0x%x\n", pcb_shell->parent);
+// printf("parent_esp: %d\n", pcb_shell->parent_esp);
+// printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
+
 /*****************************************************************************/
 /*						 Checkpoint 4 tests									 */
 /*****************************************************************************/
@@ -725,25 +776,7 @@ int open_open_close_test() {
 /*****************************************************************************/
 // bleh..... wo chow
 
-int page_nofault_test_b5(){
-	TEST_HEADER;
 
-	clear();
-
-	int *a = (int *)0x8048000;
-
-	pid_page_map(0);
-	*a = 5;
-
-	pid_page_map(1);
-	*a = 6;
-
-	pid_page_map(0);
-	
-
-	printf("%d\n", *a);
-    return PASS;
-}
 
 
 /* Test suite entry point */
@@ -776,10 +809,11 @@ void launch_tests(){
 	//TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
 	//TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
 	//TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
-	//clear();
+	clear();
 	//TEST_OUTPUT("print_open_file_test()", print_open_file_test());
 	//TEST_OUTPUT("open_then_close_test()", open_then_close_test());
 	//TEST_OUTPUT("open_open_close_test()", open_open_close_test());
+	TEST_OUTPUT("open_file_max_test()", open_file_max_test());
 
 	/*terminal test*/
 	//check_terminal_write();
