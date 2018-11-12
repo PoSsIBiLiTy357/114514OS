@@ -550,12 +550,12 @@ int print_open_file_test() {
 
 	/* Print PC before open */
 	printf("pcb_shell struct before open:\n");
-	printf("file_array: {");
-	for (i = 0; i < FDESC_SIZE - 1; i++) {
-		printf("0x%x, ",pcb_shell->file_array[i]);
-	}
-	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	printf("bitmap: {");
+	// printf("file_array: {");
+	// for (i = 0; i < FDESC_SIZE - 1; i++) {
+	// 	printf("0x%x, ",pcb_shell->file_array[i]);
+	// }
+	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
@@ -568,12 +568,12 @@ int print_open_file_test() {
 
 	/* Print PCB after open */
 	printf("pcb_shell struct after open:\n");
-	printf("file_array: {");
-	for (i = 0; i < FDESC_SIZE - 1; i++) {
-		printf("0x%x, ",pcb_shell->file_array[i]);
-	}
-	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	printf("bitmap: {");
+	// printf("file_array: {");
+	// for (i = 0; i < FDESC_SIZE - 1; i++) {
+	// 	printf("0x%x, ",pcb_shell->file_array[i]);
+	// }
+	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
@@ -609,12 +609,12 @@ int open_then_close_test() {
 
 	/* Print the PCB struct after opening the file */
 	printf("pcb_shell struct after open:\n");
-	printf("file_array: {");
-	for (i = 0; i < FDESC_SIZE - 1; i++) {
-		printf("0x%x, ",pcb_shell->file_array[i]);
-	}
-	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	printf("bitmap: {");
+	// printf("file_array: {");
+	// for (i = 0; i < FDESC_SIZE - 1; i++) {
+	// 	printf("0x%x, ",pcb_shell->file_array[i]);
+	// }
+	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
@@ -627,12 +627,12 @@ int open_then_close_test() {
 
 	/* Print the PCB struct after closing the file */
 	printf("pcb_shell struct after close:\n");
-	printf("file_array: {");
-	for (i = 0; i < FDESC_SIZE - 1; i++) {
-		printf("0x%x, ",pcb_shell->file_array[i]);
-	}
-	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-	printf("bitmap: {");
+	// printf("file_array: {");
+	// for (i = 0; i < FDESC_SIZE - 1; i++) {
+	// 	printf("0x%x, ",pcb_shell->file_array[i]);
+	// }
+	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
@@ -671,14 +671,14 @@ int open_open_close_test() {
 	printf("open(fish) returned: %d\n\n", fd2);
 
 	/* Print the PCB struct after opening the file */
-	printf("pcb_shell struct after open:\n");
-	printf("file_array: {");
-	for (i = 0; i < FDESC_SIZE - 1; i++) {
-		printf("0x%x, ",pcb_shell->file_array[i]);
-	}
-	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	printf("pcb_shell struct after two opens:\n");
+	// printf("file_array: {");
+	// for (i = 0; i < FDESC_SIZE - 1; i++) {
+	// 	printf("0x%x, ",pcb_shell->file_array[i]);
+	// }
+	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
 
-	printf("bitmap: {");
+	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
@@ -692,13 +692,13 @@ int open_open_close_test() {
 
 	/* Print the PCB struct after closing the file */
 	printf("pcb_shell struct after close:\n");
-	printf("file_array: {");
-	for (i = 0; i < FDESC_SIZE - 1; i++) {
-		printf("0x%x, ",pcb_shell->file_array[i]);
-	}
-	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	// printf("file_array: {");
+	// for (i = 0; i < FDESC_SIZE - 1; i++) {
+	// 	printf("0x%x, ",pcb_shell->file_array[i]);
+	// }
+	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
 
-	printf("bitmap: {");
+	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
@@ -735,13 +735,13 @@ int open_file_max_test() {
 
 	/* Show all files are occupied */
 	printf("pcb_shell struct after six opens:\n");
-	printf("file_array: {");
-	for (i = 0; i < FDESC_SIZE - 1; i++) {
-		printf("0x%x, ",pcb_shell->file_array[i]);
-	}
-	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	// printf("file_array: {");
+	// for (i = 0; i < FDESC_SIZE - 1; i++) {
+	// 	printf("0x%x, ",pcb_shell->file_array[i]);
+	// }
+	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
 
-	printf("bitmap: {");
+	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
 	}
@@ -809,17 +809,18 @@ void launch_tests(){
 	//TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
 	//TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
 	//TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
+	
 	clear();
 	//TEST_OUTPUT("print_open_file_test()", print_open_file_test());
-	//TEST_OUTPUT("open_then_close_test()", open_then_close_test());
+	TEST_OUTPUT("open_then_close_test()", open_then_close_test());
 	//TEST_OUTPUT("open_open_close_test()", open_open_close_test());
-	TEST_OUTPUT("open_file_max_test()", open_file_max_test());
+	//TEST_OUTPUT("open_file_max_test()", open_file_max_test());
 
 	/*terminal test*/
 	//check_terminal_write();
 
 
 	/*execute test*/
-	execute((uint8_t *)"shell");
+	//execute((uint8_t *)"shell");
 
 }

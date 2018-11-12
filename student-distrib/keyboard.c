@@ -19,11 +19,7 @@ static int ctrl_state;
 static int cursor_idx;
 static int overline;
 static char first[LINE_SIZE];
-<<<<<<< HEAD
 static char second[LINE2_SIZE];
-=======
-static char second[48];
->>>>>>> exe
 static char keyboard_buffer[BUFFER_SIZE]; //leave 1 for _
 static char terminal_buffer[BUFFER_SIZE];
 int terminal_read_ready;
