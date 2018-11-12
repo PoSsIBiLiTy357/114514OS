@@ -417,12 +417,12 @@ int32_t close(int32_t fd){
     pcb_t * temp_pcb;
     int temp_pcb_addr;
 
-    temp_pcb_addr = KSTACK_BOT - PCB_SIZE - (curr * PCB_SIZE);
+    temp_pcb_addr = KSTACK_BOT - (curr * PCB_SIZE);
     //int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
     temp_pcb = (pcb_t *) temp_pcb_addr;
     temp_pcb->file_array[fd].flag = 0;
     temp_pcb->bitmap[fd] = 0;
-   
+
     return 0;
 }
 

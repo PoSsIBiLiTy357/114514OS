@@ -522,7 +522,7 @@ int exec_null_file_test() {
 int print_open_file_test() {
 	TEST_HEADER;
 	int i;
-	int32_t output = 0;
+	int32_t fd = 0;
 
 	pcb_t * pcb_shell;
 	pcb_shell = (pcb_t *)(KSTACK_BOT);
@@ -547,8 +547,8 @@ int print_open_file_test() {
 
 	printf("pid: %d\n\n", pcb_shell->pid);
 
-	output = open((uint8_t *)"shell");
-	printf("open(shell) returned: %d\n\n", output);
+	fd = open((uint8_t *)"shell");
+	printf("open(shell) returned: %d\n\n", fd);
 
 	
 
@@ -571,6 +571,146 @@ int print_open_file_test() {
 	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
 
 	printf("pid: %d\n", pcb_shell->pid);
+
+	return PASS;
+}
+
+
+/*
+* print_open_file_test
+*	Simple test that prints all the PCB contents after opening a file and
+* 	then printing PCB contents after closing flie to show open and close
+*	update the bitmap fields.
+*
+*   INPUTS: valid file shell
+*   OUTPUTS: PASS
+*   RETURN VALUE: PASS
+*/
+int open_then_close_test() {
+	TEST_HEADER;
+
+	int i;
+	int32_t fd = 0, close_output = 0;
+
+	pcb_t * pcb_shell;
+	pcb_shell = (pcb_t *)(KSTACK_BOT);
+
+	/* Open the file shell */
+	fd = open((uint8_t *)"shell");
+	printf("open(shell) returned: %d\n\n", fd);
+
+	/* Print the PCB struct after opening the file */
+	printf("pcb_shell struct after open:\n");
+	printf("*parent: 0x%x\n", pcb_shell->parent);
+	printf("parent_esp: %d\n", pcb_shell->parent_esp);
+	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
+
+	printf("file_array: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("0x%x, ",pcb_shell->file_array[i]);
+	}
+	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
+
+	printf("bitmap: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("%d, ",pcb_shell->bitmap[i]);
+	}
+	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
+
+	printf("pid: %d\n\n", pcb_shell->pid);
+
+	/* Close the file shell */
+	close_output = close(fd);
+	printf("close(fd) returned: %d\n\n", close_output);
+
+	/* Print the PCB struct after closing the file */
+	printf("pcb_shell struct after close:\n");
+	printf("*parent: 0x%x\n", pcb_shell->parent);
+	printf("parent_esp: %d\n", pcb_shell->parent_esp);
+	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
+
+	printf("file_array: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("0x%x, ",pcb_shell->file_array[i]);
+	}
+	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
+
+	printf("bitmap: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("%d, ",pcb_shell->bitmap[i]);
+	}
+	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
+
+	printf("pid: %d\n\n", pcb_shell->pid);
+
+	return PASS;
+}
+
+
+int open_open_close_test() {
+	TEST_HEADER;
+
+	int i;
+	int32_t fd1 = 0, fd2 = 0, close_output = 0;
+
+	pcb_t * pcb_shell;
+	pcb_shell = (pcb_t *)(KSTACK_BOT);
+
+	/* Open the file shell */
+	fd1 = open((uint8_t *)"shell");
+	printf("open(shell) returned: %d\n\n", fd1);
+
+	/* Open the file fish */
+	fd2 = open((uint8_t *)"fish");
+	printf("open(fish) returned: %d\n\n", fd2);
+
+	/* Print the PCB struct after opening the file */
+	printf("pcb_shell struct after open:\n");
+	printf("*parent: 0x%x\n", pcb_shell->parent);
+	printf("parent_esp: %d\n", pcb_shell->parent_esp);
+	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
+
+	printf("file_array: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("0x%x, ",pcb_shell->file_array[i]);
+	}
+	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
+
+	printf("bitmap: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("%d, ",pcb_shell->bitmap[i]);
+	}
+	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
+
+	printf("pid: %d\n\n", pcb_shell->pid);
+
+	/* Close the file shell */
+	close_output = close(fd1);
+	printf("close(fd) returned: %d\n\n", close_output);
+
+	/* Print the PCB struct after closing the file */
+	printf("pcb_shell struct after close:\n");
+	printf("*parent: 0x%x\n", pcb_shell->parent);
+	printf("parent_esp: %d\n", pcb_shell->parent_esp);
+	printf("parent_ebp: %d\n", pcb_shell->parent_ebp);
+
+	printf("file_array: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("0x%x, ",pcb_shell->file_array[i]);
+	}
+	printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
+	//printf("file_array flag: %d\n", pcb_shell->file_array[0]);
+
+	printf("bitmap: {");
+	for (i = 0; i < FDESC_SIZE - 1; i++) {
+		printf("%d, ",pcb_shell->bitmap[i]);
+	}
+	printf("%d}\n", pcb_shell->bitmap[FDESC_SIZE-1]);
+
+	printf("pid: %d\n\n", pcb_shell->pid);
 
 	return PASS;
 }
@@ -636,8 +776,10 @@ void launch_tests(){
 	//TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
 	//TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
 	//TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
-	clear();
-	TEST_OUTPUT("print_open_file_test()", print_open_file_test());
+	//clear();
+	//TEST_OUTPUT("print_open_file_test()", print_open_file_test());
+	//TEST_OUTPUT("open_then_close_test()", open_then_close_test());
+	//TEST_OUTPUT("open_open_close_test()", open_open_close_test());
 
 	/*terminal test*/
 	//check_terminal_write();
