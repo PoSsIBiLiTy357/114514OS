@@ -9,7 +9,6 @@
 #define START_ADDR        24
 #define ADDR_OFFSET        8
 
-#define KSTACK_START        0x800000
 #define PROGRAM_IMAGE_ADDR  0x8048000
 #define PROC_NUM            6
 #define PCB_SIZE            0x2000
@@ -295,7 +294,7 @@ int32_t read(int32_t fd, void * buf, int32_t nbytes){
     if (fd >= FDESC_SIZE) return -1;
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to read() */
-    pcb_t * temp_pcb = (pcb_t*) KSTACK_BOT-curr*PCB_SIZE;
+    pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
     int offset = temp_pcb->file_array[fd].file_pos;
     int inode = temp_pcb->file_array[fd].inode;
     int count = temp_pcb->file_array[fd].read(inode,offset,buf,nbytes);
@@ -328,7 +327,7 @@ int32_t write(int32_t fd, const void * buf, int32_t nbytes){
     if (fd >= FDESC_SIZE) return -1;
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to write() */
-    pcb_t * temp_pcb = (pcb_t*) KSTACK_BOT-curr*PCB_SIZE;
+    pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
     int inode = temp_pcb->file_array[fd].inode;
     int count = temp_pcb->file_array[fd].write(inode, 0, (uint8_t *)buf, nbytes);
 
@@ -348,16 +347,19 @@ int32_t write(int32_t fd, const void * buf, int32_t nbytes){
 *   OUTPUTS: file index
 */
 int32_t open(const uint8_t * filename){
-    pcb_t pcb;
+    pcb_t * pcb;
     dentry_t temp_dentry;
     int i;
+
+    /* initialize PCB to the bottom of kernel stack offest by 8MB * curr PID */
+     pcb = (pcb_t *)(KSTACK_BOT - (PCB_SIZE * curr));
 
     /* If the filename does not exist, return -1 */
     if (read_dentry_by_name(filename, &temp_dentry) ==-1) return -1; 
     
     for (i = 0; i < FDESC_SIZE; i++) {
-        if (pcb.bitmap[FDESC_SIZE] == 0) {
-            pcb.bitmap[FDESC_SIZE] = 1;
+        if (pcb->bitmap[FDESC_SIZE] == 0) {
+            pcb->bitmap[FDESC_SIZE] = 1;
             break;
         } 
     }
@@ -365,32 +367,32 @@ int32_t open(const uint8_t * filename){
     
     /* Check if the file type is an RTC file */
     if (temp_dentry.ftype == FILE_RTC) {
-        pcb.file_array[i].read  = rtc_read_wrapper;
-        pcb.file_array[i].write = rtc_write_wrapper;
-        pcb.file_array[i].open  = rtc_open_wrapper;
-        pcb.file_array[i].close = rtc_close_wrapper;
+        pcb->file_array[i].read  = rtc_read_wrapper;
+        pcb->file_array[i].write = rtc_write_wrapper;
+        pcb->file_array[i].open  = rtc_open_wrapper;
+        pcb->file_array[i].close = rtc_close_wrapper;
     }
     
     /* Check if file type is a directory file */
     if (temp_dentry.ftype == FILE_DIR) {
-        pcb.file_array[i].read  = read_dir_wrapper;
-        pcb.file_array[i].write = write_dir_wrapper;
-        pcb.file_array[i].open  = open_dir_wrapper;
-        pcb.file_array[i].close = close_dir_wrapper;        
+        pcb->file_array[i].read  = read_dir_wrapper;
+        pcb->file_array[i].write = write_dir_wrapper;
+        pcb->file_array[i].open  = open_dir_wrapper;
+        pcb->file_array[i].close = close_dir_wrapper;        
     }
 
     /* Check if file type is a regular file */
     if (temp_dentry.ftype == FILE_REG) {
-        pcb.file_array[i].read  = read_f_wrapper;
-        pcb.file_array[i].write = write_f_wrapper;
-        pcb.file_array[i].open  = open_f_wrapper;
-        pcb.file_array[i].close = close_f_wrapper;           
+        pcb->file_array[i].read  = read_f_wrapper;
+        pcb->file_array[i].write = write_f_wrapper;
+        pcb->file_array[i].open  = open_f_wrapper;
+        pcb->file_array[i].close = close_f_wrapper;           
     }
 
     /* Set the inode for current file and set starting offset to 0 */
-    pcb.file_array[i].inode = temp_dentry.inode;
-    pcb.file_array[i].flag = 1; // file in use 
-    pcb.file_array[i].file_pos = 0;
+    pcb->file_array[i].inode = temp_dentry.inode;
+    pcb->file_array[i].flag = 1; // file in use 
+    pcb->file_array[i].file_pos = 0;
 
     return 0;
 
@@ -411,7 +413,7 @@ int32_t close(int32_t fd){
     pcb_t * temp_pcb;
     int temp_pcb_addr;
 
-    temp_pcb_addr = KSTACK_START - PCB_SIZE - (curr * PCB_SIZE);
+    temp_pcb_addr = KSTACK_BOT - PCB_SIZE - (curr * PCB_SIZE);
     //int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
     temp_pcb = (pcb_t *) temp_pcb_addr;
     temp_pcb->file_array[fd].flag = 0;
