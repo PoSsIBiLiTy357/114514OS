@@ -24,6 +24,10 @@ void clear(void) {
     }
 }
 
+
+void screen_x_set(int n){
+    screen_x = n;
+}
 /* void put_refresh_line(const  char* buf);
  * Inputs: buf
  * Return Value: none

@@ -7,6 +7,7 @@
 #define KBRD_DATA_PORT			0x60
 #define BUFFER_SIZE		129
 #define LINE_SIZE   80
+#define NUM_ROWS    25
 
 static int caplk_pressd;
 static int shift_state;
@@ -17,7 +18,7 @@ static char first[LINE_SIZE];
 static char second[48];
 static char keyboard_buffer[BUFFER_SIZE]; ///leave 1 for _
 
-
+int terminal_read_ready;
 /* init_keyboard
  * 
  * initialize scan codes for letters and numbers, then unmask the keyboard irq in PIC
@@ -34,6 +35,7 @@ void init_keyboard(void)
 	shift_state=0;
 	cursor_idx=0;
 	overline =0;
+	terminal_read_ready =0;
 	memset(first,'\0',sizeof(first));
 	//memset(second,'\0',sizeof(second));
 	memset(keyboard_buffer,'\0',sizeof(keyboard_buffer));
@@ -193,6 +195,7 @@ void keyboard_handler(void){
 			overline =1;
 		}
 		if(scan_code[(int)pressed] == '\n'){					// enter pressed go to next line clear keyboard_buffer
+			terminal_read_ready =1;
 			overline =0;
 			int i;
 			for(i=0;i<cursor_idx+1;i++){
@@ -204,7 +207,7 @@ void keyboard_handler(void){
 
 		//puts(keyboard_buffer);
 	}
-	
+
 	sti();
 }
 
@@ -216,8 +219,15 @@ void keyboard_handler(void){
  * Side Effects: None
  * 
  */
-int terminal_read(char* buf){////////////////////////////need change
-	return 0;
+int terminal_read(char* buf, int count){////////////////////////////need change
+	sti();
+	    while(terminal_read_ready!=1)
+    {
+    }
+
+	memcpy(buf,keyboard_buffer,count);
+	terminal_read_ready = 0;
+	return strlen(buf);
 }
 
 
@@ -231,35 +241,41 @@ int terminal_read(char* buf){////////////////////////////need change
  */
 int terminal_write(char * buf){//////////////////////////////need change
 
-
-	int full_col = strlen(buf) / 80;
-	int remainder = strlen(buf) % 80;
+	int length = strlen(buf);
+	int full_col = length / 80;
+	int remainder = length % 80;
 	int i,j;
 	char one_line[80];
 	for (i = 0; i < full_col; i++) {
 		for (j = 0; j < 80; j++) {
 			one_line[j] = buf[j + 80 * i];
 		}
-		put_refresh_line(one_line);
-		puts("\n");
-
+		puts(one_line);
+		if (get_screen_y() >= NUM_ROWS-1) shift();
+		screen_y_change(1);
+		screen_x_set(0);
+		if (get_screen_y() >= NUM_ROWS-1) shift();
 	}
 	for (j = 0; j < 80; j++) {
 		one_line[j] = '\0';
 	}
-	one_line[80] = '\n';
+	one_line[79] = '\n';
 	for (j = 0; j < remainder; j++) {
 		one_line[j] = buf[80 * full_col + j];
 	}
-	put_refresh_line(one_line);
+	puts(one_line);
+	if (get_screen_y() >= NUM_ROWS-1) shift();
+	screen_y_change(1);
+	screen_x_set(0);
+	if (get_screen_y() >= NUM_ROWS-1) shift();
 
 	return 0;
 }
 
 int terminal_write_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count) {
-	return terminal_write(buf);
+	return terminal_write((char*)buf);
 }
 
 int terminal_read_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count) {
-	return terminal_read(buf);
+	return terminal_read((char*) buf, (int)count);
 }

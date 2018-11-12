@@ -412,6 +412,11 @@ int RTC_read_test() {
 	return PASS;
 }
 
+void check_terminal_write(){
+	terminal_write("hnikjedshfkjdhskjfhdkjshkjfdheriufhisuhifuhdiuhsiuhiuerhiuhfsiuhiueihsufeishufeishfueisfh");
+}
+
+
 
 /*****************************************************************************/
 /*						 Checkpoint 3 tests									 */
@@ -527,7 +532,7 @@ int exec_null_file_test() {
 void launch_tests(){
 	/* Checkpoint 1 tests */
 	//TEST_OUTPUT("idt_test", idt_test());
-	TEST_OUTPUT("page_nofault_test", page_nofault_test());
+	//TEST_OUTPUT("page_nofault_test", page_nofault_test());
 	//TEST_OUTPUT("page_nofault_test", page_nofault_test_b5());
 
 	//TEST_OUTPUT("page_fault_test", page_fault_test());
@@ -553,5 +558,8 @@ void launch_tests(){
 	//TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
 	//TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
 	//TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
+
+	/*terminal test*/
+	//check_terminal_write();
 
 }
