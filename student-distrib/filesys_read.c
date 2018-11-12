@@ -173,13 +173,10 @@ int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t l
  *     OUTPUTS: -1 when failed, 0 or length when success; fill buf with desire data
  *     RETURN VALUE: 0, -1 , length
  */
-int32_t read_f(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t length){
+int32_t read_f(uint32_t inode, uint8_t *buf){
 
-   // dentry_t dentry;
-   // if(read_dentry_by_name(fname, &dentry) == -1){
-   //     return -1;
-   // }
-    return read_data(inode, offset, buf, length);
+    return read_data(inode, 0, buf, PROGRAM_MAX_SIZE);
+
 }
 
 /*
@@ -372,7 +369,7 @@ int close_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t cou
 }
 
 int read_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return read_f(inode, offset, buf,  count);
+    return read_f(inode, buf);
 }
 
 int write_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){

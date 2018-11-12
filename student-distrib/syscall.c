@@ -9,7 +9,7 @@
 #define START_ADDR        24
 #define ADDR_OFFSET        8
 
-
+#define PROGRAM_IMAGE_ADDR 0x8048000
 #define PROC_NUM 6
 #define PCB_SIZE 0x2000
 #define KSTACK_BOT 0x800000-0x2000
@@ -64,8 +64,8 @@ int get_pid(){
 
 int32_t halt(uint8_t status){
 
-    pcb_t *cur_pcb = KSTACK_BOT - PCB_SIZE * curr;
-    pcb_t *par_pcb = cur_pcb->parent;
+    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t *par_pcb = (pcb_t *)(cur_pcb->parent);
 
     //if curr is shell----restart shell
 
@@ -79,14 +79,13 @@ int32_t halt(uint8_t status){
     //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      ///
     ///////////////////////////////////////////////////////
 
-    __asm__ (
+	asm volatile(
+		    "movl   %0, %%esp  	;"
+		    "movl   %1, %%ebp  	;"
 
-            "movl %0, %esp;"
-            "movl %1, %ebp;"
-            :  /* no outputs */
-            : (),()/* input */
-            :  /* clobbered register */
-        ); 
+		    :
+		    :"g"(cur_pcb->parent_esp),"g"(cur_pcb->parent_ebp) 
+        );
 
 
     
@@ -104,7 +103,7 @@ int32_t halt(uint8_t status){
             "orl $0x80000001, %%ebx   \n"
             "movl %%ebx, %%cr0"
             : /* no output */
-            : "a"((&process[[par_pcb->pid]))
+            : "a"((&process[par_pcb->pid]))
             : "%ebx"
         ); 
 
@@ -114,14 +113,10 @@ int32_t halt(uint8_t status){
 
 
     //jmp to execute return
-        __asm__ (
+	asm volatile(
 
-                 "jmp RETURN_FROM_IRET;"
-
-                 :	/* no outputs */
-                 :  /* input */
-                 :  /* clobbered register */
-                 );    
+	   	    "jmp RETURN_FROM_IRET;"
+	    ); 
 
 
 
@@ -163,8 +158,8 @@ int32_t execute(const uint8_t * command){
     //u User-level Program Loader
 
 
-    read_dentry_by_name(inFile, d);
-    read_f(d.inode, (uint8_t)0x08048000);
+    read_dentry_by_name(inFile, &d);
+    read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
     
     //u Create PCB
     pcb_init(pid);
