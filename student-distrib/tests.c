@@ -818,4 +818,8 @@ void launch_tests(){
 	/*terminal test*/
 	//check_terminal_write();
 
+
+	/*execute test*/
+	execute((uint8_t *)"shell");
+
 }
