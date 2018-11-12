@@ -148,77 +148,49 @@ int32_t execute(const uint8_t * command){
 
     
     if (verify_file(command, inFile, &v_addr) == -1) { return -1; }
-
+    //134513384 080482E8
     //fetch a proccess id that is not in use 
     pid=get_pid();
     proc_state[pid]=1;
     //u Paging
-    paging_init(pid);
+    //paging_init(pid);
+    pid_page_map(pid);
 
     //u User-level Program Loader
 
 
     read_dentry_by_name(inFile, &d);
     read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
-    
+
     //u Create PCB
     pcb_init(pid);
 
     //u Context Switch 
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
+    pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
 
-
-
-
-    tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;
-    pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-  /* tss.esp0 = KSTACK_BOT + PCB_SIZE - PCB_SIZE * curr - 4;
-    pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    __asm__ volatile(
-        "cli;"
-        "movl %%ebp,%0;"
-        "movl %%esp,%1;"
-        "movl %2,%%ebp;"
-        "movl %2,%%esp;"
-       "movw $0x002B,%%ax;"
-       "movw %%ax,%%ds;"
-       "movw %%ax,%%es;"
-       "movw %%ax,%%fs;"
-       "movw %%ax,%%gs;"
-       "movl %%esp,%%eax;"
-       "pushl $0x002B;"
-       "pushl $0x083FFFFC;"
-       "pushf;"
-       "popl %%eax;"
-       "orl $0x200,%%eax;"
-       "pushl %%eax;"
-       "pushl $0x0023;"
-       "pushl %3;"
-       "iret;"
-        :"=r" (pcb->parent_ebp),"=r" (pcb->parent_esp) 
-        :"r"  (tss.esp0),"r" (v_addr)
-        :"eax"); 
-    return 0;
-}*/////////////////////////////////////////////  alternate version 
-     
      
 	/* Saving the current ESP and EBP into the PCB struct */
 	asm volatile("			\n\
 				movl %%ebp, %%eax 	\n\
 				movl %%esp, %%ebx 	\n\
 			"
-			:"=a"(pcb->parent_ebp), "=b"(pcb->parent_esp));
+			:"=a"(pcb->parent_ebp), "=b"(pcb->parent_esp)
+            );
 
-        asm volatile(
-                 "cli;"
+    asm volatile(
+                //  "cli;"
                  "mov $0x2B, %%ax;"
                  "mov %%ax, %%ds;"
                  "movl $0x83FFFFC, %%eax;"
+                 //"movl $0x8400000, %%eax;"
                  "pushl $0x2B;"
                  "pushl %%eax;"
                  "pushfl;"
-                 "popl %%edx;"
-                 "orl $0x200, %%edx;"
-                 "pushl %%edx;"
+                //  "popl %%edx;"
+                //  "orl $0x200, %%edx;"
+                //  "pushl %%edx;"
                  "pushl $0x23;"
                  "pushl %0;"
                  "iret;"
@@ -249,8 +221,7 @@ int32_t execute(const uint8_t * command){
                    user address into v_addr
 */
 int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_addr) {
-    int i, j;
-    uint8_t addrBuf[BYTE_LEN];
+    int i;
 
     /* Make sure passed in ptr is not a nullptr */
     if (cmd == NULL) { return -1; }
@@ -273,17 +244,10 @@ int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_
     if (strncmp(fileBuf, magicBuf, BYTE_LEN)) { return -1; }
 
     /* Retrieve address for first instruction from bytes 24-27 */
-    read_f_by_name(inFile, START_ADDR, addrBuf, BYTE_LEN);
-
-    /* Convert from string to integer address */
-    v_addr = 0;
-    for (j = 0; j < BYTE_LEN; j++) {
-        v_addr += (addrBuf[j] << (ADDR_OFFSET * j));
-    }
+    read_f_by_name(inFile, 24, (uint8_t*)v_addr, BYTE_LEN);
 
     return 0;
 }
-
 
 int32_t read(int32_t fd, void * buf, int32_t nbytes){
     if (fd>= FDESC_SIZE) return -1;

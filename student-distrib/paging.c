@@ -3,8 +3,8 @@
 #include "paging.h"
 #include "x86_desc.h"
 #define ASM 1
-#define _4MB_ 1024*4
-#define _8MB_ 1024*8
+#define _4MB_ (0x100000*4)
+#define _8MB_ (0x100000*8)
 #define program_pageIdx 32
 
 /*
@@ -100,15 +100,14 @@ void pt_init(int idx){
  *      3.Mark Video Mem present
  *      4.Set CR0, CR4 registers properly
  */
-void paging_init(int pid){
+void paging_init(){
 
     int i;
 
     //create index 2-1023 PDEs
     for(i = 2; i < PAGE_ENTRY_SIZE; i++){
-        pdt_init_mb(pid,i);
-        process[pid].page_directory[i].mb.pt_base_addr = i;
-        process[pid].page_directory[i].mb.pt_rw = 1;
+        pdt_init_mb(0,i);
+        process[0].page_directory[i].mb.pt_base_addr = i;
     }
 
     //create all 1024 PTEs
@@ -119,11 +118,11 @@ void paging_init(int pid){
     }
 
     //create index 0-4MB as 4kB page directory entry
-    pdt_init_kb(pid, 0);
-    process[pid].page_directory[0].kb.pt_present = 1;
-    process[pid].page_directory[0].kb.pt_rw = 1;
+    pdt_init_kb(0, 0);
+    process[0].page_directory[0].kb.pt_present = 1;
+    process[0].page_directory[0].kb.pt_rw = 1;
     //assign page table base addr(right shift 12 bits) to PDE 0
-    process[pid].page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12; 
+    process[0].page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12; 
 
     //mark video mem present in corresponding page table entry
     page_table[PT_VIDEO].page_present = 1;
@@ -132,18 +131,19 @@ void paging_init(int pid){
     page_table[PT_VIDEO].page_addr = PT_VIDEO;
 
     //create 4-8MB kernel as 4MB page directory entry
-    pdt_init_mb(pid, 1);
-    process[pid].page_directory[1].mb.pt_global = 1;
-    process[pid].page_directory[1].mb.pt_present = 1;
-    process[pid].page_directory[1].mb.pt_base_addr = 1;
+    pdt_init_mb(0, 1);
+    process[0].page_directory[1].mb.pt_present = 1;
+    process[0].page_directory[1].mb.pt_rw = 1;
+    process[0].page_directory[1].mb.pt_base_addr = 1;
 
+/*
     pdt_init_mb(pid, program_pageIdx);
     process[pid].page_directory[program_pageIdx].mb.pt_present = 1;
     process[pid].page_directory[program_pageIdx].mb.pt_size = 1;
     process[pid].page_directory[program_pageIdx].mb.pt_us = 1;
     process[pid].page_directory[program_pageIdx].mb.pt_rw = 1;
-    process[pid].page_directory[program_pageIdx].mb.pt_base_addr = (pid*_4MB_) + _8MB_;
-
+    process[pid].page_directory[program_pageIdx].mb.pt_base_addr = ((pid*_4MB_) + _8MB_)>>22;
+*/
     printf("PAGE_INIT OK\n");
 
     __asm__ (
@@ -158,10 +158,37 @@ void paging_init(int pid){
             "movl %%cr0, %%ebx         \n"
             "orl $0x80000001, %%ebx   \n"
             "movl %%ebx, %%cr0"
-            : /* no output */
-            : "a"((&process[pid]))
-            : "%ebx"
+            : // no output
+            : "a"(process)
+            : "%ebx", "cc"
         );   
- 
 }
+
+
+
+void flush_tlb(void){
+	asm volatile(
+                 "mov %%cr3, %%eax;"
+                 "mov %%eax, %%cr3;"
+                 :                      /* no outputs */
+                 :                      /* no inputs */
+                 :"%eax"                /* clobbered register */
+                 );
+}
+
+void pid_page_map(int pid){
+
+
+    //pdt_init_mb(0, program_pageIdx);
+    process[0].page_directory[program_pageIdx].mb.pt_present = 1;
+    process[0].page_directory[program_pageIdx].mb.pt_size = 1;
+    process[0].page_directory[program_pageIdx].mb.pt_us = 1;
+    process[0].page_directory[program_pageIdx].mb.pt_rw = 1;
+    process[0].page_directory[program_pageIdx].mb.pt_base_addr = ((pid*_4MB_) + _8MB_)>>22;
+
+    flush_tlb();
+
+}
+
+
 

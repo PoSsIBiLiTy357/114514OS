@@ -88,8 +88,11 @@ void pdt_init_mb(int pid, int idx);
 void pt_init(int idx);
 
 /*initialize paging for checkpoint 1 */
-void paging_init(int pid);
+void paging_init();
 
+void flush_tlb(void);
+
+void pid_page_map(int pid);
 
 pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page table
 process_t process[MAX_PROCESS_NUM] __attribute__((aligned (4096*2))); //process pdt + pt

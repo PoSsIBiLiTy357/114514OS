@@ -149,7 +149,7 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
     idt_init();
     lidt(idt_desc_ptr);
-    paging_init(0);
+    paging_init();
     read_filesys_bootblock(bootBlk_addr);
     init_keyboard();
 
@@ -167,7 +167,7 @@ void entry(unsigned long magic, unsigned long addr) {
     launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
-
+    execute("shell");
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

@@ -118,7 +118,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     //fill buf with desired length
     for(i = 0; i<length; i++){
 
-        if(i >= inode_start[inode].length) return 0;
+        if(i >= inode_start[inode].length) return i;
         //reset index when finish 1 datablock and points to next
         if(datablk_offset == DATABLK_SIZE){
             datablk_offset = 0;
@@ -165,6 +165,31 @@ int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t l
     }
     return read_data(dentry.inode, offset, buf, length);
 }
+
+
+
+int32_t load_f (uint8_t * fname, uint32_t buffer)
+{
+
+	int32_t length;
+	dentry_t dentry;
+	/* check if the file exists */
+	if (read_dentry_by_name((const uint8_t*)fname, &dentry) == 0)
+	{
+		/* assign the length of the file */
+		length = inode_start[dentry.inode].length;
+		return read_data(dentry.inode, 0, (uint8_t*)buffer, length);
+	}
+	return -1;
+}
+
+
+
+
+
+
+
+
 
 /*
  * int32_t read_f(int32_t inode, int32_t offset, uint8_t *buf, uint32_t length)

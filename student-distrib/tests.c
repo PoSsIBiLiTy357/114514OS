@@ -3,6 +3,7 @@
 #include "lib.h"
 #include "filesys_read.h"
 #include "keyboard.h"
+#include "paging.h"
 #define PASS 1
 #define FAIL 0
 
@@ -106,14 +107,6 @@ int page_nofault_test(){
     return PASS;
 }
 
-int page_nofault_test_b5(){
-	TEST_HEADER;
-	int *a = (int *)0xB5000;
-	int b = *a;
-	b++;
-	printf("%d\n", *a);
-    return PASS;
-}
 
 /*
 * page_fault_test()
@@ -526,6 +519,43 @@ int exec_null_file_test() {
 /*						 Checkpoint 5 tests									 */
 /*****************************************************************************/
 // bleh.....
+
+int page_nofault_test_b5(){
+	TEST_HEADER;
+
+	clear();
+
+	int *a = (int *)0x8048000;
+
+	paging_init(0);
+	*a = 5;
+
+
+
+	paging_init(1);
+	*a = 6;
+
+
+
+uint32_t page_directory_addr = (uint32_t)&process[0]; 
+
+asm (
+	"movl %0, %%eax   ;"
+	"andl $0xFFFFFFE7, %%eax          ;"
+	"movl %%eax, %%cr3                ;"
+	"movl %%cr4, %%eax                ;"
+	"orl $0x00000010, %%eax           ;"
+	"movl %%eax, %%cr4                ;"
+	"movl %%cr0, %%eax                ;"
+	"orl $0x80000000, %%eax 	      ;"
+	"movl %%eax, %%cr0                 "
+	: :"r"(page_directory_addr) : "eax", "cc" );
+
+
+
+	printf("%d\n", *a);
+    return PASS;
+}
 
 
 /* Test suite entry point */
