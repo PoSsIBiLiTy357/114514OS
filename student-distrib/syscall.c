@@ -90,22 +90,7 @@ int32_t halt(uint8_t status){
 
     
     //restore parent paging (cr3)
-    __asm__ (
-            //page_directory address to cr3
-            "movl %0, %%cr3           \n"
-            //set PSE(bit4) of cr4 4-MB page enable
-            "movl %%cr4, %%ebx        \n"
-            "orl $0x00000010, %%ebx   \n"
-            "movl %%ebx, %%cr4        \n"
-
-            //set PG(bit31) and protection(bit0) of cr0
-            "movl %%cr0, %%ebx        \n"
-            "orl $0x80000001, %%ebx   \n"
-            "movl %%ebx, %%cr0"
-            : /* no output */
-            : "a"((&process[par_pcb->pid]))
-            : "%ebx"
-        ); 
+    pid_page_map(par_pcb->pid);
 
 
     //close any relevant FDs 
@@ -114,7 +99,6 @@ int32_t halt(uint8_t status){
 
     //jmp to execute return
 	asm volatile(
-
 	   	    "jmp RETURN_FROM_IRET;"
 	    ); 
 
@@ -152,22 +136,14 @@ int32_t execute(const uint8_t * command){
     //fetch a proccess id that is not in use 
     pid=get_pid();
     proc_state[pid]=1;
-    //u Paging
-    //paging_init(pid);
-    pid_page_map(pid);
-
-    //u User-level Program Loader
 
 
-    read_dentry_by_name(inFile, &d);
-    read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
-
+   
     //u Create PCB
     pcb_init(pid);
 
     //u Context Switch 
-    tss.ss0 = KERNEL_DS;
-    tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
+
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
 
      
@@ -178,6 +154,19 @@ int32_t execute(const uint8_t * command){
 			"
 			:"=a"(pcb->parent_ebp), "=b"(pcb->parent_esp)
             );
+
+        //u Paging
+    pid_page_map(pid);
+
+
+    //u User-level Program Loader
+
+
+    read_dentry_by_name(inFile, &d);
+    read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
+
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
 
     asm volatile(
                 //  "cli;"

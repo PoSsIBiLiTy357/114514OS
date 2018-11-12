@@ -50,13 +50,13 @@ typedef union pdt_entry_t {
     }__attribute__ ((packed)) mb;
 
 } pdt_entry_t;
-
+/*
 typedef struct {
 
     pdt_entry_t page_directory[1024];
 
 }process_t;
-
+*/
 /* An page table entry (goes into the PT) */
 typedef union pt_entry_t {
     uint32_t val;
@@ -95,9 +95,9 @@ void flush_tlb(void);
 void pid_page_map(int pid);
 
 pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page table
-process_t process[MAX_PROCESS_NUM] __attribute__((aligned (4096*2))); //process pdt + pt
+//process_t process[MAX_PROCESS_NUM] __attribute__((aligned (4096))); //process pdt + pt
 
-//pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page directory entry
+pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page directory entry
 
 
 

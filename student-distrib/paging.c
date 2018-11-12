@@ -30,7 +30,7 @@ void pdt_init_kb(int pid, int idx){
        pdt_entry.kb.pt_avail    = 0;
        pdt_entry.kb.pt_base_addr = 0;
 
-       process[pid].page_directory[idx] = pdt_entry;
+    page_directory[idx] = pdt_entry;
 }
 
 /*
@@ -43,7 +43,7 @@ void pdt_init_kb(int pid, int idx){
  */
 void pdt_init_mb(int pid, int idx){
 
-       pdt_entry_t pdt_entry;
+    pdt_entry_t pdt_entry;
        pdt_entry.mb.pt_present  = 0;
        pdt_entry.mb.pt_rw       = 0;
        pdt_entry.mb.pt_us       = 0;
@@ -58,7 +58,7 @@ void pdt_init_mb(int pid, int idx){
        pdt_entry.mb.pt_reserved = 0;
        pdt_entry.mb.pt_base_addr = 0;
 
-      process[pid].page_directory[idx] = pdt_entry;
+    page_directory[idx] = pdt_entry;
 }
 
 /*
@@ -107,7 +107,7 @@ void paging_init(){
     //create index 2-1023 PDEs
     for(i = 2; i < PAGE_ENTRY_SIZE; i++){
         pdt_init_mb(0,i);
-        process[0].page_directory[i].mb.pt_base_addr = i;
+         page_directory[i].mb.pt_base_addr = i;
     }
 
     //create all 1024 PTEs
@@ -119,10 +119,10 @@ void paging_init(){
 
     //create index 0-4MB as 4kB page directory entry
     pdt_init_kb(0, 0);
-    process[0].page_directory[0].kb.pt_present = 1;
-    process[0].page_directory[0].kb.pt_rw = 1;
+     page_directory[0].kb.pt_present = 1;
+     page_directory[0].kb.pt_rw = 1;
     //assign page table base addr(right shift 12 bits) to PDE 0
-    process[0].page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12; 
+     page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12; 
 
     //mark video mem present in corresponding page table entry
     page_table[PT_VIDEO].page_present = 1;
@@ -132,9 +132,9 @@ void paging_init(){
 
     //create 4-8MB kernel as 4MB page directory entry
     pdt_init_mb(0, 1);
-    process[0].page_directory[1].mb.pt_present = 1;
-    process[0].page_directory[1].mb.pt_rw = 1;
-    process[0].page_directory[1].mb.pt_base_addr = 1;
+     page_directory[1].mb.pt_present = 1;
+     page_directory[1].mb.pt_rw = 1;
+     page_directory[1].mb.pt_base_addr = 1;
 
 /*
     pdt_init_mb(pid, program_pageIdx);
@@ -159,7 +159,7 @@ void paging_init(){
             "orl $0x80000001, %%ebx   \n"
             "movl %%ebx, %%cr0"
             : // no output
-            : "a"(process)
+            : "a"(page_directory)
             : "%ebx", "cc"
         );   
 }
@@ -180,11 +180,11 @@ void pid_page_map(int pid){
 
 
     //pdt_init_mb(0, program_pageIdx);
-    process[0].page_directory[program_pageIdx].mb.pt_present = 1;
-    process[0].page_directory[program_pageIdx].mb.pt_size = 1;
-    process[0].page_directory[program_pageIdx].mb.pt_us = 1;
-    process[0].page_directory[program_pageIdx].mb.pt_rw = 1;
-    process[0].page_directory[program_pageIdx].mb.pt_base_addr = ((pid*_4MB_) + _8MB_)>>22;
+     page_directory[program_pageIdx].mb.pt_present = 1;
+     page_directory[program_pageIdx].mb.pt_size = 1;
+     page_directory[program_pageIdx].mb.pt_us = 1;
+     page_directory[program_pageIdx].mb.pt_rw = 1;
+     page_directory[program_pageIdx].mb.pt_base_addr = ((pid*_4MB_) + _8MB_)>>22;
 
     flush_tlb();
 
