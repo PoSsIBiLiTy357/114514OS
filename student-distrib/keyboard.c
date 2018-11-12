@@ -16,8 +16,8 @@ static int cursor_idx;
 static int overline;
 static char first[LINE_SIZE];
 static char second[48];
-static char keyboard_buffer[BUFFER_SIZE]; ///leave 1 for _
-
+static char keyboard_buffer[BUFFER_SIZE]; //leave 1 for _
+static char terminal_buffer[BUFFER_SIZE];
 int terminal_read_ready;
 /* init_keyboard
  * 
@@ -199,6 +199,7 @@ void keyboard_handler(void){
 			overline =0;
 			int i;
 			for(i=0;i<cursor_idx+1;i++){
+				terminal_buffer[i]= keyboard_buffer[i];
 				keyboard_buffer[i]='\0';
 			}
 			cursor_idx= 0;
@@ -224,7 +225,20 @@ int terminal_read(char* buf, int count){////////////////////////////need change
 	    while(terminal_read_ready!=1)
     {
     }
-
+	//char temp[BUFFER_SIZE];
+	
+	/*int i;
+	for(i=0;i<200;i++){
+		temp[i]= '\0';
+	}
+	for (i=0; i<strlen(terminal_buffer);i++){
+		temp[i]= terminal_buffer[i];	
+		if (terminal_buffer[i]='_'){
+			temp[i]='\0';
+			break;
+		 }
+	}
+	*/
 	memcpy(buf,keyboard_buffer,count);
 	terminal_read_ready = 0;
 	return strlen(buf);
