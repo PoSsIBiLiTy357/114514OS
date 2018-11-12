@@ -104,13 +104,18 @@ int get_pid(){
 }
 
 
+/*
+* halt
+*   DESCRIPTION: Halts a process
+*
+*   INPUTS: uint8_t status - 
+*   OUTPUTS: 0 if successful,
+*/
 int32_t halt(uint8_t status){
-
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
     pcb_t *par_pcb = (pcb_t *)(cur_pcb->parent);
 
     //if curr is shell----restart shell
-
 
     //restore parent data 
     proc_state[cur_pcb->pid] = 0;
@@ -121,6 +126,7 @@ int32_t halt(uint8_t status){
     //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      ///
     ///////////////////////////////////////////////////////
 
+    /* Save current ebp and esp as child process's parents */
 	asm volatile(
 		    "movl   %0, %%esp  	;"
 		    "movl   %1, %%ebp  	;"
@@ -129,22 +135,16 @@ int32_t halt(uint8_t status){
 		    :"g"(cur_pcb->parent_esp),"g"(cur_pcb->parent_ebp) 
         );
 
-
-    
     //restore parent paging (cr3)
     pid_page_map(par_pcb->pid);
 
-
     //close any relevant FDs 
-
 
 
     //jmp to execute return
 	asm volatile(
 	   	    "jmp RETURN_FROM_IRET;"
 	    ); 
-
-
 
 
     return 0;
@@ -171,19 +171,15 @@ int32_t execute(const uint8_t * command){
     
     /* Ensure the given command is a valid executable file */   
     if (verify_file(command, inFile, &v_addr) == -1) { return -1; }
-    //134513384 080482E8
-    //fetch a proccess id that is not in use 
+    
+    /* Fetch a proccess id that is not in use */
     pid=get_pid();
     proc_state[pid] = 1;
 
-    //u Create PCB
+    /* Create PCB */
     pcb_init(pid);
-
-    //u Context Switch 
-
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
 
-     
 	/* Saving the current ESP and EBP into the PCB struct */
 	asm volatile("			\n\
 				movl %%ebp, %%eax 	\n\
@@ -192,13 +188,11 @@ int32_t execute(const uint8_t * command){
 			:"=a"(pcb->parent_ebp), "=b"(pcb->parent_esp)
             );
 
-        //u Paging
+    /* Initialize paging for process */
     pid_page_map(pid);
 
 
-    //u User-level Program Loader
-
-
+    /* User-level Program Loader */
     read_dentry_by_name(inFile, &d);
     read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
 

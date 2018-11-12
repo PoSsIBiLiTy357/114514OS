@@ -822,6 +822,6 @@ void launch_tests(){
 
 
 	/*execute test*/
-	//execute((uint8_t *)"shell");
+	execute((uint8_t *)"shell");
 
 }
