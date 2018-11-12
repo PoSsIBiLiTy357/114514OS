@@ -361,15 +361,9 @@ int32_t open(const uint8_t * filename){
     /* If the filename does not exist, return -1 */
     if (read_dentry_by_name(filename, &temp_dentry) ==-1) return -1; 
     
-<<<<<<< HEAD
     for (i = 0; i < FDESC_SIZE; i++) {
         if (pcb->bitmap[i] == 0) {
             pcb->bitmap[i] = 1;
-=======
-    for (i =/*0*/ 2; i < FDESC_SIZE; i++) {
-        if (pcb->bitmap[FDESC_SIZE] == 0) {
-            pcb->bitmap[FDESC_SIZE] = 1;
->>>>>>> exe
             break;
         } 
     }
