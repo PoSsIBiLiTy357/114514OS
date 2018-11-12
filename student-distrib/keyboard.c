@@ -5,9 +5,13 @@
 
 #define KBRD_STATUS_PORT		0x64
 #define KBRD_DATA_PORT			0x60
-#define BUFFER_SIZE		129
-#define LINE_SIZE   80
-#define NUM_ROWS    25
+#define BUFFER_SIZE				129
+#define INDX_SIZE				128
+#define LINE_SIZE   			80
+#define LINE2_SIZE				48
+#define NUM_ROWS    			25
+#define LTR_LOWER_BND			96
+#define LTR_UPPER_BND			122
 
 static int caplk_pressd;
 static int shift_state;
@@ -15,9 +19,9 @@ static int ctrl_state;
 static int cursor_idx;
 static int overline;
 static char first[LINE_SIZE];
-static char second[48];
-static char keyboard_buffer[BUFFER_SIZE]; ///leave 1 for _
-
+static char second[LINE2_SIZE];
+static char keyboard_buffer[BUFFER_SIZE]; //leave 1 for _
+static char terminal_buffer[BUFFER_SIZE];
 int terminal_read_ready;
 /* init_keyboard
  * 
@@ -108,7 +112,7 @@ void keyboard_handler(void){
 				//		cursor_idx++;
 				//		keyboard_buffer[cursor_idx]='_';
 				//	}
-			if (strlen(keyboard_buffer) == 128 && scan_code[(int)pressed] != '\n') {
+			if (strlen(keyboard_buffer) == INDX_SIZE && scan_code[(int)pressed] != '\n') {
 				continue;
 			}
 			if(ctrl_state==0){				//check ctrl state 
@@ -116,7 +120,7 @@ void keyboard_handler(void){
 					if(shift_state==0){
 						if (scan_code[(int)pressed]!=0){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];			// cap not pressed and shift not pressed case 
-							if (cursor_idx < 128) {
+							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
@@ -125,7 +129,7 @@ void keyboard_handler(void){
 					else{
 						if (scan_code[(int)pressed]!=0){									// shift pressed case, use shift convert table 
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
-							if (cursor_idx < 128) {
+							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
@@ -133,17 +137,17 @@ void keyboard_handler(void){
 					}
 				}
 				else{
-					if (scan_code[(int)pressed]!=0 && scan_code[(int)pressed]>96 &&  scan_code[(int)pressed]<122){  // cap case , only convert letters not numbers and symbols
+					if (scan_code[(int)pressed]!=0 && scan_code[(int)pressed]>LTR_LOWER_BND &&  scan_code[(int)pressed]<LTR_UPPER_BND){  // cap case , only convert letters not numbers and symbols
 						if(shift_state==0){
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
-							if (cursor_idx < 128) {
+							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
 						}
 						else{																//cap case with shift hold down, back to lower case letter 
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
-							if (cursor_idx < 128) {
+							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
@@ -153,14 +157,14 @@ void keyboard_handler(void){
 					else if(scan_code[(int)pressed]!=0) {		//cap case for non letters 
 						if(shift_state==0){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
-							if (cursor_idx < 128) {
+							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
 						}
 						else{
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
-							if (cursor_idx < 128) {
+							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
 								keyboard_buffer[cursor_idx] = '_';
 							}
@@ -173,8 +177,8 @@ void keyboard_handler(void){
 		for (i=0;i<LINE_SIZE;i++){
 			first[i]= keyboard_buffer[i];
 		}
-		for (i = 0; i < 48; i++) {
-			second[i] = keyboard_buffer[i+80];
+		for (i = 0; i < LINE2_SIZE; i++) {
+			second[i] = keyboard_buffer[i+LINE_SIZE];
 		}
 ///////////////////////////can be put into terminal read
 		if (strlen(keyboard_buffer)<=LINE_SIZE){						//print to screen 1 line case 
@@ -199,6 +203,7 @@ void keyboard_handler(void){
 			overline =0;
 			int i;
 			for(i=0;i<cursor_idx+1;i++){
+				terminal_buffer[i]= keyboard_buffer[i];
 				keyboard_buffer[i]='\0';
 			}
 			cursor_idx= 0;
@@ -224,7 +229,20 @@ int terminal_read(char* buf, int count){////////////////////////////need change
 	    while(terminal_read_ready!=1)
     {
     }
-
+	//char temp[BUFFER_SIZE];
+	
+	/*int i;
+	for(i=0;i<200;i++){
+		temp[i]= '\0';
+	}
+	for (i=0; i<strlen(terminal_buffer);i++){
+		temp[i]= terminal_buffer[i];	
+		if (terminal_buffer[i]='_'){
+			temp[i]='\0';
+			break;
+		 }
+	}
+	*/
 	memcpy(buf,keyboard_buffer,count);
 	terminal_read_ready = 0;
 	return strlen(buf);
@@ -242,13 +260,13 @@ int terminal_read(char* buf, int count){////////////////////////////need change
 int terminal_write(char * buf){//////////////////////////////need change
 
 	int length = strlen(buf);
-	int full_col = length / 80;
-	int remainder = length % 80;
+	int full_col = length / LINE_SIZE;
+	int remainder = length % LINE_SIZE;
 	int i,j;
-	char one_line[80];
+	char one_line[LINE_SIZE];
 	for (i = 0; i < full_col; i++) {
-		for (j = 0; j < 80; j++) {
-			one_line[j] = buf[j + 80 * i];
+		for (j = 0; j < LINE_SIZE; j++) {
+			one_line[j] = buf[j + LINE_SIZE * i];
 		}
 		puts(one_line);
 		if (get_screen_y() >= NUM_ROWS-1) shift();
@@ -256,12 +274,12 @@ int terminal_write(char * buf){//////////////////////////////need change
 		screen_x_set(0);
 		if (get_screen_y() >= NUM_ROWS-1) shift();
 	}
-	for (j = 0; j < 80; j++) {
+	for (j = 0; j < LINE_SIZE; j++) {
 		one_line[j] = '\0';
 	}
 	one_line[79] = '\n';
 	for (j = 0; j < remainder; j++) {
-		one_line[j] = buf[80 * full_col + j];
+		one_line[j] = buf[LINE_SIZE * full_col + j];
 	}
 	puts(one_line);
 	if (get_screen_y() >= NUM_ROWS-1) shift();
