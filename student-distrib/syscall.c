@@ -12,7 +12,7 @@
 #define PROGRAM_IMAGE_ADDR 0x8048000
 #define PROC_NUM 6
 #define PCB_SIZE 0x2000
-#define KSTACK_BOT 0x800000-0x2000
+#define KSTACK_BOT 0x7fe000
 #define ASM 1
 
 static int curr = 0;
