@@ -550,11 +550,6 @@ int print_open_file_test() {
 
 	/* Print PC before open */
 	printf("pcb_shell struct before open:\n");
-	// printf("file_array: {");
-	// for (i = 0; i < FDESC_SIZE - 1; i++) {
-	// 	printf("0x%x, ",pcb_shell->file_array[i]);
-	// }
-	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
 	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
@@ -568,11 +563,6 @@ int print_open_file_test() {
 
 	/* Print PCB after open */
 	printf("pcb_shell struct after open:\n");
-	// printf("file_array: {");
-	// for (i = 0; i < FDESC_SIZE - 1; i++) {
-	// 	printf("0x%x, ",pcb_shell->file_array[i]);
-	// }
-	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
 	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
@@ -609,11 +599,6 @@ int open_then_close_test() {
 
 	/* Print the PCB struct after opening the file */
 	printf("pcb_shell struct after open:\n");
-	// printf("file_array: {");
-	// for (i = 0; i < FDESC_SIZE - 1; i++) {
-	// 	printf("0x%x, ",pcb_shell->file_array[i]);
-	// }
-	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
 	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
@@ -627,11 +612,6 @@ int open_then_close_test() {
 
 	/* Print the PCB struct after closing the file */
 	printf("pcb_shell struct after close:\n");
-	// printf("file_array: {");
-	// for (i = 0; i < FDESC_SIZE - 1; i++) {
-	// 	printf("0x%x, ",pcb_shell->file_array[i]);
-	// }
-	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
 	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
@@ -672,12 +652,6 @@ int open_open_close_test() {
 
 	/* Print the PCB struct after opening the file */
 	printf("pcb_shell struct after two opens:\n");
-	// printf("file_array: {");
-	// for (i = 0; i < FDESC_SIZE - 1; i++) {
-	// 	printf("0x%x, ",pcb_shell->file_array[i]);
-	// }
-	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-
 	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
@@ -692,12 +666,6 @@ int open_open_close_test() {
 
 	/* Print the PCB struct after closing the file */
 	printf("pcb_shell struct after close:\n");
-	// printf("file_array: {");
-	// for (i = 0; i < FDESC_SIZE - 1; i++) {
-	// 	printf("0x%x, ",pcb_shell->file_array[i]);
-	// }
-	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-
 	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
@@ -735,12 +703,6 @@ int open_file_max_test() {
 
 	/* Show all files are occupied */
 	printf("pcb_shell struct after six opens:\n");
-	// printf("file_array: {");
-	// for (i = 0; i < FDESC_SIZE - 1; i++) {
-	// 	printf("0x%x, ",pcb_shell->file_array[i]);
-	// }
-	// printf("0x%x}\n", pcb_shell->file_array[FDESC_SIZE-1]);
-
 	printf("available files: {");
 	for (i = 0; i < FDESC_SIZE - 1; i++) {
 		printf("%d, ",pcb_shell->bitmap[i]);
@@ -781,7 +743,7 @@ int open_file_max_test() {
 
 /* Test suite entry point */
 void launch_tests(){
-	/* Checkpoint 1 tests */
+	/************************* Checkpoint 1 tests *****************************/
 	//TEST_OUTPUT("idt_test", idt_test());
 	//TEST_OUTPUT("page_nofault_test", page_nofault_test());
 	//TEST_OUTPUT("page_nofault_test", page_nofault_test_b5());
@@ -791,6 +753,9 @@ void launch_tests(){
 	//TEST_OUTPUT("exception_de_test", exception_de_test());
 	//TEST_OUTPUT("exception_test", exception_test());
 
+	
+	
+	/************************* Checkpoint 2 tests *****************************/
 	/* RTC tests */
 	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
 	// TEST_OUTPUT("RTC_read_test", RTC_read_test());
@@ -805,13 +770,17 @@ void launch_tests(){
 	//TEST_OUTPUT("read_file_test", read_file_test(fname));
 	//terminal_write("qwertyuiop[]\asdfghjkl;'zxcvbnm,./bfgdhfdgfdgfdgfdjkgfodjglkfjdlkgkfjkdglkjflkdjklgjklfjlkdjlgjfkdjgofiejdgprokepokpofkld;lgjhfl;djhn;lfmblc;lkfl;dk;lrfkpoerkpogkd;lkfl;gk12323432543267687686786565");
 
+	
+	
+	/************************* Checkpoint 3 tests *****************************/
 	//clear();	//optional but preferred 
 
-	/* System calls tests */
+	/* execute tests */
 	// TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
 	// TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
 	// TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
 	
+	/* open/close tests */
 	// TEST_OUTPUT("print_open_file_test()", print_open_file_test());
 	// TEST_OUTPUT("open_then_close_test()", open_then_close_test());
 	// TEST_OUTPUT("open_open_close_test()", open_open_close_test());
@@ -819,7 +788,6 @@ void launch_tests(){
 
 	/*terminal test*/
 	//check_terminal_write();
-
 
 	/*execute test*/
 	execute((uint8_t *)"shell");
