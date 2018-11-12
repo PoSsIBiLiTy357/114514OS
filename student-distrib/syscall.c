@@ -17,7 +17,7 @@
 
 static int curr = 0;
 //device_t rtc = { rtc_read, rtc_write, rtc_open, rtc_close };
-int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
+static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
 
 
 void pcb_init(int pid){
@@ -112,35 +112,36 @@ int32_t execute(const uint8_t * command){
 */
 
 
-    tss.esp0 = KSTACK_BOT + PCB_SIZE - PCB_SIZE * curr - 4;
+    tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-  /* __asm__ volatile(
-        "cli
-        movl %%ebp,%0  \n 
-         movl %%esp,%1   \n
-         movl %2,%%ebp   \n
-         movl %2,%%esp   \n
-         movw $USER_DS,%%ax \n   
-         movw %%ax,%%ds   \n
-         movw %%ax,%%es   \n
-         movw %%ax,%%fs   \n
-         movw %%ax,%%gs   \n
-         movl %%esp,%%eax   \n
-         pushl $USER_DS   \n
-         pushl $0x083FFFFC  \n 
-         pushf   \n
-         popl %%eax   \n
-         orl $0x200,%%eax  \n 
-         pushl %%eax   \n
-         pushl $USER_CS  \n 
-         pushl %3   \n
-         iret  \n
-         "
-
-         :"=r"((pcb->parent_ebp)), ((pcb->parent_esp))        ///output
-         :"r"((tss.esp0)),((v_addr))                                //input 
-         :"%eax"                                           //clobeberd reg
-         );*/////////////////////////////////////////////////////////////change here if something went fuck
+  /* tss.esp0 = KSTACK_BOT + PCB_SIZE - PCB_SIZE * curr - 4;
+    pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    __asm__ volatile(
+        "cli;"
+        "movl %%ebp,%0;"
+        "movl %%esp,%1;"
+        "movl %2,%%ebp;"
+        "movl %2,%%esp;"
+       "movw $0x002B,%%ax;"
+       "movw %%ax,%%ds;"
+       "movw %%ax,%%es;"
+       "movw %%ax,%%fs;"
+       "movw %%ax,%%gs;"
+       "movl %%esp,%%eax;"
+       "pushl $0x002B;"
+       "pushl $0x083FFFFC;"
+       "pushf;"
+       "popl %%eax;"
+       "orl $0x200,%%eax;"
+       "pushl %%eax;"
+       "pushl $0x0023;"
+       "pushl %3;"
+       "iret;"
+        :"=r" (pcb->parent_ebp),"=r" (pcb->parent_esp) 
+        :"r"  (tss.esp0),"r" (v_addr)
+        :"eax"); 
+    return 0;
+}*/////////////////////////////////////////////  alternate version 
      
      
 	/* Saving the current ESP and EBP into the PCB struct */
