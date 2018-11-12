@@ -233,30 +233,14 @@ int terminal_read(char* buf, int count){////////////////////////////need change
 	    while(terminal_read_ready!=1)
     {
     }
-<<<<<<< HEAD
-	//char temp[BUFFER_SIZE];
-	
-	/*int i;
-	for(i=0;i<200;i++){
-=======
 	char temp[BUFFER_SIZE];
 	
 	int i;
 	for(i=0;i<BUFFER_SIZE;i++){
->>>>>>> exe
 		temp[i]= '\0';
 	}
 	for (i=0; i<strlen(terminal_buffer);i++){
 		temp[i]= terminal_buffer[i];	
-<<<<<<< HEAD
-		if (terminal_buffer[i]='_'){
-			temp[i]='\0';
-			break;
-		 }
-	}
-	*/
-	memcpy(buf,keyboard_buffer,count);
-=======
 		if (terminal_buffer[i]=='_'){
 			temp[i]='\0';
 			temp[i-1]='\0';
@@ -266,7 +250,6 @@ int terminal_read(char* buf, int count){////////////////////////////need change
 	
 
 	memcpy(buf,temp,count);
->>>>>>> exe
 	terminal_read_ready = 0;
 	return strlen(buf);
 }
