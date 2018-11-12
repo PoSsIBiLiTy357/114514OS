@@ -805,16 +805,17 @@ void launch_tests(){
 	//TEST_OUTPUT("read_file_test", read_file_test(fname));
 	//terminal_write("qwertyuiop[]\asdfghjkl;'zxcvbnm,./bfgdhfdgfdgfdgfdjkgfodjglkfjdlkgkfjkdglkjflkdjklgjklfjlkdjlgjfkdjgofiejdgprokepokpofkld;lgjhfl;djhn;lfmblc;lkfl;dk;lrfkpoerkpogkd;lkfl;gk12323432543267687686786565");
 
+	//clear();	//optional but preferred 
+
 	/* System calls tests */
-	//TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
-	//TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
-	//TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
+	// TEST_OUTPUT("exec_valid_file_test()", exec_valid_file_test());
+	// TEST_OUTPUT("exec_invalid_file_test()", exec_invalid_file_test());
+	// TEST_OUTPUT("exec_null_file_test()", exec_invalid_file_test());
 	
-	clear();
-	//TEST_OUTPUT("print_open_file_test()", print_open_file_test());
-	TEST_OUTPUT("open_then_close_test()", open_then_close_test());
-	//TEST_OUTPUT("open_open_close_test()", open_open_close_test());
-	//TEST_OUTPUT("open_file_max_test()", open_file_max_test());
+	// TEST_OUTPUT("print_open_file_test()", print_open_file_test());
+	// TEST_OUTPUT("open_then_close_test()", open_then_close_test());
+	// TEST_OUTPUT("open_open_close_test()", open_open_close_test());
+	// TEST_OUTPUT("open_file_max_test()", open_file_max_test());
 
 	/*terminal test*/
 	//check_terminal_write();

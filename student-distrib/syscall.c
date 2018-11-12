@@ -209,17 +209,12 @@ int32_t execute(const uint8_t * command){
 
     /* IRET setup and context switch */
     asm volatile(
-        //  "cli;"
             "mov $0x2B, %%ax;"
             "mov %%ax, %%ds;"
             "movl $0x83FFFFC, %%eax;"
-            //"movl $0x8400000, %%eax;"
             "pushl $0x2B;"
             "pushl %%eax;"
             "pushfl;"
-        //  "popl %%edx;"
-        //  "orl $0x200, %%edx;"
-        //  "pushl %%edx;"
             "pushl $0x23;"
             "pushl %0;"
             "iret;"
