@@ -112,40 +112,81 @@ int get_pid(){
 *   OUTPUTS: 0 if successful,
 */
 int32_t halt(uint8_t status){
+int32_t i;
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    pcb_t *par_pcb = (pcb_t *)(cur_pcb->parent);
+    if(cur_pcb->parent != NULL){
 
-    //if curr is shell----restart shell
+        pcb_t *par_pcb = (pcb_t *)(cur_pcb->parent);
+        //restore parent data 
+        proc_state[cur_pcb->pid] = 0;
+        curr = par_pcb->pid;
 
-    //restore parent data 
-    proc_state[cur_pcb->pid] = 0;
-    curr = par_pcb->pid;
+        //////////////////////may wrong////////////////////////
+        tss.esp0 = cur_pcb->parent_esp;                     ///
+        //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      ///
+        ///////////////////////////////////////////////////////
 
-    //////////////////////may wrong////////////////////////
-    tss.esp0 = cur_pcb->parent_esp;                     ///
-    //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      ///
-    ///////////////////////////////////////////////////////
+      
 
-    /* Save current ebp and esp as child process's parents */
-	asm volatile(
-		    "movl   %0, %%esp  	;"
-		    "movl   %1, %%ebp  	;"
+        //restore parent paging (cr3)
 
-		    :
-		    :"g"(cur_pcb->parent_esp),"g"(cur_pcb->parent_ebp) 
+        pid_page_map(par_pcb->pid);
+
+        //close any relevant FDs 
+        for(i = 0; i < FDESC_SIZE; i++){
+
+            if(cur_pcb->file_array[i].flag){
+                close(i);
+                cur_pcb->file_array[i].flag = 0;
+                cur_pcb->file_array[i].inode = 0;
+                cur_pcb->bitmap[i]=0;
+            }
+
+          asm volatile(
+                "movl   %0, %%esp   ;"
+                "movl   %1, %%ebp   ;"
+                "movl   %2, %%eax   ;"
+                :
+                :"r"(cur_pcb->parent_esp), "r"(cur_pcb->parent_ebp), "r"((uint32_t) status)  
+            );
+
+
+        //jmp to execute return
+        asm volatile(
+            "jmp RETURN_FROM_IRET;"
+        ); 
+
+        }
+    }else{
+
+
+        proc_state[cur_pcb->pid] = 0;
+        tss.esp0 = cur_pcb->parent_esp;  
+       
+
+        //close any relevant FDs 
+        for(i = 0; i < FDESC_SIZE; i++){
+
+            if(cur_pcb->file_array[i].flag){
+                close(i);
+                cur_pcb->file_array[i].flag = 0;
+                cur_pcb->file_array[i].inode = 0;
+                cur_pcb->bitmap[i]=0;
+            }
+        }
+
+         asm volatile(
+            "movl   %0, %%esp   ;"
+            "movl   %1, %%ebp   ;"
+            "movl   %2, %%eax   ;"
+            :
+            :"r"(cur_pcb->parent_esp), "r"(cur_pcb->parent_ebp), "r"((uint32_t) status)  
         );
+        
+        //if curr is last shell----restart shell
+        execute((unsigned char*)"shell");
 
-    //restore parent paging (cr3)
-    pid_page_map(par_pcb->pid);
-
-    //close any relevant FDs 
-
-
-    //jmp to execute return
-	asm volatile(
-	   	    "jmp RETURN_FROM_IRET;"
-	    ); 
-
+    }
 
     return 0;
 }
