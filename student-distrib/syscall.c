@@ -29,6 +29,10 @@ static int curr = 0;
 /* Table of active and inactive processes (active = 1, inactive = 0) */
 static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
 
+/* Buffer for arguments and size storage */
+static uint8_t argBuf[CMD_LIMIT];
+static uint32_t argSize = 0;
+
 
 /*
 * pcb_init
@@ -289,6 +293,19 @@ int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_
     }
     inFile[i] = '\0';   /* Add sentinel to end of filename */
 
+    /* Clear argsize and argBuf and parse arguments for getargs() */
+    argSize -= argSize;
+    memset(argBuf, 0, CMD_LIMIT);
+    while (cmd[i] != '\0') {
+        /* Skip spaces */
+        if (cmd[i] == ' ') {
+            i++;    continue;
+        }
+
+        /* Copy arg into argBuf */
+        argBuf[argSize++] = cmd[i++];
+    }
+
     /* Look in filesystem to see check if given file exists */
     dentry_t dentry_buf;
     if (read_dentry_by_name(inFile, &dentry_buf) == -1) { return -1; }
@@ -463,13 +480,15 @@ int32_t close(int32_t fd){
 *   OUTPUTS: 
 *   RETURN VALUE: 
 */
-int32_t getargs(uint8_t * buf, int32_t nbytes){
-    // if(){
-    //     return -1;
-    // }
-    // if(){
-    //     return-1;
-    // }
+int32_t getargs(uint8_t * buf, int32_t nbytes) {
+    int i;
+
+    /* Make sure buffer constraints are fulfilled */
+    if (nbytes < strlen((char *)argBuf) || argSize == 0) { return -1; }
+
+    /* Copy arguments into buf */
+    for (i = 0; i < strlen((char *)argBuf); i++) { buf[i] = argBuf[i]; }
+
     return 0;
 }
 

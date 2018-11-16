@@ -731,7 +731,25 @@ int open_file_max_test() {
 /*****************************************************************************/
 /*						 Checkpoint 4 tests									 */
 /*****************************************************************************/
-// coming kinda soon.
+
+int one_letter_arg_test() {
+	TEST_HEADER;
+
+	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t dummy_addr;
+	uint8_t * outputBuf;
+	int8_t argOut;
+	int32_t size = 1;
+
+	/* Call the function that parses the args and retrive them */
+	verify_file((uint8_t *)"shell a ", dummyBuffer, &dummy_addr);
+	argOut = getargs(outputBuf, size);
+
+	/* Check outputs */
+	if (argOut == -1 || (outputBuf[0] != (uint8_t *)'a')) return FAIL;
+
+	return PASS;
+}
 
 /*****************************************************************************/
 /*						 Checkpoint 5 tests									 */
@@ -789,7 +807,11 @@ void launch_tests(){
 	/*terminal test*/
 	//check_terminal_write();
 
+	/************************* Checkpoint 4 tests *****************************/
+	clear();
+	TEST_OUTPUT("one_letter_arg_test()", one_letter_arg_test());
+
 	/*execute test*/
-	execute((uint8_t *)"shell");
+	//execute((uint8_t *)"shell");
 
 }
