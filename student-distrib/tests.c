@@ -732,12 +732,19 @@ int open_file_max_test() {
 /*						 Checkpoint 4 tests									 */
 /*****************************************************************************/
 
+/*
+* one_letter_arg_test
+*	Tests getargs() if we can pass a command with a one character argument
+*
+*   INPUTS: valid filename and argument
+*   OUTPUTS: PASS if return -1, FAIL otherwise
+*/
 int one_letter_arg_test() {
 	TEST_HEADER;
 
 	uint8_t dummyBuffer[CMD_LIMIT];
 	uint32_t dummy_addr;
-	uint8_t * outputBuf;
+	uint8_t outputBuf[CMD_LIMIT];
 	int8_t argOut;
 	int32_t size = 1;
 
@@ -746,9 +753,156 @@ int one_letter_arg_test() {
 	argOut = getargs(outputBuf, size);
 
 	/* Check outputs */
-	if (argOut == -1 || (outputBuf[0] != (uint8_t *)'a')) return FAIL;
+	if (argOut == -1 || (outputBuf[0] != 'a')) return FAIL;
 
 	return PASS;
+}
+
+
+/*
+* word_arg_test
+*	Tests getargs() if we can pass a command with a single word argument
+*
+*   INPUTS: valid filename and argument
+*   OUTPUTS: PASS if return -1, FAIL otherwise
+*/
+int word_arg_test() {
+	TEST_HEADER;
+
+	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t dummy_addr;
+	uint8_t outputBuf[CMD_LIMIT];
+	int8_t argOut;
+	int32_t size = 4, i;
+	uint8_t testarg[4] = {'t', 'e', 's', 't'};
+
+	/* Call the function that parses the args and retrive them */
+	verify_file((uint8_t *)"shell test", dummyBuffer, &dummy_addr);
+	argOut = getargs(outputBuf, size);
+
+	/* Check outputs */
+	if (argOut == -1) return FAIL;
+	for (i = 0; i < size; i++) {
+		if (outputBuf[i] != testarg[i]) return FAIL;
+	}
+
+	return PASS;
+}
+
+
+/*
+* multi_word_arg_test
+*	Tests getargs() if we can pass a command with a multiple word arguments
+*
+*   INPUTS: valid filename and argument
+*   OUTPUTS: PASS if return -1, FAIL otherwise
+*/
+int multi_word_arg_test() {
+	TEST_HEADER;
+
+	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t dummy_addr;
+	uint8_t outputBuf[CMD_LIMIT];
+	int8_t argOut;
+	int32_t size = 12, i;
+	uint8_t testarg[12] = {'r', 'e', 'd', 'g', 'r', 'e', 'e', 'n', 'b', 'l', 'u', 'e'};
+
+	/* Call the function that parses the args and retrive them */
+	verify_file((uint8_t *)"shell red green blue", dummyBuffer, &dummy_addr);
+	argOut = getargs(outputBuf, size);
+
+	/* Check outputs */
+	if (argOut == -1) return FAIL;
+	for (i = 0; i < size; i++) {
+		if (outputBuf[i] != testarg[i]) return FAIL;
+	}
+
+	return PASS;
+}
+
+
+/*
+* some_args_test
+*	Tests getargs() if we can pass a command with a multiple word arguments and
+*	retrieve only some of the arguments (some being determined by int passed 
+*	into nbytes) 
+*
+*   INPUTS: valid filename and argument
+*   OUTPUTS: PASS if return -1, FAIL otherwise
+*/
+int some_args_test() {
+	TEST_HEADER;
+
+	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t dummy_addr;
+	uint8_t outputBuf[CMD_LIMIT];
+	int8_t argOut;
+	int32_t size = 8, i;
+	uint8_t testarg[8] = {'r', 'e', 'd', 'g', 'r', 'e', 'e', 'n'};
+
+	/* Call the function that parses the args and retrive them */
+	verify_file((uint8_t *)"shell red green blue", dummyBuffer, &dummy_addr);
+	argOut = getargs(outputBuf, size);
+
+	/* Check outputs (in this case we should only get 2 of the 3 args */
+	if (argOut == -1) return FAIL;
+	for (i = 0; i < size; i++) {
+		if (outputBuf[i] != testarg[i]) return FAIL;
+	}
+
+	return PASS;
+}
+
+
+/*
+* insufficient_bytes_test
+*	Makes sure getargs will return -1 when we request more bytes than available.
+*
+*   INPUTS: valid filename and argument
+*   OUTPUTS: PASS if return -1, FAIL otherwise
+*/
+int insufficient_bytes_test() {
+	TEST_HEADER;
+
+	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t dummy_addr;
+	uint8_t outputBuf[CMD_LIMIT];
+	int8_t argOut;
+
+	/* Call the function that parses the args and retrive them */
+	verify_file((uint8_t *)"shell test", dummyBuffer, &dummy_addr);
+	argOut = getargs(outputBuf, 100);
+
+	/* Check outputs */
+	if (argOut == -1) return PASS;
+
+	return FAIL;
+}
+
+
+/*
+* no_args_test
+*	Makes sure getargs will return -1 when we request for args when there are none.
+*
+*   INPUTS: valid filename and argument
+*   OUTPUTS: PASS if return -1, FAIL otherwise
+*/
+int no_args_test() {
+	TEST_HEADER;
+
+	uint8_t dummyBuffer[CMD_LIMIT];
+	uint32_t dummy_addr;
+	uint8_t outputBuf[CMD_LIMIT];
+	int8_t argOut;
+
+	/* Call the function that parses the args and retrive them */
+	verify_file((uint8_t *)"shell", dummyBuffer, &dummy_addr);
+	argOut = getargs(outputBuf, 0);
+
+	/* Check outputs */
+	if (argOut == -1) return PASS;
+
+	return FAIL;
 }
 
 /*****************************************************************************/
@@ -762,6 +916,8 @@ int one_letter_arg_test() {
 /* Test suite entry point */
 void launch_tests(){
 	/************************* Checkpoint 1 tests *****************************/
+	//clear();	//optional but preferred 
+
 	//TEST_OUTPUT("idt_test", idt_test());
 	//TEST_OUTPUT("page_nofault_test", page_nofault_test());
 	//TEST_OUTPUT("page_nofault_test", page_nofault_test_b5());
@@ -774,6 +930,8 @@ void launch_tests(){
 	
 	
 	/************************* Checkpoint 2 tests *****************************/
+	//clear();	//optional but preferred 
+
 	/* RTC tests */
 	//TEST_OUTPUT("RTC_freq_test", RTC_freq_test());
 	// TEST_OUTPUT("RTC_read_test", RTC_read_test());
@@ -808,8 +966,15 @@ void launch_tests(){
 	//check_terminal_write();
 
 	/************************* Checkpoint 4 tests *****************************/
-	clear();
-	TEST_OUTPUT("one_letter_arg_test()", one_letter_arg_test());
+	// clear();	//optional but preferred
+
+	/* getargs tests */
+	// TEST_OUTPUT("one_letter_arg_test()", one_letter_arg_test());
+	// TEST_OUTPUT("word_arg_test()", word_arg_test());
+	// TEST_OUTPUT("multi_word_arg_test()", multi_word_arg_test());
+	// TEST_OUTPUT("some_args_test()", some_args_test());
+	// TEST_OUTPUT("insufficient_bytes_test()", insufficient_bytes_test());
+	// TEST_OUTPUT("no_args_test()", no_args_test());
 
 	/*execute test*/
 	//execute((uint8_t *)"shell");

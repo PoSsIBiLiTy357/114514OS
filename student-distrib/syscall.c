@@ -473,18 +473,17 @@ int32_t close(int32_t fd){
 
 /*
 *  getargs
-*   DESCRIPTION: 
+*   DESCRIPTION: Returns the last arguments passed into execute 
 *
 *   INPUTS: uint8_t * buf
 *           int32_t nbytes
-*   OUTPUTS: 
-*   RETURN VALUE: 
+*   OUTPUTS: 0 on success, -1 on fail
 */
 int32_t getargs(uint8_t * buf, int32_t nbytes) {
     int i;
 
     /* Make sure buffer constraints are fulfilled */
-    if (nbytes < strlen((char *)argBuf) || argSize == 0) { return -1; }
+    if (nbytes > strlen((char *)argBuf) || argSize == 0) { return -1; }
 
     /* Copy arguments into buf */
     for (i = 0; i < strlen((char *)argBuf); i++) { buf[i] = argBuf[i]; }
