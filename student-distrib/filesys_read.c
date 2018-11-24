@@ -45,7 +45,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
     int i;
     uint8_t *i_fname;
     //loop through all dentries
-    for(i = 1; i < num_dentry; i++){
+    for(i = 0; i < num_dentry; i++){
         i_fname = dentry_start[i].fname;
 
         //compare current i_fname with input fname

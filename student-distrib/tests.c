@@ -977,6 +977,6 @@ void launch_tests(){
 	// TEST_OUTPUT("no_args_test()", no_args_test());
 
 	/*execute test*/
-	//execute((uint8_t *)"shell");
+	execute((uint8_t *)"shell");
 
 }
