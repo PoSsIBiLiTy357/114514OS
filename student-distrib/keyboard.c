@@ -259,7 +259,7 @@ int terminal_read(char* buf, int count){////////////////////////////need change
  * Side Effects: print to screen, send eoi to processor
  * 
  */
-int terminal_write(char * buf){//////////////////////////////need change
+int terminal_write(char * buf){
 
 	int length = strlen(buf);
 	int full_col = length / LINE_SIZE;
@@ -289,7 +289,7 @@ int terminal_write(char * buf){//////////////////////////////need change
 	screen_x_set(0);
 	if (get_screen_y() >= NUM_ROWS-1) shift();
 
-	return 0;
+	return 0; 
 }
 
 int terminal_write_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count) {

@@ -44,7 +44,7 @@ void put_refresh_line(const  char* buf){
     screen_x = 0;
 
     puts(buf);
-    if (screen_y >= NUM_ROWS-1) shift();
+
 }
 
 
@@ -230,7 +230,7 @@ int32_t puts(const int8_t* s) {
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(const uint8_t c) {
-    if(c == '\n' || c == '\r') {
+    if(c == '\n' || c == '\r' || screen_x == 79) {
         screen_y++;
         screen_x = 0;
     } else {
@@ -240,6 +240,7 @@ void putc(const uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+        if (screen_y >= NUM_ROWS-1) shift();
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
