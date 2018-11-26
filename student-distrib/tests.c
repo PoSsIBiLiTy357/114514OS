@@ -966,7 +966,7 @@ void launch_tests(){
 	//check_terminal_write();
 
 	/************************* Checkpoint 4 tests *****************************/
-	 clear();	//optional but preferred
+	//clear();	//optional but preferred
 
 	/* getargs tests */
 	// TEST_OUTPUT("one_letter_arg_test()", one_letter_arg_test());
