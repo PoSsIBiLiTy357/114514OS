@@ -105,32 +105,37 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry){
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
 
     int i, inode_datablk_offset, datablk_offset;
+    int file_size = inode_start[inode].length;
+
 
     //invalid input checks
     if(inode == NULL) return -1;
     if(buf == NULL) return -1;
-    if(inode >= num_inodes) return -1;
+    if(inode > num_inodes) return -1;
     //return 0 if offset reach end 
-    if(offset >= inode_start[inode].length) return 0;
+    if(offset >= file_size) return 0;
 
     inode_datablk_offset = offset / DATABLK_SIZE;
     datablk_offset = offset % DATABLK_SIZE;
     //fill buf with desired length
     for(i = 0; i<length; i++){
 
-        if(i >= inode_start[inode].length) return i;
+        if(offset >= file_size) return file_size;
         //reset index when finish 1 datablock and points to next
         if(datablk_offset == DATABLK_SIZE){
             datablk_offset = 0;
             inode_datablk_offset += 1;
         }
 
+        if(offset == file_size) return offset;
+
         buf[i] = *((uint8_t *)(datablk_start + inode_start[inode].data_block[inode_datablk_offset] * DATABLK_SIZE + datablk_offset));
 
         datablk_offset += 1;
+        offset += 1;
     }
 
-    return length;
+    return file_size;
 }
 
 
@@ -294,6 +299,37 @@ int32_t write_dir(){
 }
 
 
+int read_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return read_dir(buf);
+}
+
+int write_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return write_dir();
+}
+
+int open_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return open_dir();
+}
+
+int close_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return close_dir();
+}
+
+int read_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return read_f(inode, buf);
+}
+
+int write_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return write_f();
+}
+
+int open_f_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
+    return open_f();
+}
+
+int close_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
+    return close_f();
+}
 
 //////////////////////////////////////////////////////T   E   S   T s////////////////////////////////////////////////////////////
 
@@ -377,34 +413,3 @@ int read_file_test(uint8_t *fname){
 	return 1;
 }
 
-int read_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return read_dir(buf);
-}
-
-int write_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return write_dir();
-}
-
-int open_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return open_dir();
-}
-
-int close_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return close_dir();
-}
-
-int read_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return read_f(inode, buf);
-}
-
-int write_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return write_f();
-}
-
-int open_f_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
-    return open_f();
-}
-
-int close_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return close_f();
-}

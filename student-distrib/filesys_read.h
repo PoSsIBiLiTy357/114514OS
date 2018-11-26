@@ -57,9 +57,6 @@ int32_t close_dir();
 int32_t read_dir(uint8_t *buf);
 int32_t write_dir();
 
-/* test functions */
-int print_allfile_test();
-int read_file_test(uint8_t *fname);
 
 int read_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count);
 int write_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count);
@@ -69,6 +66,11 @@ int read_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count)
 int write_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count);
 int open_f_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count);
 int close_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count);
+
+/* test functions */
+int print_allfile_test();
+int read_file_test(uint8_t *fname);
+
 
 #endif  /* _FILESYS_READ_H  */  
 ////wrappers
