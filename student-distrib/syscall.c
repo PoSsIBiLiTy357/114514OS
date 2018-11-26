@@ -348,6 +348,7 @@ int32_t read(int32_t fd, void * buf, int32_t nbytes){
 
     /* Check if read handler returned an error, if so, return -1 */
     if (count < 0) return -1;
+    
 
     /* Increment the read offset */
     temp_pcb->file_array[fd].file_pos += count;
