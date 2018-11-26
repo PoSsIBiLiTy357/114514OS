@@ -191,7 +191,8 @@ void pid_page_map(int pid){
 
 
 void vidMem_page_map(int vAddr){
-    int i, pd_i;
+    //int i, pd_i;      //not using i?
+    int pd_i;
     pd_i = vAddr>>22;
 
     //set up pd according to virtual addr

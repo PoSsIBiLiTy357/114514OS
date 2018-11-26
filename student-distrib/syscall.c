@@ -485,7 +485,7 @@ int32_t getargs(uint8_t * buf, int32_t nbytes) {
     int i;
 
     /* Make sure buffer constraints are fulfilled */
-    if (nbytes > strlen((char *)argBuf) || argSize == 0) { return -1; }
+    if (buf == NULL || argSize == 0) { return -1; }
 
     /* Copy arguments into buf */
     for (i = 0; i < strlen((char *)argBuf); i++) { buf[i] = argBuf[i]; }
@@ -505,7 +505,7 @@ int32_t getargs(uint8_t * buf, int32_t nbytes) {
 int32_t vidmap(uint8_t ** start_screen){
 
     
-    if(start_screen == NULL || start_screen == _4MB_) return -1;
+    if(start_screen == NULL || start_screen == (uint8_t **)_4MB_) return -1;
     
     vidMem_page_map((int)(132*_MB_));
 
