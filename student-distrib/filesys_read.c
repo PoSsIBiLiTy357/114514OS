@@ -49,7 +49,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
         i_fname = dentry_start[i].fname;
 
         //compare current i_fname with input fname
-        if(strncmp((int8_t*)fname, (int8_t *)i_fname, strlen((int8_t*)fname)) == 0){
+        if(strncmp((int8_t*)fname, (int8_t *)i_fname, /*strlen((int8_t*)fname)*/32) == 0){
             
             //copy desire dentry info into input dentry
             memcpy( dentry->fname, dentry_start[i].fname, sizeof(dentry_start[i].fname));
