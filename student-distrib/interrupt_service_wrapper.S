@@ -2,7 +2,7 @@
 #define ASM 1
 #include "x86_desc.h"
 
-#define SYSCALL_NUM 7
+#define SYSCALL_NUM 9
 
 .globl keyboard_handler_asm
 .globl  rtc_handler_asm 
@@ -67,4 +67,4 @@ syscall_asm:
 
 
 sys_call_table:
-.long 0x0, halt, execute, read, write,open, close, getargs
+.long 0x0, halt, execute, read, write,open, close, getargs, vidmap

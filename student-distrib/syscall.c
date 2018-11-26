@@ -504,8 +504,9 @@ int32_t getargs(uint8_t * buf, int32_t nbytes) {
 */
 int32_t vidmap(uint8_t ** start_screen){
 
-    if(start_screen == NULL) return -1;
-
+    
+    if(start_screen == NULL || start_screen == _4MB_) return -1;
+    
     vidMem_page_map((int)(132*_MB_));
 
     *start_screen = (uint8_t *)(132*_MB_);

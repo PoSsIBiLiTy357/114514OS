@@ -3,8 +3,7 @@
 #include "paging.h"
 #include "x86_desc.h"
 #define ASM 1
-#define _4MB_ (0x100000*4)
-#define _8MB_ (0x100000*8)
+
 #define program_pageIdx 32
 
 /*
