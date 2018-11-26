@@ -338,7 +338,7 @@ int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_
 */
 int32_t read(int32_t fd, void * buf, int32_t nbytes){
     /* Check that we haven't exceeded max number of open files */
-    if (fd >= FDESC_SIZE) return -1;
+    if (fd >= FDESC_SIZE|| fd<0||buf == NULL) return -1;
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to read() */
     pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
@@ -371,7 +371,7 @@ int32_t read(int32_t fd, void * buf, int32_t nbytes){
 */
 int32_t write(int32_t fd, const void * buf, int32_t nbytes){
     /* Check that we haven't exceeded max number of open files */
-    if (fd >= FDESC_SIZE) return -1;
+    if (fd >= FDESC_SIZE|| fd<0||buf ==NULL) return -1;
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to write() */
     pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
@@ -405,7 +405,7 @@ int32_t open(const uint8_t * filename){
     /* If the filename does not exist, return -1 */
     if (read_dentry_by_name(filename, &temp_dentry) ==-1) return -1; 
     
-    for (i = 0; i < FDESC_SIZE; i++) {
+    for (i = 2; i < FDESC_SIZE; i++) {
         if (pcb->bitmap[i] == 0) {
             pcb->bitmap[i] = 1;
             break;
@@ -458,7 +458,7 @@ int32_t open(const uint8_t * filename){
 */
 int32_t close(int32_t fd){
     /* Make sure given file descriptor is within range */
-    if (fd >= FDESC_SIZE) return -1;
+    if (fd >= FDESC_SIZE||fd <0) return -1;
 
     pcb_t * temp_pcb;
     int temp_pcb_addr;
@@ -466,7 +466,9 @@ int32_t close(int32_t fd){
     temp_pcb_addr = KSTACK_BOT - (curr * PCB_SIZE);
     //int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
     temp_pcb = (pcb_t *) temp_pcb_addr;
+    
     temp_pcb->file_array[fd].flag = 0;
+
     temp_pcb->bitmap[fd] = 0;
 
     return 0;
