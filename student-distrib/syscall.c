@@ -503,8 +503,17 @@ int32_t getargs(uint8_t * buf, int32_t nbytes) {
 *   RETURN VALUE: 
 */
 int32_t vidmap(uint8_t ** start_screen){
-    return 0;
+
+    if(start_screen == NULL) return -1;
+
+    vidMem_page_map((int)(132*_MB_));
+
+    *start_screen = (uint8_t *)(132*_MB_);
+
+    return 132*_MB_;
 }
+
+
 
 
 /*

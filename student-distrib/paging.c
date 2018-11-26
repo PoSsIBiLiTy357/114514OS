@@ -15,7 +15,7 @@
  *     RETURN VALUE: none
  *     SIDE EFFECTS: initialize PDT idx entry as 4KB entry
  */
-void pdt_init_kb(int pid, int idx){
+void pdt_init_kb(int idx){
 
        pdt_entry_t pdt_entry;
        pdt_entry.kb.pt_present  = 0;
@@ -41,7 +41,7 @@ void pdt_init_kb(int pid, int idx){
  *     RETURN VALUE: none
  *     SIDE EFFECTS: initialize PDT idx entry as 4MB entry
  */
-void pdt_init_mb(int pid, int idx){
+void pdt_init_mb(int idx){
 
     pdt_entry_t pdt_entry;
        pdt_entry.mb.pt_present  = 0;
@@ -106,7 +106,7 @@ void paging_init(){
 
     //create index 2-1023 PDEs
     for(i = 2; i < PAGE_ENTRY_SIZE; i++){
-        pdt_init_mb(0,i);
+        pdt_init_mb(i);
          page_directory[i].mb.pt_base_addr = i;
     }
 
@@ -118,7 +118,7 @@ void paging_init(){
     }
 
     //create index 0-4MB as 4kB page directory entry
-    pdt_init_kb(0, 0);
+    pdt_init_kb(0);
      page_directory[0].kb.pt_present = 1;
      page_directory[0].kb.pt_rw = 1;
     //assign page table base addr(right shift 12 bits) to PDE 0
@@ -131,7 +131,7 @@ void paging_init(){
     page_table[PT_VIDEO].page_addr = PT_VIDEO;
 
     //create 4-8MB kernel as 4MB page directory entry
-    pdt_init_mb(0, 1);
+    pdt_init_mb(1);
      page_directory[1].mb.pt_present = 1;
      page_directory[1].mb.pt_rw = 1;
      page_directory[1].mb.pt_base_addr = 1;
@@ -189,6 +189,36 @@ void pid_page_map(int pid){
     flush_tlb();
 
 }
+
+
+void vidMem_page_map(int vAddr){
+    int i, pd_i;
+    pd_i = vAddr>>22;
+
+    //set up pd according to virtual addr
+    pdt_init_kb(pd_i);
+    page_directory[pd_i].kb.pt_present = 1;
+    page_directory[pd_i].kb.pt_us = 1;
+    page_directory[pd_i].kb.pt_rw = 1;
+    page_directory[pd_i].kb.pt_base_addr = (uint32_t)vidMem_table>>12; 
+
+    //set up pt for video mem
+    vidMem_table[0].page_present = 1;
+    vidMem_table[0].page_rw = 1;
+    vidMem_table[0].page_us = 1;
+    vidMem_table[0].page_wthrough = 0;
+    vidMem_table[0].page_cache_da = 0;
+    vidMem_table[0].page_accessed = 0;
+    vidMem_table[0].page_dirty    = 0;
+    vidMem_table[0].page_attr     = 0;
+    vidMem_table[0].page_global   = 0;
+    vidMem_table[0].page_avail    = 0;
+    vidMem_table[0].page_addr = PT_VIDEO;
+
+    flush_tlb();
+
+}
+
 
 
 

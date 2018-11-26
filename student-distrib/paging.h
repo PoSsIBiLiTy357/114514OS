@@ -7,6 +7,7 @@
 #define PAGE_ENTRY_SIZE 1024
 #define PT_VIDEO 0Xb8
 #define MAX_PROCESS_NUM 6
+#define _MB_  0x100000
 
 
 /* An page descriptor entry (goes into the PDT) */
@@ -79,10 +80,10 @@ typedef union pt_entry_t {
 } pt_entry_t;
 
 /*initialize 4kb pde */
-void pdt_init_kb(int pid, int idx);
+void pdt_init_kb(int idx);
 
 /*initialize 4mb pde */
-void pdt_init_mb(int pid, int idx);
+void pdt_init_mb(int idx);
 
 /*initialize pte */
 void pt_init(int idx);
@@ -94,8 +95,11 @@ void flush_tlb(void);
 
 void pid_page_map(int pid);
 
+void vidMem_page_map(int vAddr);
+
 pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page table
-//process_t process[MAX_PROCESS_NUM] __attribute__((aligned (4096))); //process pdt + pt
+pt_entry_t vidMem_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page table
+
 
 pdt_entry_t page_directory[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page directory entry
 
