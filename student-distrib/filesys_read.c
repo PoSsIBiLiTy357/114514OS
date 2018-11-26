@@ -274,12 +274,14 @@ int32_t close_dir(){
 int32_t read_dir(uint8_t *buf){
     int ret;
     dentry_t dentry;
-    if(read_dir_index >= num_dentry) return -1;
+    if(read_dir_index > num_dentry) return -1;
     
-    if(read_dentry_by_index(read_dir_index, &dentry)== -1) return -1;
+    if(read_dentry_by_index(read_dir_index, &dentry)== -1) return 0;
     memcpy(buf, dentry.fname, sizeof(dentry.fname));
     ret = sizeof(dentry.fname);
+
     read_dir_index += 1;
+    
     return ret;
 
 }

@@ -423,7 +423,7 @@ int32_t open(const uint8_t * filename){
     
     /* Check if file type is a directory file */
     if (temp_dentry.ftype == FILE_DIR) {
-
+        open_dir();
         pcb->file_array[i].read  = read_dir_wrapper;
         pcb->file_array[i].write = write_dir_wrapper;
         pcb->file_array[i].open  = open_dir_wrapper;
@@ -432,7 +432,7 @@ int32_t open(const uint8_t * filename){
 
     /* Check if file type is a regular file */
     if (temp_dentry.ftype == FILE_REG) {
-        open_dir();
+        
         pcb->file_array[i].read  = read_f_wrapper;
         pcb->file_array[i].write = write_f_wrapper;
         pcb->file_array[i].open  = open_f_wrapper;
