@@ -62,12 +62,12 @@ void putc_scroll(uint8_t c){
     if(c=='\n' || c=='\r'){
         screen_y++;
         screen_x=0;
-        if(screen_y==NUM_ROWS){
+        if(screen_y==NUM_ROWS-1){
             shift();
         }
     }
     else{
-        if(screen_y==NUM_ROWS){
+        if(screen_y==NUM_ROWS-1){
             shift();    
         }
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
