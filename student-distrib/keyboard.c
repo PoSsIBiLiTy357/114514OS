@@ -19,7 +19,7 @@ static int ctrl_state;
 static int cursor_idx;
 static int overline;
 static char first[LINE_SIZE];
-static char second[LINE2_SIZE];
+//static char second[LINE2_SIZE];
 static char keyboard_buffer[BUFFER_SIZE]; //leave 1 for _
 static char terminal_buffer[BUFFER_SIZE];
 static char write_buffer[1025];
@@ -63,11 +63,11 @@ void keyboard_handler(void){
 	send_eoi(1);  // protected send of eoi
 	unsigned char pressed;
 	int i;
-	while ((inb(KBRD_STATUS_PORT)&0x01)!=0){  // only read from data port when the status is ready
-		pressed=inb(KBRD_DATA_PORT);   //get key code
-		if(strlen(keyboard_buffer)>0 && pressed ==BACKSPACE){
+	while ((inb(KBRD_STATUS_PORT)&0x01)!=0) {  // only read from data port when the status is ready
+		pressed = inb(KBRD_DATA_PORT);   //get key code
+		if(strlen(keyboard_buffer) > 0 && pressed ==BACKSPACE) {
 			keyboard_buffer[cursor_idx] ='\0';
-			if(cursor_idx>=1){
+			if(cursor_idx >= 8){
 				cursor_idx--;
 				//keyboard_buffer[cursor_idx] ='_';
 			}
@@ -199,16 +199,19 @@ void keyboard_handler(void){
 			// overline =1;
 			puts_scroll_refresh(keyboard_buffer);
 		}
-		if(scan_code[(int)pressed] == '\n'){					// enter pressed go to next line clear keyboard_buffer
+		if (scan_code[(int)pressed] == '\n') {					// enter pressed go to next line clear keyboard_buffer
 			terminal_read_ready =1;
 			//overline =0;
 			int i;
-			for(i=0;i<cursor_idx+1;i++){
-				terminal_buffer[i]= keyboard_buffer[i];
-				keyboard_buffer[i]='\0';
+
+			for (i = 0; i < cursor_idx + 1; i++) {
+				terminal_buffer[i] = keyboard_buffer[i];
+				keyboard_buffer[i] ='\0';
 			}
+
 			memcpy(keyboard_buffer,"391OS> ",strlen((char*)"391OS> "));
 			cursor_idx= 7;
+			puts_scroll("");
 			//keyboard_buffer[cursor_idx]='_';
 		}
 
