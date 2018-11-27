@@ -315,10 +315,10 @@ int terminal_read_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t c
 	return terminal_read((char*) buf, (int)count);
 }
 
-int terminal_wrong() {
+//when calling from wrong function. e.g read from stdout
+int terminal_wrong(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
 	return -1;
 }
-
-int terminal_nothing() {
+int terminal_nothing(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
 	return 0;
 }
