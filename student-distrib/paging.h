@@ -8,6 +8,8 @@
 #define PT_VIDEO 0Xb8
 #define MAX_PROCESS_NUM 6
 #define _MB_  0x100000
+#define _4MB_ (0x100000*4)
+#define _8MB_ (0x100000*8)
 
 
 /* An page descriptor entry (goes into the PDT) */

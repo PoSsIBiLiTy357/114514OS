@@ -905,6 +905,8 @@ int no_args_test() {
 	return FAIL;
 }
 
+
+
 /*****************************************************************************/
 /*						 Checkpoint 5 tests									 */
 /*****************************************************************************/
@@ -966,15 +968,17 @@ void launch_tests(){
 	//check_terminal_write();
 
 	/************************* Checkpoint 4 tests *****************************/
-	// clear();	//optional but preferred
+	//clear();	//optional but preferred
 
 	/* getargs tests */
 	// TEST_OUTPUT("one_letter_arg_test()", one_letter_arg_test());
 	// TEST_OUTPUT("word_arg_test()", word_arg_test());
 	// TEST_OUTPUT("multi_word_arg_test()", multi_word_arg_test());
 	// TEST_OUTPUT("some_args_test()", some_args_test());
-	// TEST_OUTPUT("insufficient_bytes_test()", insufficient_bytes_test());
 	// TEST_OUTPUT("no_args_test()", no_args_test());
+
+	/* unused test */
+	//TEST_OUTPUT("insufficient_bytes_test()", insufficient_bytes_test());
 
 	/*execute test*/
 	execute((uint8_t *)"shell");

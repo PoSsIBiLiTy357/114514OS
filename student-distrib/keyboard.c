@@ -243,13 +243,8 @@ int terminal_read(char* buf, int count){////////////////////////////need change
 	}
 
 
-	for (i = 7; i < strlen(terminal_buffer); i++){
-		temp[i - 7]= terminal_buffer[i];	
-		if (terminal_buffer[i] == '\0'){
-			// temp[i]='\0';
-			// temp[i-1]='\0';
-			break;
-		 }
+	for (i = 0; i < strlen(terminal_buffer); i++){
+		temp[i]= terminal_buffer[i + 7];	
 	}
 
 	memcpy(buf,temp,count);
@@ -318,4 +313,12 @@ int terminal_write_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t 
 
 int terminal_read_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count) {
 	return terminal_read((char*) buf, (int)count);
+}
+
+int terminal_wrong() {
+	return -1;
+}
+
+int terminal_nothing() {
+	return 0;
 }

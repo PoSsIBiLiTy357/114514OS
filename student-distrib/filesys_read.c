@@ -8,7 +8,7 @@ static inode_t *inode_start;
 static uint8_t *datablk_start;
 static int32_t read_dir_index;
 
-
+static int temp_counter;
 /*
  * void read_filesys_bootblock(uint32_t bootBlk_addr)
  *     DESCRIPTION: Initialize file system, read in all the metadata in first dentry
@@ -17,7 +17,7 @@ static int32_t read_dir_index;
  *     RETURN VALUE: none
  */
 void read_filesys_bootblock(uint32_t bootBlk_addr){
-
+    temp_counter =0;
     num_dentry     = *((int32_t *)bootBlk_addr);
     num_inodes     = *((int32_t *)(bootBlk_addr + NUM_INODE_OFFSET));
     num_dataBlocks = *((int32_t *)(bootBlk_addr + NUM_DBLK_OFFSET));
@@ -49,7 +49,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
         i_fname = dentry_start[i].fname;
 
         //compare current i_fname with input fname
-        if(strncmp((int8_t*)fname, (int8_t *)i_fname, strlen((int8_t*)fname)) == 0){
+        if(strncmp((int8_t*)fname, (int8_t *)i_fname, /*strlen((int8_t*)fname)*/32) == 0){
             
             //copy desire dentry info into input dentry
             memcpy( dentry->fname, dentry_start[i].fname, sizeof(dentry_start[i].fname));
@@ -103,7 +103,13 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry){
  *     RETURN VALUE: success:length  reach to end:0  failed:-1
  */
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
-
+/*//////////////////////////////////
+    if(temp_counter ==5) {
+        temp_counter =0;
+        return 0;
+    }
+    temp_counter++;
+*///////////////////////////////////
     int i, inode_datablk_offset, datablk_offset;
 
     //invalid input checks
@@ -398,7 +404,7 @@ int close_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t cou
 }
 
 int read_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
-    return read_f(inode, buf);
+    return  read_data(inode,offset, buf,count);
 }
 
 int write_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){

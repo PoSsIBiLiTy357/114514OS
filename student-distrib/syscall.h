@@ -8,7 +8,7 @@
 #include "paging.h"
 
 #define KSTACK_BOT          0x7fe000
-#define FDESC_SIZE          6
+#define FDESC_SIZE          8
 #define CMD_LIMIT         129
 
 

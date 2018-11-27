@@ -2,7 +2,7 @@
 #define ASM 1
 #include "x86_desc.h"
 
-#define SYSCALL_NUM 7
+#define SYSCALL_NUM 9
 
 .globl keyboard_handler_asm
 .globl  rtc_handler_asm 
@@ -48,10 +48,28 @@ syscall_asm:
     #check syscall number, if above the range, 
     cmpl $(SYSCALL_NUM),%eax
     jae invalid
+    cmpl $0,%eax
+    jbe invalid
+
     call *sys_call_table(,%eax,4)
     movl %eax,0x18(%esp)    #save return value
+    jmp return
 
     invalid:
+    popl %ebx
+    popl %ecx
+    popl %edx
+    popl %esi
+    popl %edi
+    popl %ebp
+    popl %eax
+    popl %ds
+    popl %es
+    addl $4,%esp
+    movl $-1,%eax
+    iret
+    
+    return:
     popl %ebx
     popl %ecx
     popl %edx
@@ -67,4 +85,4 @@ syscall_asm:
 
 
 sys_call_table:
-.long 0x0, halt, execute, read, write,open, close, getargs
+.long 0x0, halt, execute, read, write,open, close, getargs, vidmap
