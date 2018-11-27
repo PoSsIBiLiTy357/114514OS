@@ -322,6 +322,7 @@ int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_
     if (cmd == NULL) { return -1; }
 
     /* Retrieve file name */
+    memset(inFile, 0, CMD_LIMIT);
     for (i = 0; i < strlen((char *)cmd); i++) { 
         if (cmd[i] == ' ') break;
         inFile[i] = cmd[i];
@@ -531,10 +532,12 @@ int32_t getargs(uint8_t * buf, int32_t nbytes) {
     int i;
 
     /* Make sure buffer constraints are fulfilled */
-    if (buf == NULL || argSize == 0) { return -1; }
+    //if (buf == NULL || argSize == 0) { return -1; }
 
-    /* Copy arguments into buf */
+    /* Copy arguments into buf after resetting it */
+    memset(buf, 0, strlen((char *)buf));
     for (i = 0; i < strlen((char *)argBuf); i++) { buf[i] = argBuf[i]; }
+    buf[i] = '\0';
 
     return 0;
 }
