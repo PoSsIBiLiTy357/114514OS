@@ -299,3 +299,11 @@ int terminal_write_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t 
 int terminal_read_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count) {
 	return terminal_read((char*) buf, (int)count);
 }
+
+int terminal_wrong() {
+	return -1;
+}
+
+int terminal_nothing() {
+	return 0;
+}
