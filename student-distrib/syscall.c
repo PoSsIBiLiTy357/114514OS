@@ -403,7 +403,7 @@ int32_t open(const uint8_t * filename){
             break;
         } 
     }
-    if (i == FDESC_SIZE-1) return -1; //if no descriptors are free, return -1
+    if (i == FDESC_SIZE) return -1; //if no descriptors are free, return -1
     
     /* Check if the file type is an RTC file */
     if (temp_dentry.ftype == FILE_RTC) {
@@ -450,7 +450,7 @@ int32_t open(const uint8_t * filename){
 */
 int32_t close(int32_t fd){
     /* Make sure given file descriptor is within range */
-    if (fd >= FDESC_SIZE||fd <=1) return -1;
+    if (fd >= FDESC_SIZE || fd <= 1) return -1;
 
     
     
