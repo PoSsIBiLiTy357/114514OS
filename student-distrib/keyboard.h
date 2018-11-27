@@ -13,3 +13,5 @@ extern int terminal_read(char* buf, int count);
 extern int terminal_write(char * buf);
 int terminal_read_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count);
 int terminal_write_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count);
+int terminal_wrong(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count);
+int terminal_nothing(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count);
