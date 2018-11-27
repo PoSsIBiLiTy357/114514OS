@@ -943,7 +943,7 @@ void launch_tests(){
 	// TEST_OUTPUT("RTC_base_2_test", RTC_base_2_test());
 	
 	/* File system tests */
-	//uint8_t fname[] = "frame0.txt";		/* select file name */
+	//uint8_t fname[] = "hello";		/* select file name */
 	//TEST_OUTPUT("print_allfile_test", print_allfile_test());
 	//TEST_OUTPUT("read_file_test", read_file_test(fname));
 	//terminal_write("qwertyuiop[]\asdfghjkl;'zxcvbnm,./bfgdhfdgfdgfdgfdjkgfodjglkfjdlkgkfjkdglkjflkdjklgjklfjlkdjlgjfkdjgofiejdgprokepokpofkld;lgjhfl;djhn;lfmblc;lkfl;dk;lrfkpoerkpogkd;lkfl;gk12323432543267687686786565");

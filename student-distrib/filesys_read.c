@@ -377,7 +377,7 @@ int read_file_test(uint8_t *fname){
 */
     memset(buf, 0, sizeof(buf));
 
-    read_f_by_name(fname, 0, buf, 38000);
+    read_data(d.inode, 0, buf, PROGRAM_MAX_SIZE);
     for(i=0; i<inode.length; i++){
         //if(buf[i] == '\0') break;
         putc(buf[i]);

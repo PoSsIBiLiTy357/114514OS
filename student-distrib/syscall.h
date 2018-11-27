@@ -35,7 +35,7 @@ typedef struct file_desc_t {
 } file_desc_t;
 
 typedef struct pcb_t{
-    int32_t *parent;
+    int32_t p_pid;
     int32_t parent_esp;
     int32_t parent_ebp;
     file_desc_t file_array[FDESC_SIZE];

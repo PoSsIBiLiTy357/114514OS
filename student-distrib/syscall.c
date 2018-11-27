@@ -75,10 +75,10 @@ void pcb_init(int pid) {
 
     /* Check if this is the first process, and if it is, set parent ptr to NULL */
     if (pid == 0) {
-        pcb->parent = NULL;
+        pcb->p_pid = pid;
     }
     else {
-        pcb->parent = (int32_t *)(KSTACK_BOT - PCB_SIZE * pid + PCB_SIZE);
+        pcb->p_pid = pid-1;
     }
 }
 
@@ -116,62 +116,109 @@ int get_pid(){
 *   OUTPUTS: 0 if successful,
 */
 int32_t halt(uint8_t status){
-int32_t i;
+
+    int32_t i;
+    cli();
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t *par_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * cur_pcb->p_pid);
 
-    /* Check if this is the first process or a child of a process */
-    if (cur_pcb->parent != NULL) {
-        pcb_t *par_pcb = (pcb_t *)(cur_pcb->parent);
+    //restore parent data 
+    proc_state[cur_pcb->pid] = 0;
 
-        //restore parent data 
-        proc_state[cur_pcb->pid] = 0;
-        curr = par_pcb->pid;
+    //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      
 
-        /* Update the tss.esp0 */
-        tss.esp0 = cur_pcb->parent_esp;                     
-        //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      
 
-        //restore parent paging (cr3)
-        pid_page_map(par_pcb->pid);
 
-        //close any relevant FDs 
-        for(i = 2; i < FDESC_SIZE; i++){
+    //close any relevant FDs 
+    for(i = 0; i < FDESC_SIZE; i++){
 
-           // if(cur_pcb->file_array[i].flag){
-                close(i);
-           // }
+        if(cur_pcb->file_array[i].flag){
+            close(i);
         }
+        cur_pcb->file_array[i].flag = 0;
+    
+    }
+    
+    curr = par_pcb->pid;
 
-        asm volatile(
-            "movl   %0, %%esp   ;"
-            "movl   %1, %%ebp   ;"
-            "movl   %2, %%eax   ;"
-            
-            "LEAVE;"
-            "RET;"
-            :
-            :"r"(cur_pcb->parent_esp), "r"(cur_pcb->parent_ebp), "r"((uint32_t) status)  
-        );
-        
-    } else {
-        /* Update processor state and tss.esp0 */
-        proc_state[cur_pcb->pid] = 0;
-        tss.esp0 = cur_pcb->parent_esp;  
-
-        //close any relevant FDs 
-        for(i = 2; i < FDESC_SIZE; i++){
-
-            //if(cur_pcb->file_array[i].flag){
-                close(i);
-            //}
-        }
-        
-        //if curr is last shell----restart shell
-        execute((unsigned char*)"shell");
-
+    if(cur_pcb->pid == cur_pcb->p_pid){
+        execute((uint8_t *)"shell");
     }
 
-    return 0;
+    //restore parent paging (cr3)
+    pid_page_map(par_pcb->pid);
+
+    /* Update the tss.esp0 */
+    tss.esp0 = cur_pcb->parent_esp;   
+
+    sti();
+    asm volatile(
+        "movl   %0, %%esp   ;"
+        "movl   %1, %%ebp   ;"
+        "movl   %2, %%eax   ;"
+        "jmp RETURN_FROM_IRET;"
+
+        :
+        :"r"(cur_pcb->parent_esp), "r"(cur_pcb->parent_ebp), "r"((uint32_t) status)  
+    );
+
+
+        // int32_t i;
+        // cli();
+        // pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+        // /* Check if this is the first process or a child of a process */
+        // if (cur_pcb->parent != NULL) {
+        //     pcb_t *par_pcb = (pcb_t *)(cur_pcb->parent);
+
+        //     //restore parent data 
+        //     proc_state[cur_pcb->pid] = 0;
+        //     curr = par_pcb->pid;
+
+        //     /* Update the tss.esp0 */
+        //     tss.esp0 = cur_pcb->parent_esp;                     
+        //     //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      
+
+        //     //restore parent paging (cr3)
+        //     pid_page_map(par_pcb->pid);
+
+        //     //close any relevant FDs 
+        //     for(i = 2; i < FDESC_SIZE; i++){
+
+        //     // if(cur_pcb->file_array[i].flag){
+        //             close(i);
+        //     // }
+        //     }
+        //     sti();
+        //     asm volatile(
+        //         "movl   %0, %%esp   ;"
+        //         "movl   %1, %%ebp   ;"
+        //         "movl   %2, %%eax   ;"
+                
+        //         "LEAVE;"
+        //         "RET;"
+        //         :
+        //         :"r"(cur_pcb->parent_esp), "r"(cur_pcb->parent_ebp), "r"((uint32_t) status)  
+        //     );
+            
+        // } else {
+        //     /* Update processor state and tss.esp0 */
+        //     proc_state[cur_pcb->pid] = 0;
+        //     tss.esp0 = cur_pcb->parent_esp;  
+
+        //     //close any relevant FDs 
+        //     for(i = 2; i < FDESC_SIZE; i++){
+
+        //         //if(cur_pcb->file_array[i].flag){
+        //             close(i);
+        //         //}
+        //     }
+        //     sti();
+        //     //if curr is last shell----restart shell
+        //     execute((unsigned char*)"shell");
+
+        // }
+
+        // return 0;
 
 
 }
@@ -194,6 +241,8 @@ int32_t execute(const uint8_t * command){
     uint32_t v_addr;            /* virtual addr of first instruction */
     dentry_t d;
     int pid;
+
+    cli();
     
     /* Ensure the given command is a valid executable file */   
     if (verify_file(command, inFile, &v_addr) == -1) { return -1; }
@@ -227,8 +276,10 @@ int32_t execute(const uint8_t * command){
     //tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
     tss.esp0 = KSTACK_BOT - (PCB_SIZE * pid) - MEM_FENCE;
 
+    sti();
     /* IRET setup and context switch */
     asm volatile(
+            
             "mov $0x2B, %%ax;"
             "mov %%ax, %%ds;"
             "movl $0x83FFFFC, %%eax;"
@@ -450,8 +501,9 @@ int32_t open(const uint8_t * filename){
 */
 int32_t close(int32_t fd){
     /* Make sure given file descriptor is within range */
-    if (fd >= FDESC_SIZE || fd <= 1) return -1;
-
+/////////////////////////////////////////////////////////
+    if (fd > 7 || fd < 2) return -1;///arg change to 7
+/////////////////////////////////////////////////////////
     
     
     pcb_t *temp_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
@@ -460,9 +512,7 @@ int32_t close(int32_t fd){
     /////////////////////////////////
     //int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
 
-    
     temp_pcb->file_array[fd].flag = 0;
-
     temp_pcb->bitmap[fd] = 0;
     
     return 0;
