@@ -405,9 +405,9 @@ int RTC_read_test() {
 	return PASS;
 }
 
-void check_terminal_write(){
-	terminal_write("hnikjedshfkjdhskjfhdkjshkjfdheriufhisuhifuhdiuhsiuhiuerhiuhfsiuhiueihsufeishufeishfueisfh");
-}
+// void check_terminal_write(){
+// 	terminal_write("hnikjedshfkjdhskjfhdkjshkjfdheriufhisuhifuhdiuhsiuhiuerhiuhfsiuhiueihsufeishufeishfueisfh");
+// }
 
 
 

@@ -10,6 +10,8 @@
 
 static int screen_x;
 static int screen_y;
+static int screen_x_preinput=0;
+static int screen_y_preinput;
 static char* video_mem = (char *)VIDEO;
 
 /* void clear(void);
@@ -47,6 +49,65 @@ void put_refresh_line(const  char* buf){
 
 }
 
+void update_cursor(int x,int y){
+    uint16_t pos = y*NUM_COLS + x;
+
+    outb(0x0F,0x3D4);
+    outb((uint8_t)(pos&0xFF),0x3D5);
+    outb(0x0E,0x3D4);
+    outb((uint8_t)((pos>>8)&0xFF),0x3D5);
+}
+
+void putc_scroll(uint8_t c){
+    if(c=='\n' || c=='\r'){
+        screen_y++;
+        screen_x=0;
+        if(screen_y==NUM_ROWS){
+            shift();
+        }
+    }
+    else{
+        if(screen_y==NUM_ROWS){
+            shift();    
+        }
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        screen_x++;
+        screen_y=screen_y+screen_x/NUM_COLS;
+        screen_x %= NUM_COLS;
+    }
+}
+
+int32_t puts_scroll(int8_t* s){
+    register int32_t idx=0;
+    while(s[idx]!='\0'){
+        putc_scroll(s[idx]);
+        idx++;
+    }
+    update_cursor(screen_x,screen_y);
+    screen_x_preinput=screen_x;
+    screen_y_preinput=screen_y;
+    return idx;
+}
+
+int32_t puts_scroll_refresh(int8_t* s){
+    register int32_t idx=0;
+    int x,y;
+    for(y=screen_y_preinput;y<=screen_y;y++){
+        for(x=0;x<NUM_COLS;x++){
+            *(uint8_t *)(video_mem + ((NUM_COLS * y + x) << 1)) = ' ';
+            *(uint8_t *)(video_mem + ((NUM_COLS * y + x) << 1) + 1) = ATTRIB;
+        }
+    }
+    screen_x=0;
+    screen_y=screen_y_preinput;
+    while(s[idx]!='\0'){
+        putc_scroll(s[idx]);
+        idx++;
+    }
+    update_cursor(screen_x,screen_y);
+    return idx;
+}
 
 /* void clear(void);
  * Inputs: void
@@ -230,7 +291,7 @@ int32_t puts(const int8_t* s) {
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(const uint8_t c) {
-    if(c == '\n' || c == '\r' || screen_x == 79) {
+    if(c == '\n' || c == '\r') {
         screen_y++;
         screen_x = 0;
     } else {

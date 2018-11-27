@@ -22,6 +22,7 @@ static char first[LINE_SIZE];
 static char second[LINE2_SIZE];
 static char keyboard_buffer[BUFFER_SIZE]; //leave 1 for _
 static char terminal_buffer[BUFFER_SIZE];
+static char write_buffer[1025];
 int terminal_read_ready;
 /* init_keyboard
  * 
@@ -37,16 +38,15 @@ void init_keyboard(void)
 	init_scan_code();
 	caplk_pressd=0;
 	shift_state=0;
-	cursor_idx=0;
+	cursor_idx=7;
 	overline =0;
 	terminal_read_ready =0;
 	memset(first,'\0',sizeof(first));
 	//memset(second,'\0',sizeof(second));
 	memset(keyboard_buffer,'\0',sizeof(keyboard_buffer));
-
-	keyboard_buffer[cursor_idx]='_';
+	memcpy(keyboard_buffer,"391OS> ",strlen((char*)"391OS> "));
 	enable_irq(1);  //unmask IRQ1 of PIC
-	
+	puts_scroll_refresh((char*)keyboard_buffer);
 }
 
 
@@ -69,14 +69,13 @@ void keyboard_handler(void){
 			keyboard_buffer[cursor_idx] ='\0';
 			if(cursor_idx>=1){
 				cursor_idx--;
-				keyboard_buffer[cursor_idx] ='_';
+				//keyboard_buffer[cursor_idx] ='_';
 			}
-			else keyboard_buffer[cursor_idx] ='_';
+			//else keyboard_buffer[cursor_idx] ='_';
 			if (strlen(keyboard_buffer)==LINE_SIZE) {
 				screen_y_change(-1);
-				overline =0;
+				//overline =0;
 			}
-
 		}
 		else{
 			if(pressed==CAPSLOCK){				// record caps lock status
@@ -100,7 +99,8 @@ void keyboard_handler(void){
 				for(i=0;i<BUFFER_SIZE;i++){					//empty the buffer
 					keyboard_buffer[i]='\0';
 				}
-				cursor_idx=0;
+				memcpy(keyboard_buffer,"391OS> ",strlen((char*)"391OS> "));
+				cursor_idx=7;
 			}
 				//	if(scan_code[(int)pressed] == '\n'){
 				//		int i;
@@ -122,7 +122,7 @@ void keyboard_handler(void){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];			// cap not pressed and shift not pressed case 
 							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
-								keyboard_buffer[cursor_idx] = '_';
+								//keyboard_buffer[cursor_idx] = '_';
 							}
 						}	
 					}	
@@ -131,7 +131,7 @@ void keyboard_handler(void){
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
 							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
-								keyboard_buffer[cursor_idx] = '_';
+								//keyboard_buffer[cursor_idx] = '_';
 							}
 						}
 					}
@@ -142,14 +142,14 @@ void keyboard_handler(void){
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
 							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
-								keyboard_buffer[cursor_idx] = '_';
+								//keyboard_buffer[cursor_idx] = '_';
 							}
 						}
 						else{																//cap case with shift hold down, back to lower case letter 
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
 							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
-								keyboard_buffer[cursor_idx] = '_';
+								//keyboard_buffer[cursor_idx] = '_';
 							}
 						}
 				
@@ -159,14 +159,14 @@ void keyboard_handler(void){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
 							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
-								keyboard_buffer[cursor_idx] = '_';
+								//keyboard_buffer[cursor_idx] = '_';
 							}
 						}
 						else{
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
 							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
-								keyboard_buffer[cursor_idx] = '_';
+								//keyboard_buffer[cursor_idx] = '_';
 							}
 							}
 						}	
@@ -174,15 +174,15 @@ void keyboard_handler(void){
 			}
 		}
 		
-		for (i=0;i<LINE_SIZE;i++){
-			first[i]= keyboard_buffer[i];
-		}
-		for (i = 0; i < LINE2_SIZE; i++) {
-			second[i] = keyboard_buffer[i+LINE_SIZE];
-		}
+		// for (i=0;i<LINE_SIZE;i++){
+		// 	first[i]= keyboard_buffer[i];
+		// }
+		// for (i = 0; i < LINE2_SIZE; i++) {
+		// 	second[i] = keyboard_buffer[i+LINE_SIZE];
+		// }
 ///////////////////////////can be put into terminal read
 		if (strlen(keyboard_buffer)<=LINE_SIZE){						//print to screen 1 line case 
-			put_refresh_line(keyboard_buffer);
+			puts_scroll_refresh(keyboard_buffer);
 		}else{
 /*			int i;
 			for (i=0;i<LINE_SIZE;i++){
@@ -191,23 +191,25 @@ void keyboard_handler(void){
 			for (i=0;i<27;i++){
 				second[i] = keyboard_buffer[i+LINE_SIZE]; 
 			}*/
-			if (overline ==0){						//   print to screen 2 line case ; first line 
-				put_refresh_line(first);
-				puts("\n");
-			}
-			put_refresh_line(second);			//  print to screen 2 line case ; second line 
-			overline =1;
+			// if (overline ==0){						//   print to screen 2 line case ; first line 
+			// 	put_refresh_line(first);
+			// 	puts("\n");
+			// }
+			// put_refresh_line(second);			//  print to screen 2 line case ; second line 
+			// overline =1;
+			puts_scroll_refresh(keyboard_buffer);
 		}
 		if(scan_code[(int)pressed] == '\n'){					// enter pressed go to next line clear keyboard_buffer
 			terminal_read_ready =1;
-			overline =0;
+			//overline =0;
 			int i;
 			for(i=0;i<cursor_idx+1;i++){
 				terminal_buffer[i]= keyboard_buffer[i];
 				keyboard_buffer[i]='\0';
 			}
-			cursor_idx= 0;
-			keyboard_buffer[cursor_idx]='_';
+			memcpy(keyboard_buffer,"391OS> ",strlen((char*)"391OS> "));
+			cursor_idx= 7;
+			//keyboard_buffer[cursor_idx]='_';
 		}
 
 		//puts(keyboard_buffer);
@@ -259,41 +261,54 @@ int terminal_read(char* buf, int count){////////////////////////////need change
  * Side Effects: print to screen, send eoi to processor
  * 
  */
-int terminal_write(char * buf){
+int terminal_write(char * buf, int count){
 
-	int length = strlen(buf);
-	int full_col = length / LINE_SIZE;
-	int remainder = length % LINE_SIZE;
-	int i,j;
-	char one_line[LINE_SIZE];
-	for (i = 0; i < full_col; i++) {
-		for (j = 0; j < LINE_SIZE; j++) {
-			one_line[j] = buf[j + LINE_SIZE * i];
-		}
-		puts(one_line);
-		if (get_screen_y() >= NUM_ROWS-1) shift();
-		screen_y_change(1);
-		screen_x_set(0);
-		if (get_screen_y() >= NUM_ROWS-1) shift();
-	}
-	for (j = 0; j < LINE_SIZE; j++) {
-		one_line[j] = '\0';
-	}
-	one_line[79] = '\n';
-	for (j = 0; j < remainder; j++) {
-		one_line[j] = buf[LINE_SIZE * full_col + j];
-	}
-	puts(one_line);
-	if (get_screen_y() >= NUM_ROWS-1) shift();
-	screen_y_change(1);
-	screen_x_set(0);
-	if (get_screen_y() >= NUM_ROWS-1) shift();
+	// int length = strlen(buf);
+	// int full_col = length / LINE_SIZE;
+	// int remainder = length % LINE_SIZE;
+	// int i,j;
+	// char one_line[LINE_SIZE];
+	// for (i = 0; i < full_col; i++) {
+	// 	for (j = 0; j < LINE_SIZE; j++) {
+	// 		one_line[j] = buf[j + LINE_SIZE * i];
+	// 	}
+	// 	puts(one_line);
+	// 	if (get_screen_y() >= NUM_ROWS-1) shift();
+	// 	screen_y_change(1);
+	// 	screen_x_set(0);
+	// 	if (get_screen_y() >= NUM_ROWS-1) shift();
+	// }
+	// for (j = 0; j < LINE_SIZE; j++) {
+	// 	one_line[j] = '\0';
+	// }
+	// one_line[79] = '\n';
+	// for (j = 0; j < remainder; j++) {
+	// 	one_line[j] = buf[LINE_SIZE * full_col + j];
+	// }
+	// puts(one_line);
+	// if (get_screen_y() >= NUM_ROWS-1) shift();
+	// screen_y_change(1);
+	// screen_x_set(0);
+	// if (get_screen_y() >= NUM_ROWS-1) shift();
 
-	return 0; 
+	// return 0; 
+
+	if(strncmp("391OS> ",buf,strlen((char*)"391OS> "))==0) return count;
+	int lim=sizeof(write_buffer);
+	if(count<lim) lim=count;
+	memcpy(write_buffer,buf,lim);
+	write_buffer[lim]=0;
+	if(write_buffer[strlen((char*)write_buffer)-1]!='\n'){
+		write_buffer[strlen((char*)write_buffer)+1]='\0';
+		write_buffer[strlen((char*)write_buffer)]='\n';
+	}
+	puts_scroll_refresh("");
+	puts_scroll((char*)write_buffer);
+	return count;
 }
 
 int terminal_write_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count) {
-	return terminal_write((char*)buf);
+	return terminal_write((char*)buf,count);
 }
 
 int terminal_read_wrap(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count) {
