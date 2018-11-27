@@ -237,18 +237,20 @@ int terminal_read(char* buf, int count){////////////////////////////need change
 	char temp[BUFFER_SIZE];
 	
 	int i;
-	for(i=0;i<BUFFER_SIZE;i++){
+	/* Clear temp buffer */
+	for (i = 0; i < BUFFER_SIZE; i++) {
 		temp[i]= '\0';
 	}
-	for (i=0; i<strlen(terminal_buffer);i++){
-		temp[i]= terminal_buffer[i];	
-		if (terminal_buffer[i]=='_'){
-			temp[i]='\0';
-			temp[i-1]='\0';
+
+
+	for (i = 7; i < strlen(terminal_buffer); i++){
+		temp[i - 7]= terminal_buffer[i];	
+		if (terminal_buffer[i] == '\0'){
+			// temp[i]='\0';
+			// temp[i-1]='\0';
 			break;
 		 }
 	}
-	
 
 	memcpy(buf,temp,count);
 	terminal_read_ready = 0;
