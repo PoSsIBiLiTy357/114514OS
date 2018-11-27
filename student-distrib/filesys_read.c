@@ -113,9 +113,8 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     int i, inode_datablk_offset, datablk_offset;
 
     //invalid input checks
-    if(inode == NULL) return -1;
     if(buf == NULL) return -1;
-    if(inode >= num_inodes) return -1;
+    if(inode == NULL || inode <0 || inode >= num_inodes) return -1;
     //return 0 if offset reach end 
     if(offset >= inode_start[inode].length) return 0;
 

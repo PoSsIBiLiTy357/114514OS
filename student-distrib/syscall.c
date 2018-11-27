@@ -138,7 +138,7 @@ int32_t halt(uint8_t status){
         cur_pcb->file_array[i].flag = 0;
     
     }
-    
+
     curr = par_pcb->pid;
 
     if(cur_pcb->pid == cur_pcb->p_pid){
@@ -160,66 +160,11 @@ int32_t halt(uint8_t status){
 
         :
         :"r"(cur_pcb->parent_esp), "r"(cur_pcb->parent_ebp), "r"((uint32_t) status)  
+        :"%eax"
     );
 
 
-        // int32_t i;
-        // cli();
-        // pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-        // /* Check if this is the first process or a child of a process */
-        // if (cur_pcb->parent != NULL) {
-        //     pcb_t *par_pcb = (pcb_t *)(cur_pcb->parent);
-
-        //     //restore parent data 
-        //     proc_state[cur_pcb->pid] = 0;
-        //     curr = par_pcb->pid;
-
-        //     /* Update the tss.esp0 */
-        //     tss.esp0 = cur_pcb->parent_esp;                     
-        //     //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      
-
-        //     //restore parent paging (cr3)
-        //     pid_page_map(par_pcb->pid);
-
-        //     //close any relevant FDs 
-        //     for(i = 2; i < FDESC_SIZE; i++){
-
-        //     // if(cur_pcb->file_array[i].flag){
-        //             close(i);
-        //     // }
-        //     }
-        //     sti();
-        //     asm volatile(
-        //         "movl   %0, %%esp   ;"
-        //         "movl   %1, %%ebp   ;"
-        //         "movl   %2, %%eax   ;"
-                
-        //         "LEAVE;"
-        //         "RET;"
-        //         :
-        //         :"r"(cur_pcb->parent_esp), "r"(cur_pcb->parent_ebp), "r"((uint32_t) status)  
-        //     );
-            
-        // } else {
-        //     /* Update processor state and tss.esp0 */
-        //     proc_state[cur_pcb->pid] = 0;
-        //     tss.esp0 = cur_pcb->parent_esp;  
-
-        //     //close any relevant FDs 
-        //     for(i = 2; i < FDESC_SIZE; i++){
-
-        //         //if(cur_pcb->file_array[i].flag){
-        //             close(i);
-        //         //}
-        //     }
-        //     sti();
-        //     //if curr is last shell----restart shell
-        //     execute((unsigned char*)"shell");
-
-        // }
-
-        // return 0;
-
+    return 0;
 
 }
 
