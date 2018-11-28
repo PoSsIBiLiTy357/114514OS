@@ -15,6 +15,7 @@
 #define PCB_SIZE            0x2000
 #define ASM                 1
 #define RESERV_FILES        2
+#define ERR_BUF            26
 
 #define FILE_RTC            0
 #define FILE_DIR            1
@@ -99,6 +100,7 @@ int get_pid(){
     /* Look thru process table for an inactive process (marked 0) and return it */
     for(i = 0; i < PROC_NUM; i++){
         if(proc_state[i] == 0){
+            proc_state[i] = 1;      /* Mark pid as used */
             return i;
         }
     }
@@ -116,7 +118,6 @@ int get_pid(){
 *   OUTPUTS: 0 if successful,
 */
 int32_t halt(uint8_t status){
-
     int32_t i;
     cli();
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
@@ -126,8 +127,6 @@ int32_t halt(uint8_t status){
     proc_state[cur_pcb->pid] = 0;
 
     //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      
-
-
 
     //close any relevant FDs 
     for(i = 0; i < FDESC_SIZE; i++){
@@ -186,6 +185,10 @@ int32_t execute(const uint8_t * command){
     uint32_t v_addr;            /* virtual addr of first instruction */
     dentry_t d;
     int pid;
+    char errMsg[ERR_BUF] = "TOO MANY PROCESSES OPEN!";
+
+    /* Ensure parameter is valid */
+    if (command == NULL) { return -1; }
 
     cli();
     
@@ -193,9 +196,14 @@ int32_t execute(const uint8_t * command){
     if (verify_file(command, inFile, &v_addr) == -1) { return -1; }
     
     /* Fetch a proccess id that is not in use */
-    pid=get_pid();
-    proc_state[pid] = 1;
+    pid = get_pid();
 
+    /* Ensure we don't launch too many processes */
+    if (pid == -1) {
+        terminal_write(errMsg, ERR_BUF);
+        return 0; 
+    }
+    
     /* Create PCB */
     pcb_init(pid);
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
@@ -318,8 +326,11 @@ int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_
 *                 -1 on failure (no characters to read)
 */
 int32_t read(int32_t fd, void * buf, int32_t nbytes){
+    /* Ensure parameter is valid */
+    if (buf == NULL) { return -1; }
+
     /* Check that we haven't exceeded max number of open files */
-    if (fd >= FDESC_SIZE|| fd<0) return -1;
+    if (fd >= FDESC_SIZE || fd < 0) { return -1; }
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to read() */
     pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
@@ -355,8 +366,11 @@ int32_t read(int32_t fd, void * buf, int32_t nbytes){
 *                 -1 on failure (no characters to written)
 */
 int32_t write(int32_t fd, const void * buf, int32_t nbytes){
+    /* Ensure parameter is valid */
+    if (buf == NULL) { return -1; }
+
     /* Check that we haven't exceeded max number of open files */
-    if (fd >= FDESC_SIZE|| fd<0||buf ==NULL) return -1;
+    if (fd >= FDESC_SIZE || fd < 0 || buf == NULL) return -1;
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to write() */
     pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
@@ -382,11 +396,13 @@ int32_t write(int32_t fd, const void * buf, int32_t nbytes){
 *   OUTPUTS: file index
 *   RETURN VALUE: file index or -1 on failure
 */
-int32_t open(const uint8_t * filename){
-    
+int32_t open(const uint8_t * filename){ 
     pcb_t * pcb;
     dentry_t temp_dentry;
     int i;
+
+    /* Ensure parameter is valid */
+    if (filename == NULL) { return -1; }
 
     /* initialize PCB to the bottom of kernel stack offest by 8MB * curr PID */
     pcb = (pcb_t *)(KSTACK_BOT - (PCB_SIZE * curr));
@@ -477,7 +493,7 @@ int32_t getargs(uint8_t * buf, int32_t nbytes) {
     int i;
 
     /* Make sure buffer constraints are fulfilled */
-    //if (buf == NULL || argSize == 0) { return -1; }
+    if (buf == NULL || argSize == 0) { return -1; }
 
     /* Copy arguments into buf after resetting it */
     memset(buf, 0, strlen((char *)buf));
@@ -496,18 +512,16 @@ int32_t getargs(uint8_t * buf, int32_t nbytes) {
 *   OUTPUTS: 
 *   RETURN VALUE: 
 */
-int32_t vidmap(uint8_t ** start_screen){
-
-    
+int32_t vidmap(uint8_t ** start_screen) {   
     if(start_screen == NULL || start_screen == (uint8_t **)_4MB_){
         return -1;
     } 
     
-    vidMem_page_map((int)(132*_MB_));
+    vidMem_page_map((int)(132 * _MB_));
 
-    *start_screen = (uint8_t *)(132*_MB_);
+    *start_screen = (uint8_t *)(132 * _MB_);
 
-    return 132*_MB_;
+    return 132 * _MB_;
 }
 
 
