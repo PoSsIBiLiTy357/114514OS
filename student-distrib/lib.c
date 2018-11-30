@@ -62,12 +62,12 @@ void putc_scroll(uint8_t c){
     if(c=='\n' || c=='\r'){
         screen_y++;
         screen_x=0;
-        if(screen_y==NUM_ROWS-1){
+        if(screen_y==NUM_ROWS){
             shift();
         }
     }
     else{
-        if(screen_y==NUM_ROWS-1){
+        if(screen_y==NUM_ROWS){
             shift();    
         }
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
@@ -125,7 +125,8 @@ void shift(){
         *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS-1) + j) << 1)) = ' ';
         *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS-1) + j) << 1) + 1) = ATTRIB;     
     }
-    screen_y-- ;
+    //screen_y--;
+    screen_y=screen_y_preinput;
 
 }
 /* void clear(void);
@@ -134,6 +135,7 @@ void shift(){
  * Function: set screen_y to specific line number */
 void screen_y_set(int n){
 	screen_y =n;
+    screen_y_preinput=0;
 }
 
 /* void clear(void);

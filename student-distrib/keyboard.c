@@ -66,7 +66,6 @@ void keyboard_handler(void){
 	while ((inb(KBRD_STATUS_PORT)&0x01)!=0) {  // only read from data port when the status is ready
 		pressed = inb(KBRD_DATA_PORT);   //get key code
 		if(strlen(keyboard_buffer) > 0 && pressed ==BACKSPACE) {
-			keyboard_buffer[cursor_idx] ='\0';
 			if(cursor_idx >= 8){
 				cursor_idx--;
 				//keyboard_buffer[cursor_idx] ='_';
@@ -76,6 +75,8 @@ void keyboard_handler(void){
 				screen_y_change(-1);
 				//overline =0;
 			}
+			keyboard_buffer[cursor_idx] ='\0';
+			//puts_scroll_refresh("");
 		}
 		else{
 			if(pressed==CAPSLOCK){				// record caps lock status
