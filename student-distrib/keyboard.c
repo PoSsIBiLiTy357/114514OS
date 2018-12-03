@@ -22,7 +22,7 @@ static char first[LINE_SIZE];
 //static char second[LINE2_SIZE];
 static char keyboard_buffer[BUFFER_SIZE]; //leave 1 for _
 static char terminal_buffer[BUFFER_SIZE];
-static char write_buffer[1025];
+static char write_buffer[1024];
 int terminal_read_ready;
 /* init_keyboard
  * 
