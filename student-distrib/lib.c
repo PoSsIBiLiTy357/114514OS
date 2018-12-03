@@ -68,7 +68,7 @@ void putc_scroll(uint8_t c){
     }
     else{
         if(screen_y==NUM_ROWS){
-            shift();    
+            shift();
         }
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
@@ -93,6 +93,11 @@ int32_t puts_scroll(int8_t* s){
 int32_t puts_scroll_refresh(int8_t* s){
     register int32_t idx=0;
     int x,y;
+    if(screen_x==0 && screen_y==25 && screen_y_preinput==24){
+            shift();
+            screen_y=24;
+            screen_y_preinput=23;
+        }
     for(y=screen_y_preinput;y<=screen_y;y++){
         for(x=0;x<NUM_COLS;x++){
             *(uint8_t *)(video_mem + ((NUM_COLS * y + x) << 1)) = ' ';
