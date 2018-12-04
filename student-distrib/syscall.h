@@ -11,6 +11,8 @@
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
 
+/* Current PID */
+static int curr = 0;
 
 /*typedef struct func_pointer{
     int (*open)(int32_t,int32_t, int8_t* , int32_t); 
@@ -36,6 +38,8 @@ typedef struct file_desc_t {
 
 typedef struct pcb_t{
     int32_t p_pid;
+    int32_t esp;
+    int32_t ebp;
     int32_t parent_esp;
     int32_t parent_ebp;
     file_desc_t file_array[FDESC_SIZE];

@@ -23,8 +23,6 @@
 #define MEM_FENCE           BYTE_LEN
 
 
-/* Current PID */
-static int curr = 0;
 
 /* Table of active and inactive processes (active = 1, inactive = 0) */
 static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
@@ -121,24 +119,15 @@ int32_t halt(uint8_t status){
     cli();
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
     pcb_t *par_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * cur_pcb->p_pid);
-
-    //restore parent data 
     proc_state[cur_pcb->pid] = 0;
-
-    //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      
-
-
 
     //close any relevant FDs 
     for(i = 0; i < FDESC_SIZE; i++){
-
         if(cur_pcb->file_array[i].flag){
             close(i);
         }
         cur_pcb->file_array[i].flag = 0;
-    
     }
-
     curr = par_pcb->pid;
 
     if(cur_pcb->pid == cur_pcb->p_pid){
@@ -147,11 +136,10 @@ int32_t halt(uint8_t status){
 
     //restore parent paging (cr3)
     pid_page_map(par_pcb->pid);
-
     /* Update the tss.esp0 */
     tss.esp0 = cur_pcb->parent_esp;   
-
     sti();
+
     asm volatile(
         "movl   %0, %%esp   ;"
         "movl   %1, %%ebp   ;"
@@ -163,9 +151,7 @@ int32_t halt(uint8_t status){
         :"%eax"
     );
 
-
     return 0;
-
 }
 
 
@@ -210,12 +196,9 @@ int32_t execute(const uint8_t * command){
 
     /* Initialize paging for process */
     pid_page_map(pid);
-
-
     /* User-level Program Loader */
     read_dentry_by_name(inFile, &d);
     read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
-
     /* Upate TSS ss0 and esp0 */
     tss.ss0 = KERNEL_DS;
     //tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
