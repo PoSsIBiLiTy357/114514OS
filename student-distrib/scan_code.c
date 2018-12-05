@@ -74,18 +74,6 @@
 #define 	COMMA	51
 #define 	POINT	52
 
-#define 	F1             59
-#define 	F2             60
-#define 	F3             61
-#define 	F4             62
-#define 	F5             63
-#define 	F6             64
-#define 	F7             65
-#define 	F8             66
-#define 	F9             67
-#define 	F10            68
-#define 	F11            87
-#define 	F12            88
 
 #define 	PAGEUP			104
 #define 	PAGEDOWN        109

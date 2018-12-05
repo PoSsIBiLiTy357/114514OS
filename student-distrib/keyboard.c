@@ -2,6 +2,7 @@
 #include "i8259.h"
 #include "keyboard.h"
 #include "scan_code.h"
+#include "syscall.h"
 
 #define KBRD_STATUS_PORT		0x64
 #define KBRD_DATA_PORT			0x60
@@ -12,18 +13,24 @@
 #define NUM_ROWS    			25
 #define LTR_LOWER_BND			96
 #define LTR_UPPER_BND			122
+#define TERMINAL_NUM		3
+
 
 static int caplk_pressd;
 static int shift_state;
 static int ctrl_state;
-static int cursor_idx;
+static int alt_state;
+static int cursor_idx[TERMINAL_NUM];
 static int overline;
 static char first[LINE_SIZE];
 //static char second[LINE2_SIZE];
-static char keyboard_buffer[BUFFER_SIZE]; //leave 1 for _
-static char terminal_buffer[BUFFER_SIZE];
-static char write_buffer[1024];
-int terminal_read_ready;
+static char keyboard_buffer[TERMINAL_NUM][BUFFER_SIZE]; //leave 1 for _
+static char terminal_buffer[TERMINAL_NUM][BUFFER_SIZE];
+//static char write_buffer[1024];
+int terminal_read_ready[TERMINAL_NUM];
+int hold_num;
+int need_nl=0;
+volatile int terminal_2_running=0, terminal_3_running=0;
 /* init_keyboard
  * 
  * initialize scan codes for letters and numbers, then unmask the keyboard irq in PIC
@@ -38,13 +45,14 @@ void init_keyboard(void)
 	init_scan_code();
 	caplk_pressd=0;
 	shift_state=0;
-	cursor_idx=7;
+	memset(cursor_idx,0,sizeof(cursor_idx));
+	memset(terminal_read_ready,0,sizeof(terminal_read_ready));
 	overline =0;
-	terminal_read_ready =0;
+	hold_num=0;
 	memset(first,'\0',sizeof(first));
 	//memset(second,'\0',sizeof(second));
 	memset(keyboard_buffer,'\0',sizeof(keyboard_buffer));
-	memcpy(keyboard_buffer,"391OS> ",strlen((char*)"391OS> "));
+	memset(terminal_buffer,'\0',sizeof(terminal_buffer));
 	enable_irq(1);  //unmask IRQ1 of PIC
 	puts_scroll_refresh((char*)keyboard_buffer);
 }
@@ -66,17 +74,17 @@ void keyboard_handler(void){
 	while ((inb(KBRD_STATUS_PORT)&0x01)!=0) {  // only read from data port when the status is ready
 		pressed = inb(KBRD_DATA_PORT);   //get key code
 		if(strlen(keyboard_buffer) > 0 && pressed ==BACKSPACE) {
-			if(cursor_idx >= 8){
-				cursor_idx--;
-				//keyboard_buffer[cursor_idx] ='_';
+			if(cursor_idx[get_display_terminal()] >= 8){
+				cursor_idx[get_display_terminal()]--;
+				
 			}
-			//else keyboard_buffer[cursor_idx] ='_';
+			
 			if (strlen(keyboard_buffer)==LINE_SIZE) {
 				screen_y_change(-1);
 				//overline =0;
 			}
-			keyboard_buffer[cursor_idx] ='\0';
-			//puts_scroll_refresh("");
+			keyboard_buffer[get_display_terminal()][cursor_idx] ='\0';
+			
 		}
 		else{
 			if(pressed==CAPSLOCK){				// record caps lock status
@@ -94,25 +102,44 @@ void keyboard_handler(void){
 			if(pressed==LEFTCTRL_R){		//change state if released
 				ctrl_state=0;
 			}
+			if(pressed==LEFTALT){
+				alt_state=1;
+			}
+			if(pressed==LEFTALT_R){
+				alt_state=0;
+			}
 			if(scan_code[(int)pressed]=='l' && ctrl_state==1){					///clear screen if ctrl+l
 				clear();
 				screen_y_set(0);
-				for(i=0;i<BUFFER_SIZE;i++){					//empty the buffer
-					keyboard_buffer[i]='\0';
+				for(i=0;i<sizeof(keyboard_buffer[get_display_terminal()]);i++){					//empty the buffer
+					keyboard_buffer[get_display_terminal()][i]='\0';
 				}
-				memcpy(keyboard_buffer,"391OS> ",strlen((char*)"391OS> "));
-				cursor_idx=7;
+				cursor_idx[get_display_terminal()]=0;
 			}
-				//	if(scan_code[(int)pressed] == '\n'){
-				//		int i;
-				//		for(i=0;i<cursor_idx;i++){
-				//			keyboard_buffer[i]=0;
-				//		}
-				//		cursor_idx=0;
-				//		keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
-				//		cursor_idx++;
-				//		keyboard_buffer[cursor_idx]='_';
-				//	}
+			if(alt_state==1){
+				if(pressed==F1){
+					set_display_terminal(1);
+				}
+				if(pressed==F2){
+					set_display_terminal(2);
+					if(terminal_2_running==0){
+						if(get_empty_pid()==-1) return;
+						terminal_2_running =1;
+						execute_term_num((uint8_t *) "shell",1,1);                      ////////////////////need function
+
+					}
+					
+				}
+				if(pressed==F3){
+					if (terminal_3_running==0){
+						set_display_terminal(3);
+						if (get_empty_pid()==-1)return;
+						terminal_3_running =1;
+						execute_term_num((uint8_t *) "shell",2,1);
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////start here
 			if (strlen(keyboard_buffer) == INDX_SIZE && scan_code[(int)pressed] != '\n') {
 				continue;
 			}
@@ -122,8 +149,7 @@ void keyboard_handler(void){
 						if (scan_code[(int)pressed]!=0){
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];			// cap not pressed and shift not pressed case 
 							if (cursor_idx < INDX_SIZE) {
-								cursor_idx++;
-								//keyboard_buffer[cursor_idx] = '_';
+								cursor_idx++;								
 							}
 						}	
 					}	
@@ -131,8 +157,7 @@ void keyboard_handler(void){
 						if (scan_code[(int)pressed]!=0){									// shift pressed case, use shift convert table 
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
 							if (cursor_idx < INDX_SIZE) {
-								cursor_idx++;
-								//keyboard_buffer[cursor_idx] = '_';
+								cursor_idx++;								
 							}
 						}
 					}
@@ -142,15 +167,13 @@ void keyboard_handler(void){
 						if(shift_state==0){
 							keyboard_buffer[cursor_idx]=shift_convert[(int)pressed];
 							if (cursor_idx < INDX_SIZE) {
-								cursor_idx++;
-								//keyboard_buffer[cursor_idx] = '_';
+								cursor_idx++;								
 							}
 						}
 						else{																//cap case with shift hold down, back to lower case letter 
 							keyboard_buffer[cursor_idx]=scan_code[(int)pressed];
 							if (cursor_idx < INDX_SIZE) {
 								cursor_idx++;
-								//keyboard_buffer[cursor_idx] = '_';
 							}
 						}
 				
