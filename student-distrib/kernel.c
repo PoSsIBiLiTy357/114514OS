@@ -153,6 +153,7 @@ void entry(unsigned long magic, unsigned long addr) {
     read_filesys_bootblock(bootBlk_addr);
     init_keyboard();
 
+    pit_init();
     rtc_init();
 
     /* Enable interrupts */

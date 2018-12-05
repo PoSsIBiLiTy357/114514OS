@@ -12,8 +12,9 @@
 #define PIT_CHANNEL_0               0x40
 #define LSB_MASK                    0xFF
 #define MSB_SHIFT                   8
-#define PIT_IRQ_NUM                 0
+#define PIT_IRQ                     0
 
+int PIT_ctr = 0;
 
 /*
 * pit_init
@@ -32,7 +33,7 @@ void pit_init() {
     divisor = PIT_CLOCK_FREQ / DESIRED_FREQ;
 
     /* Enable PIT IRQs */
-    enable_irq(PIT_IRQ_NUM);
+    enable_irq(PIT_IRQ);
 
     /* Send command byte to command port and frequency to channel 0 */
     outb(PIT_COMM_BYTE, PIT_COMM_PORT);
@@ -41,5 +42,12 @@ void pit_init() {
 }
 
 void pit_int_handler() {
+    cli();
+    
+    PIT_ctr++;
 
+    /* Send EOI for PIT interrupt */
+    send_eoi(PIT_IRQ);
+
+    sti();
 }

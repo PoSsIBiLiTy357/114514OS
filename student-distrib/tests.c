@@ -22,6 +22,8 @@ static inline void assertion_failure(){
 /* Counter for RTC interrupts declared in RTC.c */
 extern int RTC_ctr;
 
+extern int PIT_ctr;
+
 /*****************************************************************************/
 /*						 Checkpoint 1 tests									 */
 /*****************************************************************************/
@@ -910,7 +912,15 @@ int no_args_test() {
 /*****************************************************************************/
 /*						 Checkpoint 5 tests									 */
 /*****************************************************************************/
-// bleh..... wo chow
+
+int pit_test() {
+	TEST_HEADER;
+	while (PIT_ctr < 20) {
+		printf("%d\n", PIT_ctr);
+	}
+
+	return PASS;
+}
 
 
 
@@ -968,7 +978,7 @@ void launch_tests(){
 	//check_terminal_write();
 
 	/************************* Checkpoint 4 tests *****************************/
-	//clear();	//optional but preferred
+	clear();	//optional but preferred
 
 	/* getargs tests */
 	// TEST_OUTPUT("one_letter_arg_test()", one_letter_arg_test());
@@ -977,10 +987,12 @@ void launch_tests(){
 	// TEST_OUTPUT("some_args_test()", some_args_test());
 	// TEST_OUTPUT("no_args_test()", no_args_test());
 
+	TEST_OUTPUT("pit_test()", pit_test());
+
 	/* unused test */
 	//TEST_OUTPUT("insufficient_bytes_test()", insufficient_bytes_test());
 
 	/*execute test*/
-	execute((uint8_t *)"shell");
+	//execute((uint8_t *)"shell");
 
 }
