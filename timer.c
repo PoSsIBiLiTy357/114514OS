@@ -14,6 +14,18 @@
 #define MSB_SHIFT                   8
 #define PIT_IRQ_NUM                 0
 
+
+/*
+* pit_init
+*   DESCRIPTION: Initializes the Programmable Interval Timer (PIT). Device is
+*       initialized on IRQ 0 for the PIC. Command byte (0x36) is sent to 
+*       PIT command port (0x43). Calculated frequency is written to channel
+*       0 data register for PIT.
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*/
 void pit_init() {
     /* Calculate frequency */
     int32_t divisor;
