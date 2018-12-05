@@ -38,6 +38,10 @@ typedef struct pcb_t{
     int32_t p_pid;
     int32_t parent_esp;
     int32_t parent_ebp;
+    int32_t current_esp;
+    int32_t current_ebp;
+    int32_t terminal;
+    int32_t tml_proc;
     file_desc_t file_array[FDESC_SIZE];
     int32_t bitmap[FDESC_SIZE];
     int32_t pid;

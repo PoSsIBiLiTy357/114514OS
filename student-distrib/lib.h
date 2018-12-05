@@ -24,14 +24,24 @@ int32_t strncmp(const int8_t* s1, const int8_t* s2, uint32_t n);
 int8_t* strcpy(int8_t* dest, const int8_t*src);
 int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
 //////////////////////////////////////////
+int get_active_terminal();
+int get_display_terminal();
+//void set_active_terminal(int terminal_id);
+//void set_disiplay_terminal(int terminal_id);
+void putc_scroll_display(uint8_t c);
+void erase_last_ch_display();
+void erase_last_ch();
+
+
+
 void put_refresh_line(const char* buf);
-void shift();
+void shift_up();
 void screen_y_change(int n);
 void screen_y_set(int n);
 int get_screen_y();
 void screen_x_set(int n);
 void putc_scroll(uint8_t c);
-int32_t puts_scroll(int8_t* s);
+int32_t puts_scroll(int8_t* s, int32_t len);
 int32_t puts_scroll_refresh(int8_t* s);
 //////////////////////////////////////////
 /* Userspace address-check functions */

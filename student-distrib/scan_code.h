@@ -13,6 +13,9 @@
 #define		LEFTCTRL_R	0x9D
 #define     LEFTALT  56
 #define     LEFTALT_R 0xB8
+#define   ENTER		0x1C
+
+#define   L		38
 
 #define 	F1             59
 #define 	F2             60

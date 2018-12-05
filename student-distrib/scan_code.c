@@ -51,7 +51,7 @@
 #define   H		35
 #define   J		36
 #define   K		37
-#define   L		38
+
 #define   Z		44
 #define   X		45
 #define   C		46
