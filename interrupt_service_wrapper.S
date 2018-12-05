@@ -26,6 +26,14 @@ rtc_handler_asm:
     popa
     iret
 
+pit_handler_asm:
+    pusha
+    pushfl
+    call pit_int_handler
+    popfl
+    popa
+    iret
+
 https://www.win.tue.nl/~aeb/linux/lk/lk-4.html
 syscall_asm:
     pushl %eax   #save orginal eax

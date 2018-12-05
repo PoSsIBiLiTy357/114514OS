@@ -1,6 +1,4 @@
 /* rtc.h - Header file for RTC device. Contains basic function declarations.
- *  Author: Andrew Chen
- *  Date: 10/20/18 
  */
 
 #ifndef _RTC_H

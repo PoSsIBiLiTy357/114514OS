@@ -1,3 +1,6 @@
+/* timer.h - Header file for RTC device. Contains basic function declarations.
+ */
+
 #ifndef _TIMER_H
 #define _TIMER_H
 

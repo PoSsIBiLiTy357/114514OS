@@ -1,8 +1,6 @@
 /* rtc.c - C file for RTC device. Contains functions for RTC
  *  initialization and interrupt handling. Heavy influence from:
  *  https://wiki.osdev.org/RTC
- *  Author: Andrew Chen
- *  Date: 10/20/18 
  */
 
 #include "rtc.h"
