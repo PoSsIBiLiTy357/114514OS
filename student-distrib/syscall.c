@@ -23,10 +23,6 @@
 #define MEM_FENCE           BYTE_LEN
 
 
-
-/* Table of active and inactive processes (active = 1, inactive = 0) */
-static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
-
 /* Buffer for arguments and size storage */
 static uint8_t argBuf[CMD_LIMIT];
 static uint32_t argSize = 0;
@@ -185,14 +181,30 @@ int32_t execute(const uint8_t * command){
     /* Create PCB */
     pcb_init(pid);
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
+    pcb_t* p_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * (pid-1));
 
-	/* Saving the current ESP and EBP into the PCB struct */
+	/* Saving the current ESP and EBP into the new PCB struct */
 	asm volatile("			\n\
 				movl %%ebp, %%eax 	\n\
 				movl %%esp, %%ebx 	\n\
 			"
 			:"=a"(pcb->parent_ebp), "=b"(pcb->parent_esp)
             );
+
+/////////////////////////////////////////////////////////////////////
+    if(pcb->pid != pcb->p_pid){
+    /* Saving the current ESP and EBP into the parent PCB struct */
+
+        asm volatile("			\n\
+                    movl %%ebp, %%eax 	\n\
+                    movl %%esp, %%ebx 	\n\
+                "
+                :"=a"(pcb->ebp), "=b"(pcb->esp)
+                );
+
+    }
+/////////////////////////////////////////////////////////////////////
+
 
     /* Initialize paging for process */
     pid_page_map(pid);
@@ -203,6 +215,7 @@ int32_t execute(const uint8_t * command){
     tss.ss0 = KERNEL_DS;
     //tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
     tss.esp0 = KSTACK_BOT - (PCB_SIZE * pid) - MEM_FENCE;
+
 
     sti();
     /* IRET setup and context switch */

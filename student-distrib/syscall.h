@@ -11,8 +11,10 @@
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
 
+/* Table of active and inactive processes (active = 1, inactive = 0) */
+int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
 /* Current PID */
-static int curr = 0;
+int curr = 0;
 
 /*typedef struct func_pointer{
     int (*open)(int32_t,int32_t, int8_t* , int32_t); 
@@ -42,6 +44,9 @@ typedef struct pcb_t{
     int32_t ebp;
     int32_t parent_esp;
     int32_t parent_ebp;
+    int32_t esp;
+    int32_t ebp;
+    //int32_t t_idx;
     file_desc_t file_array[FDESC_SIZE];
     int32_t bitmap[FDESC_SIZE];
     int32_t pid;

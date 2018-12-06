@@ -1,6 +1,10 @@
 #include "lib.h"
 #include "i8259.h"
 #include "schedule.h"
+#include "syscall.h"
+
+extern curr;
+extern proc_state;
 
 void pit_init(){
     //////////////////////////////////////////
@@ -21,27 +25,28 @@ void pit_catch(){
     send_eoi(0);
 
     //need if check is there any other process needs to run
-    //if(only one process) sti(); return?? 
-
-
+    if(!proc_state[1]){
+        sti(); 
+        return;
+    }
     ///////////////Code for process switch////////////////////////
-    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    pcb_t *nxt_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * (curr + 1));/////process gonna run
 
-    //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;  
+    int32_t nxt_pid = (curr+1)%6;
+    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t *nxt_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * nxt_pid);/////process gonna run
 
     curr = nxt_pcb->pid;
     //switch paging for next process(cr3)
     pid_page_map(nxt_pcb->pid);
     /* Update the tss.ss0/esp0 */
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = //assign to nxt_pcb esp
+    tss.esp0 = KSTACK_BOT - (PCB_SIZE * nxt_pid) - MEM_FENCE;
     sti();
 
     asm volatile(
         "movl   %%esp, %0   ;"
         "movl   %%ebp, %1   ;"
-        :"r"(cur_pcb->nxt_esp), "r"(cur_pcb->nxt_ebp) : :
+        :"r"(cur_pcb->esp), "r"(cur_pcb->ebp) : :
     );
 
     asm volatile(
@@ -49,10 +54,10 @@ void pit_catch(){
         "movl   %1, %%ebp   ;"
         "jmp RETURN_FROM_IRET;"
 
-        : :"r"(nxt_pcb->parent_esp), "r"(nxt_pcb->parent_ebp) :
+        : :"r"(nxt_pcb->esp), "r"(nxt_pcb->ebp) :
     );
     ////////////////////////////////////////////////////////////////
-    return 0;
+    return;
 
 }
 
