@@ -7,6 +7,7 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "i8259.h"
+#include "syscall.h"
 
 /* PIT initialization and interrupt handler routines */
 void pit_init();

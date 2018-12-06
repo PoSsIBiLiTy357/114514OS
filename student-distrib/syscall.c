@@ -25,10 +25,10 @@
 
 
 /* Current PID */
-static int curr_process = 0;
+int curr_process = 0;
 
 /* Table of active and inactive processes (active = 1, inactive = 0) */
-static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
+int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
 
 /* Buffer for arguments and size storage */
 static uint8_t argBuf[CMD_LIMIT];
