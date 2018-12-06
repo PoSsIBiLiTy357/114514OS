@@ -14,7 +14,10 @@
 #define MSB_SHIFT                   8
 #define PIT_IRQ                     0
 
-int PIT_ctr = 0;
+int8_t prog_timer = 0;
+static int curr_process;          // set in execute()?
+
+int PIT_ctr = 0;            // for testing delete later
 
 /*
 * pit_init
@@ -43,11 +46,25 @@ void pit_init() {
 
 void pit_int_handler() {
     cli();
-    
-    PIT_ctr++;
+    int i;
 
-    /* Send EOI for PIT interrupt */
+     /* Send EOI for PIT interrupt */
     send_eoi(PIT_IRQ);
+
+    if (prog_timer) {
+        /* Continue running a process */
+        prog_timer--;
+        sti();  
+        return;
+    } else {
+        /* Load in a different process to execute */
+        for (i = 0; i < 6; i++) {
+            curr_process += (curr_process + 1) % 6;
+
+        }
+    }
+    
+    //PIT_ctr++;            // delete later
 
     sti();
 }
