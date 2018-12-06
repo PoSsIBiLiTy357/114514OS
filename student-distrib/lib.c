@@ -36,23 +36,23 @@ int get_display_terminal()
     return display_terminal;
 }
 
-/*void set_active_terminal(int terminal_id)
+void set_active_terminal(int terminal_id)
 {
     if(terminal_id == display_terminal)
         set_active_terminal_paging(terminal_id, 1);
     else
         set_active_terminal_paging(terminal_id, 0);
     active_terminal = terminal_id;
-}*/
+}
 
-/*void set_disiplay_terminal(int terminal_id)
+void set_disiplay_terminal(int terminal_id)
 {
     memcpy(TERMINAL_MEM[display_terminal], physical_video_mem, KB_4);
     memcpy(physical_video_mem, TERMINAL_MEM[terminal_id], KB_4);
     display_terminal = terminal_id;
     set_active_terminal(active_terminal);
     update_cursor(screen_x_multi[terminal_id], screen_y_multi[terminal_id]);
-}*/
+}
 
 void erase_last_ch() {
     if( screen_x_multi[active_terminal] == 0 )

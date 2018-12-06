@@ -91,37 +91,37 @@ void keyboard_handler()
 				memset(keyboard_buffer[get_display_terminal()], 0 , sizeof(keyboard_buffer[get_display_terminal()]) );
 				cursor_ind[get_display_terminal()] = 0;
 			}
-			// else if (  (pressed_key[LEFTALT]==1)  )
-			// {
-			// 	if(input == F1)
-			// 		set_disiplay_terminal(0);
-			// 	if(input == F2)
-			// 	{
-			// 		set_disiplay_terminal(1);
+			else if (  (pressed_key[LEFTALT]==1)  )
+			{
+				if(input == F1)
+					set_disiplay_terminal(0);
+				if(input == F2)
+				{
+					set_disiplay_terminal(1);
 
-			// 		if(!terminal_2_running)
-			// 		{
-			// 			if(get_pid()==-1) return;
-			// 			terminal_2_running = 1;
-			// 			//sti();
-			// 			execute_with_terminal_num((unsigned char *)"shell",1,1);
-			// 		}
+					if(!terminal_2_running)
+					{
+						if(get_pid()==-1) return;
+						terminal_2_running = 1;
+						//sti();
+						execute_with_terminal_num((unsigned char *)"shell",1,1);
+					}
 
-			// 	}
-			// 	if(input == F3)
-			// 	{
-			// 		set_disiplay_terminal(2);
+				}
+				if(input == F3)
+				{
+					set_disiplay_terminal(2);
 
-			// 		if(!terminal_3_running)
-			// 		{
-			// 			if(get_pid()==-1) return;
-			// 			terminal_3_running = 1;
-			// 			//sti();
-			// 			execute_with_terminal_num((unsigned char *)"shell",2,1);
-			// 		}
+					if(!terminal_3_running)
+					{
+						if(get_pid()==-1) return;
+						terminal_3_running = 1;
+						//sti();
+						execute_with_terminal_num((unsigned char *)"shell",2,1);
+					}
 
-			// 	}
-			// }
+				}
+			}
 			else if(scan_code[input]!=0)
 			{
 				if(cursor_ind[get_display_terminal()]>=MAX_KEY_IND+1)

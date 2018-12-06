@@ -219,6 +219,20 @@ void vidMem_page_map(int vAddr){
 
 }
 
+void set_active_terminal_paging(int terminal_id,int display){
+    
+    if(display=0){
+        ////////////////////////////////////////////////////////////////
+        page_table[PT_VIDEO].page_addr=PT_VIDEO + terminal_id +1;///////
+        ////////////////////////////////////////////////////////////////   debug here if needed
+    }
+    else{
+        ////////////////////////////////////////////////////////////////
+        page_table[PT_VIDEO].page_addr=PT_VIDEO;                 ///////
+        ////////////////////////////////////////////////////////////////   debug here if needed
+    }
 
+    flush_tlb();
+}
 
 
