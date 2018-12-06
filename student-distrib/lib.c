@@ -4,7 +4,7 @@
 #include "lib.h"
 #include "paging.h"
 #define VIDEO       0xB8000
-#define VIDEO_PHYSICAL       (0xB8000+0x4000)
+#define VIDEO_PHYSICAL       (0xB8000)
 #define NUM_COLS    80
 #define NUM_ROWS    25
 #define ATTRIB      0x7

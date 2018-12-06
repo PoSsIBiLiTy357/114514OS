@@ -254,13 +254,15 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int i
 
 
     /* update  prev_pcb's curent ebp esp*/
+    if(prev_pcb!=NULL){
 	asm volatile("			\n\
 				movl %%ebp, %%eax 	\n\
 				movl %%esp, %%ebx 	\n\
 			"
 			:"=a"(prev_pcb->current_ebp), "=b"(prev_pcb->current_ebp)
             );
-
+    }
+    
     sti();
     /* IRET setup and context switch */
     asm volatile(
