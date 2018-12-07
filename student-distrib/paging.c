@@ -238,7 +238,7 @@ void vidMem_page_map(int vAddr){
     vidMem_table[0].page_attr     = 0;
     vidMem_table[0].page_global   = 0;
     vidMem_table[0].page_avail    = 0;
-    vidMem_table[0].page_addr = PT_VIDEO;
+    vidMem_table[0].page_addr =PT_VIDEO;
 
     flush_tlb();
 

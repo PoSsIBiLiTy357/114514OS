@@ -52,9 +52,9 @@ unsigned char character_convert(unsigned char c)
     if( scan_code[c] ==0 ) return 0;
     unsigned char res = scan_code[c];
     if( (cap_status == 1) && (res>='a') && (res<='z') )
-        res = shift_convert[res];
+        res = shift_convert[c];
     if( (pressed_key[LEFTSHIFT]==1) || (pressed_key[RIGHTSHIFT]==1) )
-        res = shift_convert[res];
+        res = shift_convert[c];
     return res;
 }
 
