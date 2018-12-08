@@ -49,7 +49,7 @@ void pcb_init(int pid, int terminal_num) {
 
     /* Create PCB for current process and assign PID */
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
-    pcb_t* p_pcb = (pcb_t *)(tss.esp0 & KSTACK_BOT);
+    pcb_t* p_pcb;
     pcb->pid = pid;
 
     /* Fill in file descriptors for reserved file stdin for every new process */
@@ -78,6 +78,7 @@ void pcb_init(int pid, int terminal_num) {
         pcb->p_pid = pid;
     }
     else {
+        p_pcb = (pcb_t *)(tss.esp0 & KSTACK_BOT);
         pcb->p_pid = p_pcb->pid;
     }
     
@@ -171,7 +172,7 @@ int32_t halt(uint8_t status){
 }
 
 int32_t execute(const uint8_t * command){
-    pcb_t *pcb = (pcb_t *)(KSTACK_BOT & tss.esp0);
+    pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
     return execute_with_terminal_num(command, pcb->terminal);
 }
 
@@ -193,7 +194,7 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num){
     uint32_t v_addr;            /* virtual addr of first instruction */
     dentry_t d;
     int pid;
-    char errMsg[ERR_BUF] = "TOO MANY PROCESSES OPEN!";
+    char errMsg[ERR_BUF] = "TOO MANY PROCESSES OPEN!\n";
 
     /* Ensure parameter is valid */
     if (command == NULL) { return -1; }

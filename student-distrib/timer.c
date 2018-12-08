@@ -50,9 +50,10 @@ void pit_int_handler() {
     send_eoi(PIT_IRQ);
 
 //////////////////////Code for process switch////////////////////////////
-
+    if(t_curr[1] == -1 && t_curr[2] == -1){
+        return;
+    }
     
-
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
     int32_t nxt_terminal = (cur_pcb->terminal+1)%3;
     pcb_t *nxt_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * t_curr[nxt_terminal]);
