@@ -12,7 +12,7 @@
 #define KSTACK_START        0x800000
 #define PROGRAM_IMAGE_ADDR  0x8048000
 #define PROC_NUM            6
-#define PCB_SIZE            0x2000
+
 #define ASM                 1
 #define RESERV_FILES        2
 #define ERR_BUF            26
@@ -21,11 +21,9 @@
 #define FILE_DIR            1
 #define FILE_REG            2
 
-#define MEM_FENCE           BYTE_LEN
-
 
 /* Current PID */
-int curr_process = 0;
+static int curr_process = 0;
 
 /* Table of active and inactive processes (active = 1, inactive = 0) */
 static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
@@ -34,6 +32,32 @@ static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
 static uint8_t argBuf[CMD_LIMIT];
 static uint32_t argSize = 0;
 
+
+/*
+* set_curr_process
+*   DESCRIPTION: Updates the current running process
+*
+*   INPUTS: int pid - new process ID
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*/
+void set_curr_process(int pid) {
+    curr_process = pid;
+}
+
+
+/*
+* curr_running
+*   DESCRIPTION: Checks if process at requested PID is currenlty running
+*
+*   INPUTS: int pid - process ID
+*   OUTPUTS: 1 if process is running, 0 if not, or -1 on failure
+*   RETURN VALUE: int values described above
+*/
+int8_t curr_running(int pid) {
+    if (pid > 6 || pid < 0) { return -1;}
+    return proc_state[pid];
+}
 
 /*
 * pcb_init
@@ -45,7 +69,7 @@ static uint32_t argSize = 0;
 *   RETURN VALUE: none
 *	SIDE EFFECTS : Creates a new PCB for the process with requested PID
 */
-void pcb_init(int pid) {
+void pcb_init(int pid, int terminal_num, int isTerm) {
     int i;
     curr_process = pid;
     
@@ -74,13 +98,83 @@ void pcb_init(int pid) {
     }
 
 
-    /* Check if this is the first process, and if it is, set parent ptr to NULL */
-    if (pid == 0) {
+    // /* Check if this is the first process, and if it is, set parent ptr to NULL */
+    // if (pid == 0) {
+    //     pcb->p_pid = pid;
+    // }
+    // else {
+    //     pcb->p_pid = pid-1;
+    // }
+
+    pcb_t* prev_pcb;
+    // /* Upate TSS ss0 and esp0 */
+    // if(curr_process == 0){
+    //     prev_pcb=NULL;
+    // }
+    // else{
+    //     prev_pcb=(pcb_t *)(KSTACK_BOT - PCB_SIZE * (pid-1));
+    // }
+
+    /* Check if we are initializing a PCB for a teriminal */
+    if (isTerm) {
+        prev_pcb = NULL;
+        pcb->isTerm = isTerm;
         pcb->p_pid = pid;
+        pcb->c_pid = -1;        /* No child set yet */
+    } else {
+        /* Find PCB for current terminal and set its child PID */
+        prev_pcb = get_term_pcb(terminal_num);
+        prev_pcb->c_pid = pid;
+        pcb->p_pid = prev_pcb->pid;
     }
-    else {
-        pcb->p_pid = pid-1;
+
+    /* Save terminal num for prgrm or terminal to run */
+    pcb->terminal = terminal_num;
+    
+    // if (isTerm == 0){
+    //     prev_pcb->c_pid = pcb->pid;
+    // }
+
+}
+
+/*
+* get_term_pcb
+*   DESCRIPTION: Returns PCB address of the process with given Terminal number.
+*
+*   INPUTS: int terminal_num - terminal number
+*   OUTPUTS: pcb_t * - address to PCB of requested process
+*   RETURN VALUE: pcb_t *
+*/
+pcb_t * get_term_pcb(int terminal_num) {
+    int i;
+    pcb_t * temp_pcb;
+
+    /* Return -1 if given an invalid or inactive process ID */
+    if (terminal_num > 2 || terminal_num < 0) { return (pcb_t *)-1; }
+
+    for (i = 0; i < PROC_NUM; i++) {
+        temp_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * i);
+        if (temp_pcb == NULL) { continue; }
+        if (temp_pcb->isTerm == 1 && temp_pcb->terminal == terminal_num) { 
+            return temp_pcb; 
+        }
     }
+
+    return (pcb_t *)-1;
+}
+
+
+/*
+* get_pcb
+*   DESCRIPTION: Returns PCB of current process
+*
+*   INPUTS: none
+*   OUTPUTS: pcb_t * - address to PCB of requested process
+*   RETURN VALUE: pcb_t *
+*/
+pcb_t * get_curr_pcb() {
+    if (curr_process > 6 || curr_process < 0) { return (pcb_t *)-1; }
+    return (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr_process);
 }
 
 
@@ -167,8 +261,9 @@ int32_t halt(uint8_t status){
 }
 
 int32_t execute(const uint8_t * command){
-     pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr_process);
-    return execute_with_terminal_num(command,pcb->terminal,0);
+     //pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr_process);
+    pcb_t * pcb = get_term_pcb(get_active_terminal());
+    return execute_with_terminal_num(command, pcb->terminal, 0);
 }
 
 
@@ -184,7 +279,7 @@ int32_t execute(const uint8_t * command){
 *   RETURN VALUE: 0 on success, -1 on failure
 *	SIDE EFFECTS : Switches processor to user mode to run given user program
 */
-int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int isTerm){
+int32_t execute_with_terminal_num(const uint8_t * command, int terminal_num, int isTerm){
     uint8_t inFile[CMD_LIMIT];  /* name of executable file           */
     uint32_t v_addr;            /* virtual addr of first instruction */
     dentry_t d;
@@ -211,8 +306,9 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int i
     proc_state[pid] = 1;      /* Mark pid as used */
     
     /* Create PCB */
-    pcb_init(pid);
+    pcb_init(pid, terminal_num, isTerm);
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
+    pcb_t* prev_pcb = get_term_pcb(terminal_num);
 
 	/* Saving the current ESP and EBP into the PCB struct */
 	asm volatile("			\n\
@@ -231,31 +327,17 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int i
     read_dentry_by_name(inFile, &d);
     read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
 
-
-    pcb_t* prev_pcb;
     /* Upate TSS ss0 and esp0 */
-    if(curr_process==0){
-        prev_pcb=NULL;
-    }
-    else{
-        prev_pcb=(pcb_t *)(KSTACK_BOT - PCB_SIZE * (pid-1));
-    }
-    pcb->terminal=terminal_num;
-    pcb->isTerm=isTerm;
-    if(isTerm==0){
-        prev_pcb->c_pid = pcb->pid;
-    }
-
     tss.ss0 = KERNEL_DS;
     //tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
     tss.esp0 = KSTACK_BOT - (PCB_SIZE * pid) - MEM_FENCE;
 
-    pcb->current_ebp=tss.esp0;
-    pcb->current_esp=tss.esp0;
+    pcb->current_ebp = tss.esp0;
+    pcb->current_esp = tss.esp0;
 
 
     /* update  prev_pcb's curent ebp esp*/
-    if(prev_pcb!=NULL){
+    if (prev_pcb != NULL) {
 	asm volatile("			\n\
 				movl %%ebp, %%eax 	\n\
 				movl %%esp, %%ebx 	\n\

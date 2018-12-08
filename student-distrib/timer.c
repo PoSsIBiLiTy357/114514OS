@@ -14,6 +14,8 @@
 #define MSB_SHIFT                   8
 #define PIT_IRQ                     0
 
+#define PID_NEXT(x)                 (((x) + 1) % 6)
+
 int8_t prog_timer = 0;
 //static int curr_process;          // set in execute()?
 
@@ -46,10 +48,52 @@ void pit_init() {
 
 void pit_int_handler() {
     cli();
+    send_eoi(PIT_IRQ);  // delete this if uncommenting chunk below
+    sti();              // delete this if uncommenting chunk below
+//////////////////////////////////////////////////////////////////////////////////////////
 
-    // /int i;
-     /* Send EOI for PIT interrupt */
-    send_eoi(PIT_IRQ);
+    // int32_t pid;
+    // int8_t found_process = 0;
+
+    // /* Send EOI for PIT interrupt */
+    // send_eoi(PIT_IRQ);
+
+    // /* Traverse all processes and find a different active process than current */
+    // pcb_t * next_pcb;
+    // for (pid = PID_NEXT(get_curr_pcb()->pid); pid != get_curr_pcb()->pid; pid = PID_NEXT(pid)) {
+    //     if (curr_running(pid)) {
+    //         next_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
+    //         found_process = 1;
+    //         break;
+    //         //if (next_pcb->c_pid == -1) { break; }
+    //     }
+    // }
+
+    // /* Exit and continue running current process if no new one was found */
+    // if (!found_process) {
+    //     sti();  return;
+    // }
+
+    // /* Update the currently running process to new process and initialize paging */
+    // set_curr_process(next_pcb->pid);
+    // pid_page_map(next_pcb->pid);
+
+    // tss.ss0 = KERNEL_DS;
+    // tss.esp0 = KSTACK_BOT - (PCB_SIZE * next_pcb->pid) - MEM_FENCE;
+    // sti();
+
+    // asm volatile(
+    //     "movl   %0, %%esp   ;"
+    //     "movl   %1, %%ebp   ;"
+    //     "LEAVE;"
+    //     "RET;"
+
+    //     : :"r"(next_pcb->current_esp), "r"(next_pcb->current_ebp)
+    // );
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 
     // start 3 terms at once ???
     // if (PIT_ctr < 3 && PIT_ctr > 0) {
@@ -73,7 +117,7 @@ void pit_int_handler() {
     //     }
     // }
     
-    PIT_ctr++;            // delete later
+   // PIT_ctr++;            // delete later
 
-    sti();
+    //sti();
 }

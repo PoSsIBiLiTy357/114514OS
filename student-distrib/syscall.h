@@ -11,6 +11,9 @@
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
 
+#define PCB_SIZE            0x2000
+#define MEM_FENCE           4
+
 
 /*typedef struct func_pointer{
     int (*open)(int32_t,int32_t, int8_t* , int32_t); 
@@ -65,10 +68,13 @@ int32_t set_handler(int32_t signum, void * handler_address);
 int32_t sigreturn(void);
 
 /* Helper functions */
-void pcb_init(int pid);
-pcb_t * get_pcb(int pid);
+void pcb_init(int pid, int terminal_num, int isTerm);
+pcb_t * get_term_pcb(int terminal_num);
+pcb_t * get_curr_pcb();
+void set_curr_process(int pid);
+int8_t curr_running(int pid);
 int get_pid();
+void set_curr_terminal(int terminal_num);
 int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_addr);
-int get_pid();
 
 #endif  /* _SYSCALL_H  */
