@@ -26,7 +26,7 @@ int cursor_ind[TERMINAL_NUM];
 int hold_num;
 int terminal_read_ready[TERMINAL_NUM];
 int need_nl = 0;
-volatile int terminal_2_running = 0, terminal_3_running = 0;
+volatile int terminal_2_running = 1, terminal_3_running = 1;
 /* keyboard initilization
  *
  * initialize the keyboard and let it begin generating interrupts
@@ -99,26 +99,26 @@ void keyboard_handler()
 				{
 					set_disiplay_terminal(1);
 
-					if(!terminal_2_running)
-					{
-						if(get_pid()==-1) return;
-						terminal_2_running = 1;
-						//sti();
-						execute_with_terminal_num((unsigned char *)"shell",1,1);
-					}
+					// if(!terminal_2_running)
+					// {
+					// 	if(get_pid()==-1) return;
+					// 	terminal_2_running = 1;
+					// 	//sti();
+					// 	execute_with_terminal_num((unsigned char *)"shell",1,1);
+					// }
 
 				}
 				if(input == F3)
 				{
 					set_disiplay_terminal(2);
 
-					if(!terminal_3_running)
-					{
-						if(get_pid()==-1) return;
-						terminal_3_running = 1;
-						//sti();
-						execute_with_terminal_num((unsigned char *)"shell",2,1);
-					}
+					// if(!terminal_3_running)
+					// {
+					// 	if(get_pid()==-1) return;
+					// 	terminal_3_running = 1;
+					// 	//sti();
+					// 	execute_with_terminal_num((unsigned char *)"shell",2,1);
+					// }
 
 				}
 			}
