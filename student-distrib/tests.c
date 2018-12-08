@@ -981,6 +981,6 @@ void launch_tests(){
 	//TEST_OUTPUT("insufficient_bytes_test()", insufficient_bytes_test());
 
 	/*execute test*/
-	execute_with_terminal_num((uint8_t *)"shell",0,1);
+	//execute_with_terminal_num((uint8_t *)"shell",0,1);
 
 }

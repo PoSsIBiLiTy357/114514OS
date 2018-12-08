@@ -65,5 +65,6 @@ int32_t sigreturn(void);
 
 /* Helper functions */
 int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_addr);
+int get_pid();
 
 #endif  /* _SYSCALL_H  */

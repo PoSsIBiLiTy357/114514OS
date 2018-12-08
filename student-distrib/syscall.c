@@ -94,13 +94,12 @@ void pcb_init(int pid) {
 *   OUTPUTS: int - PID (0-5)
 *   RETURN VALUE: none
 */
-int get_pid(){
+int get_pid() {
     int i;
 
     /* Look thru process table for an inactive process (marked 0) and return it */
     for(i = 0; i < PROC_NUM; i++){
         if(proc_state[i] == 0){
-            proc_state[i] = 1;      /* Mark pid as used */
             return i;
         }
     }
@@ -208,6 +207,8 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int i
         terminal_write(errMsg, ERR_BUF);
         return 0; 
     }
+
+    proc_state[pid] = 1;      /* Mark pid as used */
     
     /* Create PCB */
     pcb_init(pid);
@@ -242,7 +243,7 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int i
     pcb->terminal=terminal_num;
     pcb->isTerm=isTerm;
     if(isTerm==0){
-        prev_pcb->c_pid=(int32_t*)pcb->pid;
+        prev_pcb->c_pid = pcb->pid;
     }
 
     tss.ss0 = KERNEL_DS;
