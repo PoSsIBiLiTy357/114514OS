@@ -106,8 +106,10 @@ void keyboard_handler()
 				{
 					set_disiplay_terminal(1);
 
+					/* Make sure teminal 2 isn't already running */
 					if(!terminal_2_running)
 					{
+						/* Mark that terminal 2 is now active (if enough processes*/
 						if(get_pid()==-1) return;
 						terminal_2_running = 1;
 						//sti();
@@ -119,11 +121,14 @@ void keyboard_handler()
 				{
 					set_disiplay_terminal(2);
 
+					/* Make sure teminal 3 isn't already running */
 					if(!terminal_3_running)
 					{
 						if(get_pid()==-1) return;
+						/* Mark that terminal 3 is now active */
 						terminal_3_running = 1;
 						//sti();
+						/* Execute terminal 3 */
 						execute_with_terminal_num((unsigned char *)"shell",2,1);
 					}
 
