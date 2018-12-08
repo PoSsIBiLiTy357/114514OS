@@ -46,9 +46,7 @@ static uint32_t argSize = 0;
 */
 void pcb_init(int pid, int terminal_num) {
     int i;
-    curr = pid;
-    t_curr[terminal_num] = pid;
-    
+
     /* Create PCB for current process and assign PID */
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
     pcb_t* p_pcb = (pcb_t *)(tss.esp0 & KSTACK_BOT);
@@ -76,12 +74,16 @@ void pcb_init(int pid, int terminal_num) {
 
 
     /* Check if this is the first process, and if it is, set parent ptr to NULL */
-    if (pid == 0) {
+    if (t_curr[terminal_num] == -1) {
         pcb->p_pid = pid;
     }
     else {
         pcb->p_pid = p_pcb->pid;
     }
+    
+    curr = pid;
+    t_curr[terminal_num] = pid;
+
 }
 
 
@@ -170,7 +172,7 @@ int32_t halt(uint8_t status){
 }
 
 int32_t execute(const uint8_t * command){
-    pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t *pcb = (pcb_t *)(KSTACK_BOT & tss.esp0);
     return execute_with_terminal_num(command, pcb->terminal);
 }
 
