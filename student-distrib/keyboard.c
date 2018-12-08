@@ -111,7 +111,7 @@ void keyboard_handler()
 						if(get_pid()==-1) return;
 						terminal_2_running = 1;
 						//sti();
-						execute_with_terminal_num((unsigned char *)"shell",1,1);
+						execute_with_terminal_num((unsigned char *)"shell",1);
 					}
 
 				}
@@ -124,7 +124,7 @@ void keyboard_handler()
 						if(get_pid()==-1) return;
 						terminal_3_running = 1;
 						//sti();
-						execute_with_terminal_num((unsigned char *)"shell",2,1);
+						execute_with_terminal_num((unsigned char *)"shell",2);
 					}
 
 				}

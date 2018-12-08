@@ -7,10 +7,11 @@
 #include "keyboard.h"
 #include "paging.h"
 
-#define KSTACK_BOT          0x7fe000
+#define PCB_SIZE            0x1000
+#define KSTACK_BOT          0x7FF000
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
-
+#define MEM_FENCE           4
 
 /*typedef struct func_pointer{
     int (*open)(int32_t,int32_t, int8_t* , int32_t); 
@@ -21,8 +22,8 @@
 
 } func_pointer;
 */
-
-
+int32_t curr;
+ //page table
 /* Initialization struct for device referenced from: */
 /* https://stackoverflow.com/questions/9932212/jump-table-examples-in-c */
 typedef struct file_desc_t { 
@@ -42,7 +43,6 @@ typedef struct pcb_t{
     int32_t current_esp;
     int32_t current_ebp;
     int32_t terminal;
-    int32_t isTerm;  //indicate this pcb is a terminal
     file_desc_t file_array[FDESC_SIZE];
     int32_t bitmap[FDESC_SIZE];
     int32_t pid;
@@ -53,7 +53,7 @@ typedef struct pcb_t{
 /* System calls */
 int32_t halt(uint8_t status);
 int32_t execute(const uint8_t * command);
-int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int isTerm);
+int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num);
 int32_t read(int32_t fd, void * buf, int32_t nbytes);
 int32_t write(int32_t fd, const void * buf, int32_t nbytes);
 int32_t open(const uint8_t * filename);

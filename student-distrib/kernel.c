@@ -169,7 +169,7 @@ void entry(unsigned long magic, unsigned long addr) {
 #endif
     /* Execute the first program ("shell") ... */
     clear();
-    execute_with_terminal_num((uint8_t *)"shell",0,1);
+    execute_with_terminal_num((uint8_t *)"shell",0);
 
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");

@@ -13,11 +13,11 @@
 #define LSB_MASK                    0xFF
 #define MSB_SHIFT                   8
 #define PIT_IRQ                     0
-
+extern int32_t t_curr[3];
 int8_t prog_timer = 0;
 //static int curr_process;          // set in execute()?
 
-int PIT_ctr = 0;            // for testing delete later
+//int PIT_ctr = 0;            // for testing delete later
 
 /*
 * pit_init
@@ -46,33 +46,36 @@ void pit_init() {
 
 void pit_int_handler() {
     cli();
-    //int i;
-
-     /* Send EOI for PIT interrupt */
+    /* Send EOI for PIT interrupt */
     send_eoi(PIT_IRQ);
 
-    // if (PIT_ctr  < 3 && PIT_ctr > 0) {
-    //     PIT_ctr++;
-    //     printf("%d", PIT_ctr);
-    //     execute_with_terminal_num((uint8_t *)"shell",PIT_ctr,1);
-    //     sti();
-    //     return;
-    // }
+//////////////////////Code for process switch////////////////////////////
 
-    // if (prog_timer) {
-    //     /* Continue running a process */
-    //     prog_timer--;
-    //     sti();  
-    //     return;
-    // } else {
-    //     /* Load in a different process to execute */
-    //     for (i = 0; i < 6; i++) {
-    //         curr_process += (curr_process + 1) % 6;
-
-    //     }
-    // }
     
-    PIT_ctr++;            // delete later
 
+    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    int32_t nxt_terminal = (cur_pcb->terminal+1)%3;
+    pcb_t *nxt_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * t_curr[nxt_terminal]);
+
+    curr = nxt_pcb->pid;
+    //t_curr[nxt_terminal] = nxt_pcb->pid;
+    //switch paging for next process(cr3)
+    pid_page_map(nxt_pcb->pid);
+    /* Update the tss.ss0/esp0 */
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = KSTACK_BOT - (PCB_SIZE * nxt_pcb->pid) - MEM_FENCE;
     sti();
+
+    asm volatile(
+        "movl   %0, %%esp   ;"
+        "movl   %1, %%ebp   ;"
+        "LEAVE;"
+        "RET;"
+        : :"r"(nxt_pcb->current_esp), "r"(nxt_pcb->current_ebp) 
+    );
+
+//////////////////////////////////////////////////////////////////////// 
+    //PIT_ctr++;            // delete later
+    return;
+
 }
