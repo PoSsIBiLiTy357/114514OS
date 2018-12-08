@@ -129,6 +129,30 @@ void paging_init(){
     page_table[PT_VIDEO].page_cache_da = 1;
     page_table[PT_VIDEO].page_addr = PT_VIDEO;
 
+    //mark video mem present in corresponding page table entry
+    page_table[PT_VIDEO+1].page_present = 1;
+    page_table[PT_VIDEO+1].page_rw = 1;
+    page_table[PT_VIDEO+1].page_cache_da = 1;
+    page_table[PT_VIDEO+1].page_addr = PT_VIDEO+1;
+
+    //mark video mem present in corresponding page table entry
+    page_table[PT_VIDEO+2].page_present = 1;
+    page_table[PT_VIDEO+2].page_rw = 1;
+    page_table[PT_VIDEO+2].page_cache_da = 1;
+    page_table[PT_VIDEO+2].page_addr = PT_VIDEO+2;
+
+    //mark video mem present in corresponding page table entry
+    page_table[PT_VIDEO+3].page_present = 1;
+    page_table[PT_VIDEO+3].page_rw = 1;
+    page_table[PT_VIDEO+3].page_cache_da = 1;
+    page_table[PT_VIDEO+3].page_addr = PT_VIDEO+3;
+    
+    //mark video mem present in corresponding page table entry
+    page_table[PT_VIDEO+4].page_present = 1;
+    page_table[PT_VIDEO+4].page_rw = 1;
+    page_table[PT_VIDEO+4].page_cache_da = 1;
+    page_table[PT_VIDEO+4].page_addr = PT_VIDEO+4;
+
     //create 4-8MB kernel as 4MB page directory entry
     pdt_init_mb(1);
      page_directory[1].mb.pt_present = 1;
@@ -175,6 +199,7 @@ void flush_tlb(void){
                  );
 }
 
+
 void pid_page_map(int pid){
 
 
@@ -213,12 +238,18 @@ void vidMem_page_map(int vAddr){
     vidMem_table[0].page_attr     = 0;
     vidMem_table[0].page_global   = 0;
     vidMem_table[0].page_avail    = 0;
-    vidMem_table[0].page_addr = PT_VIDEO;
+    vidMem_table[0].page_addr =PT_VIDEO;
 
     flush_tlb();
 
 }
 
-
+void set_active_terminal_paging(int terminal_id,int display){
+    ////////////////////////////////////////////////////////////////
+    page_table[PT_VIDEO].page_addr=PT_VIDEO;                 ///////
+    ////////////////////////////////////////////////////////////////   debug here if needed
+   
+    flush_tlb();
+}
 
 

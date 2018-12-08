@@ -114,7 +114,6 @@ int get_pid() {
     /* Look thru process table for an inactive process (marked 0) and return it */
     for(i = 0; i < PROC_NUM; i++){
         if(proc_state[i] == 0){
-            proc_state[i] = 1;      /* Mark pid as used */
             return i;
         }
     }
@@ -181,6 +180,11 @@ int32_t halt(uint8_t status){
 
 }
 
+int32_t execute(const uint8_t * command){
+     pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    return execute_with_terminal_num(command,pcb->terminal,0);
+}
+
 
 /*
 * execute
@@ -194,7 +198,7 @@ int32_t halt(uint8_t status){
 *   RETURN VALUE: 0 on success, -1 on failure
 *	SIDE EFFECTS : Switches processor to user mode to run given user program
 */
-int32_t execute(const uint8_t * command){
+int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int isTerm){
     uint8_t inFile[CMD_LIMIT];  /* name of executable file           */
     uint32_t v_addr;            /* virtual addr of first instruction */
     dentry_t d;
@@ -217,6 +221,8 @@ int32_t execute(const uint8_t * command){
         terminal_write(errMsg, ERR_BUF);
         return 0; 
     }
+
+    proc_state[pid] = 1;      /* Mark pid as used */
     
     /* Create PCB */
     pcb_init(pid);
@@ -233,15 +239,45 @@ int32_t execute(const uint8_t * command){
     /* Initialize paging for process */
     pid_page_map(pid);
 
+    set_active_terminal(terminal_num);
+
     /* User-level Program Loader */
     read_dentry_by_name(inFile, &d);
     read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
 
+
+    pcb_t* prev_pcb;
     /* Upate TSS ss0 and esp0 */
+    if(curr==0){
+        prev_pcb=NULL;
+    }
+    else{
+        prev_pcb=(pcb_t *)(KSTACK_BOT - PCB_SIZE * (pid-1));
+    }
+    pcb->terminal=terminal_num;
+    pcb->isTerm=isTerm;
+    if(isTerm==0){
+        prev_pcb->c_pid = pcb->pid;
+    }
+
     tss.ss0 = KERNEL_DS;
     //tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
     tss.esp0 = KSTACK_BOT - (PCB_SIZE * pid) - MEM_FENCE;
 
+    pcb->current_ebp=tss.esp0;
+    pcb->current_esp=tss.esp0;
+
+
+    /* update  prev_pcb's curent ebp esp*/
+    if(prev_pcb!=NULL){
+	asm volatile("			\n\
+				movl %%ebp, %%eax 	\n\
+				movl %%esp, %%ebx 	\n\
+			"
+			:"=a"(prev_pcb->current_ebp), "=b"(prev_pcb->current_ebp)
+            );
+    }
+    
     sti();
     /* IRET setup and context switch */
     asm volatile(

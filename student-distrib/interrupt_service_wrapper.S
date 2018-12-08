@@ -5,7 +5,7 @@
 #define SYSCALL_NUM 9
 
 .globl keyboard_handler_asm
-.globl rtc_handler_asm
+.globl rtc_handler_asm 
 .globl pit_handler_asm 
 .globl syscall_asm
 .globl from_syscall

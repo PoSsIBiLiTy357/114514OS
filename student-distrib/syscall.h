@@ -36,8 +36,13 @@ typedef struct file_desc_t {
 
 typedef struct pcb_t{
     int32_t p_pid;
+    int32_t c_pid; // child pcb pid
     int32_t parent_esp;
     int32_t parent_ebp;
+    int32_t current_esp;
+    int32_t current_ebp;
+    int32_t terminal;
+    int32_t isTerm;  //indicate this pcb is a terminal
     file_desc_t file_array[FDESC_SIZE];
     int32_t bitmap[FDESC_SIZE];
     int32_t pid;
@@ -49,6 +54,7 @@ typedef struct pcb_t{
 /* System calls */
 int32_t halt(uint8_t status);
 int32_t execute(const uint8_t * command);
+int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int isTerm);
 int32_t read(int32_t fd, void * buf, int32_t nbytes);
 int32_t write(int32_t fd, const void * buf, int32_t nbytes);
 int32_t open(const uint8_t * filename);
@@ -63,5 +69,6 @@ void pcb_init(int pid);
 pcb_t * get_pcb(int pid);
 int get_pid();
 int8_t verify_file(const uint8_t * cmd, uint8_t inFile[CMD_LIMIT], uint32_t * v_addr);
+int get_pid();
 
 #endif  /* _SYSCALL_H  */
