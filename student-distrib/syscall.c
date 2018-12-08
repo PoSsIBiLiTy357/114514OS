@@ -27,6 +27,8 @@
 /* Current PID */
 int curr_process = 0;
 
+int curr_terminal = 0;
+
 /* Table of active and inactive processes (active = 1, inactive = 0) */
 int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
 
@@ -75,11 +77,8 @@ void pcb_init(int pid) {
 
 
     /* Check if this is the first process, and if it is, set parent ptr to NULL */
-    if (pid == 0) {
+    if (pid == 0 || pid == 1 || pid == 2) {
         pcb->p_pid = pid;
-    }
-    else {
-        pcb->p_pid = pid-1;
     }
 }
 

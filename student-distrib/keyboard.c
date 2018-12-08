@@ -24,6 +24,9 @@ static char keyboard_buffer[BUFFER_SIZE]; //leave 1 for _
 static char terminal_buffer[BUFFER_SIZE];
 static char write_buffer[1024];
 int terminal_read_ready;
+
+extern int curr_terminal;
+
 /* init_keyboard
  * 
  * initialize scan codes for letters and numbers, then unmask the keyboard irq in PIC

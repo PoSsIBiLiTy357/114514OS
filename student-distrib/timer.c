@@ -15,7 +15,7 @@
 #define PIT_IRQ                     0
 
 int8_t prog_timer = 0;
-//static int curr_process;
+//static int curr_process;          // set in execute()?
 
 int PIT_ctr = 0;            // for testing delete later
 
@@ -46,6 +46,7 @@ void pit_init() {
 
 void pit_int_handler() {
     cli();
+<<<<<<< HEAD
     // /int i;
      /* Send EOI for PIT interrupt */
     send_eoi(PIT_IRQ);
@@ -53,13 +54,26 @@ void pit_int_handler() {
     if (PIT_ctr < 3 && PIT_ctr > 0) {
         PIT_ctr++;            // delete later
         printf("%d\n", PIT_ctr);
+=======
+    //int i;
+
+     /* Send EOI for PIT interrupt */
+    send_eoi(PIT_IRQ);
+
+    if (PIT_ctr  < 3 && PIT_ctr > 0) {
+        PIT_ctr++;
+        printf("%d", PIT_ctr);
+>>>>>>> 76e8a072afeab5f013226950bb3b605db8cdfffc
         execute((uint8_t *)"shell");
         sti();
         return;
     }
 
+<<<<<<< HEAD
     
 
+=======
+>>>>>>> 76e8a072afeab5f013226950bb3b605db8cdfffc
     // if (prog_timer) {
     //     /* Continue running a process */
     //     prog_timer--;
