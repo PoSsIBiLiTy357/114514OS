@@ -6,6 +6,7 @@
 
 .globl keyboard_handler_asm
 .globl  rtc_handler_asm 
+.globl pit_handler_asm 
 .globl syscall_asm
 .globl from_syscall
 .align   4
@@ -25,6 +26,15 @@ rtc_handler_asm:
     popfl
     popa
     iret
+
+pit_handler_asm:
+    pusha
+    pushfl
+    call pit_int_handler
+    popfl
+    popa
+    iret
+
 
 https://www.win.tue.nl/~aeb/linux/lk/lk-4.html
 syscall_asm:

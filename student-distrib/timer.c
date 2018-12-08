@@ -51,13 +51,13 @@ void pit_int_handler() {
      /* Send EOI for PIT interrupt */
     send_eoi(PIT_IRQ);
 
-    if (PIT_ctr  < 3 && PIT_ctr > 0) {
-        PIT_ctr++;
-        printf("%d", PIT_ctr);
-        execute_with_terminal_num((uint8_t *)"shell",PIT_ctr,1);
-        sti();
-        return;
-    }
+    // if (PIT_ctr  < 3 && PIT_ctr > 0) {
+    //     PIT_ctr++;
+    //     printf("%d", PIT_ctr);
+    //     execute_with_terminal_num((uint8_t *)"shell",PIT_ctr,1);
+    //     sti();
+    //     return;
+    // }
 
     // if (prog_timer) {
     //     /* Continue running a process */

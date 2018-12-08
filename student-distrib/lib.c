@@ -100,6 +100,7 @@ void clear(void) {
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
     update_cursor(screen_x_multi[display_terminal], screen_y_multi[display_terminal]);
+    //puts_scroll("391OS> ",7);
 }
 
 
