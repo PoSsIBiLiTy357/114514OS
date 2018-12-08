@@ -133,6 +133,10 @@ void init_scan_code(){
 	shift_convert[Z]='Z';
 	shift_convert[X]='X';
     shift_convert[C]='C';
+	shift_convert[V]='V';
+    shift_convert[B]='B';
+    shift_convert[N]='N';
+    shift_convert[M]='M';
 	
 	shift_convert[BACKTICK]= '~';
 	shift_convert[ONE]='!';
