@@ -59,20 +59,30 @@ void pit_int_handler() {
         return;
     }
 
-    // if (prog_timer) {
-    //     /* Continue running a process */
-    //     prog_timer--;
-    //     sti();  
-    //     return;
-    // } else {
-    //     /* Load in a different process to execute */
-    //     for (i = 0; i < 6; i++) {
-    //         curr_process += (curr_process + 1) % 6;
+//////////////////////Code for process switch////////////////////////////
 
-    //     }
-    // }
-    
-    PIT_ctr++;            // delete later
 
+    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t *nxt_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * t_curr[cur_pcb->terminal]);
+
+    curr = nxt_pcb->pid;
+    //switch paging for next process(cr3)
+    pid_page_map(nxt_pcb->pid);
+    /* Update the tss.ss0/esp0 */
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = KSTACK_BOT - (PCB_SIZE * nxt_pcb->pid) - MEM_FENCE;
     sti();
+
+    asm volatile(
+        "movl   %0, %%esp   ;"
+        "movl   %1, %%ebp   ;"
+        "jmp RETURN_FROM_IRET;"
+
+        : :"r"(nxt_pcb->esp), "r"(nxt_pcb->ebp) :
+    );
+
+//////////////////////////////////////////////////////////////////////// 
+    PIT_ctr++;            // delete later
+    return;
+
 }

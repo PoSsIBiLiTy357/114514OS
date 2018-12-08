@@ -12,7 +12,6 @@
 #define KSTACK_START        0x800000
 #define PROGRAM_IMAGE_ADDR  0x8048000
 #define PROC_NUM            6
-#define PCB_SIZE            0x2000
 #define ASM                 1
 #define RESERV_FILES        2
 #define ERR_BUF            26
@@ -45,13 +44,15 @@ static uint32_t argSize = 0;
 *   RETURN VALUE: none
 *	SIDE EFFECTS : Creates a new PCB for the process with requested PID
 */
-void pcb_init(int pid) {
+void pcb_init(int pid, int terminal_num) {
     int i;
     curr = pid;
+    t_curr[terminal_num] = pid;
     
     /* Create PCB for current process and assign PID */
-    pcb_t* pcb= (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
-    pcb->pid=pid;
+    pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
+    pcb_t* p_pcb = (pcb_t *)(tss.esp0 & KSTACK_BOT);
+    pcb->pid = pid;
 
     /* Fill in file descriptors for reserved file stdin for every new process */
     pcb->file_array[0].read  = terminal_read_wrap;  //init stdin and stdout
@@ -79,7 +80,7 @@ void pcb_init(int pid) {
         pcb->p_pid = pid;
     }
     else {
-        pcb->p_pid = pid-1;
+        pcb->p_pid = p_pcb->pid;
     }
 }
 
@@ -139,6 +140,7 @@ int32_t halt(uint8_t status){
     }
 
     curr = par_pcb->pid;
+    t_curr[cur_pcb->terminal] = par_pcb->pid;
 
     if(cur_pcb->pid == cur_pcb->p_pid){
         execute((uint8_t *)"shell");
@@ -168,8 +170,8 @@ int32_t halt(uint8_t status){
 }
 
 int32_t execute(const uint8_t * command){
-     pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    return execute_with_terminal_num(command,pcb->terminal,0);
+    pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    return execute_with_terminal_num(command, pcb->terminal);
 }
 
 
@@ -185,7 +187,7 @@ int32_t execute(const uint8_t * command){
 *   RETURN VALUE: 0 on success, -1 on failure
 *	SIDE EFFECTS : Switches processor to user mode to run given user program
 */
-int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int isTerm){
+int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num){
     uint8_t inFile[CMD_LIMIT];  /* name of executable file           */
     uint32_t v_addr;            /* virtual addr of first instruction */
     dentry_t d;
@@ -210,7 +212,7 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int i
     }
     
     /* Create PCB */
-    pcb_init(pid);
+    pcb_init(pid, terminal_num);
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
 
 	/* Saving the current ESP and EBP into the PCB struct */
@@ -230,38 +232,13 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int i
     read_dentry_by_name(inFile, &d);
     read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
 
-
-    pcb_t* prev_pcb;
-    /* Upate TSS ss0 and esp0 */
-    if(curr==0){
-        prev_pcb=NULL;
-    }
-    else{
-        prev_pcb=(pcb_t *)(KSTACK_BOT - PCB_SIZE * (pid-1));
-    }
     pcb->terminal=terminal_num;
-    pcb->isTerm=isTerm;
-    if(isTerm==0){
-        prev_pcb->c_pid=(int32_t*)pcb->pid;
-    }
 
     tss.ss0 = KERNEL_DS;
-    //tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
     tss.esp0 = KSTACK_BOT - (PCB_SIZE * pid) - MEM_FENCE;
 
     pcb->current_ebp=tss.esp0;
     pcb->current_esp=tss.esp0;
-
-
-    /* update  prev_pcb's curent ebp esp*/
-    if(prev_pcb!=NULL){
-	asm volatile("			\n\
-				movl %%ebp, %%eax 	\n\
-				movl %%esp, %%ebx 	\n\
-			"
-			:"=a"(prev_pcb->current_ebp), "=b"(prev_pcb->current_ebp)
-            );
-    }
     
     sti();
     /* IRET setup and context switch */

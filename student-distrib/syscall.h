@@ -7,7 +7,8 @@
 #include "keyboard.h"
 #include "paging.h"
 
-#define KSTACK_BOT          0x7fe000
+#define PCB_SIZE            0x1000
+#define KSTACK_BOT          0x7FF000
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
 
@@ -21,8 +22,7 @@
 
 } func_pointer;
 */
-
-
+int32_t t_curr[3] = {-1,-1,-1}; //page table
 /* Initialization struct for device referenced from: */
 /* https://stackoverflow.com/questions/9932212/jump-table-examples-in-c */
 typedef struct file_desc_t { 
@@ -42,7 +42,6 @@ typedef struct pcb_t{
     int32_t current_esp;
     int32_t current_ebp;
     int32_t terminal;
-    int32_t isTerm;  //indicate this pcb is a terminal
     file_desc_t file_array[FDESC_SIZE];
     int32_t bitmap[FDESC_SIZE];
     int32_t pid;
