@@ -181,7 +181,7 @@ int32_t halt(uint8_t status){
 }
 
 int32_t execute(const uint8_t * command){
-     pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+     pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr_process);
     return execute_with_terminal_num(command,pcb->terminal,0);
 }
 
@@ -248,7 +248,7 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int i
 
     pcb_t* prev_pcb;
     /* Upate TSS ss0 and esp0 */
-    if(curr==0){
+    if(curr_process==0){
         prev_pcb=NULL;
     }
     else{
