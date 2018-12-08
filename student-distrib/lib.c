@@ -249,11 +249,14 @@ void shift_up(){
         *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS-1) + j) << 1)) = ' ';
         *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS-1) + j) << 1) + 1) = ATTRIB;     
     }
-    screen_y--;
+    //screen_y--;
     //screen_y=screen_y_preinput;
-    screen_x =0;
-
+    //screen_x =0;
+    screen_y_multi[active_terminal] = NUM_ROWS-1;
+    screen_x_multi[active_terminal] = 0;
 }
+
+
 /* void clear(void);
  * Inputs: n -- col number
  * Return Value: none
