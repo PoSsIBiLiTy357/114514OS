@@ -25,7 +25,7 @@
 
 
 /* Current PID */
-static int curr = 0;
+int curr_process = 0;
 
 /* Table of active and inactive processes (active = 1, inactive = 0) */
 static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
@@ -47,7 +47,7 @@ static uint32_t argSize = 0;
 */
 void pcb_init(int pid) {
     int i;
-    curr = pid;
+    curr_process = pid;
     
     /* Create PCB for current process and assign PID */
     pcb_t* pcb= (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
@@ -119,13 +119,13 @@ int get_pid() {
 int32_t halt(uint8_t status){
     int32_t i;
     cli();
-    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr_process);
     pcb_t *par_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * cur_pcb->p_pid);
 
     //restore parent data 
     proc_state[cur_pcb->pid] = 0;
 
-    //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      
+    //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr_process - 4;      
 
     //close any relevant FDs 
     for(i = 0; i < FDESC_SIZE; i++){
@@ -137,7 +137,7 @@ int32_t halt(uint8_t status){
     
     }
 
-    curr = par_pcb->pid;
+    curr_process = par_pcb->pid;
 
     if(cur_pcb->pid == cur_pcb->p_pid){
         execute((uint8_t *)"shell");
@@ -167,7 +167,7 @@ int32_t halt(uint8_t status){
 }
 
 int32_t execute(const uint8_t * command){
-     pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+     pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr_process);
     return execute_with_terminal_num(command,pcb->terminal,0);
 }
 
@@ -234,7 +234,7 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num,int i
 
     pcb_t* prev_pcb;
     /* Upate TSS ss0 and esp0 */
-    if(curr==0){
+    if(curr_process==0){
         prev_pcb=NULL;
     }
     else{
@@ -368,7 +368,7 @@ int32_t read(int32_t fd, void * buf, int32_t nbytes){
     if (fd >= FDESC_SIZE || fd < 0) { return -1; }
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to read() */
-    pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
+    pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr_process * PCB_SIZE));
     /////////////////////////////////
     if(temp_pcb->file_array[fd].flag == 0) return -1;
     /////////////////////////////////
@@ -408,7 +408,7 @@ int32_t write(int32_t fd, const void * buf, int32_t nbytes){
     if (fd >= FDESC_SIZE || fd < 0 || buf == NULL) return -1;
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to write() */
-    pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
+    pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr_process * PCB_SIZE));
      /////////////////////////////////
     if(temp_pcb->bitmap[fd] == 0) return -1;
     /////////////////////////////////
@@ -439,8 +439,8 @@ int32_t open(const uint8_t * filename){
     /* Ensure parameter is valid */
     if (filename == NULL) { return -1; }
 
-    /* initialize PCB to the bottom of kernel stack offest by 8MB * curr PID */
-    pcb = (pcb_t *)(KSTACK_BOT - (PCB_SIZE * curr));
+    /* initialize PCB to the bottom of kernel stack offest by 8MB * curr_process PID */
+    pcb = (pcb_t *)(KSTACK_BOT - (PCB_SIZE * curr_process));
 
     /* If the filename does not exist, return -1 */
     if (read_dentry_by_name(filename, &temp_dentry) ==-1) return -1; 
@@ -503,11 +503,11 @@ int32_t close(int32_t fd){
 /////////////////////////////////////////////////////////
     
     
-    pcb_t *temp_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t *temp_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr_process);
     /////////////////////////////////
     if(temp_pcb->file_array[fd].flag == 0) return -1;
     /////////////////////////////////
-    //int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
+    //int temp_pcb_addr = 0x800000-0x2000-curr_process*0x2000;
 
     temp_pcb->file_array[fd].flag = 0;
     temp_pcb->bitmap[fd] = 0;
