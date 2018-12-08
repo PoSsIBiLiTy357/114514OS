@@ -26,7 +26,6 @@ int curr = 0;
 } func_pointer;
 */
 
-
 /* Initialization struct for device referenced from: */
 /* https://stackoverflow.com/questions/9932212/jump-table-examples-in-c */
 typedef struct file_desc_t { 
@@ -38,6 +37,7 @@ typedef struct file_desc_t {
     int32_t inode, file_pos, flag;
 } file_desc_t;
 
+
 typedef struct pcb_t{
     int32_t p_pid;
     int32_t esp;
@@ -46,10 +46,12 @@ typedef struct pcb_t{
     int32_t parent_ebp;
     int32_t esp;
     int32_t ebp;
-    //int32_t t_idx;
     file_desc_t file_array[FDESC_SIZE];
     int32_t bitmap[FDESC_SIZE];
     int32_t pid;
+
+    int32_t idx_terminal;
+    int32_t is_terminal;
 } pcb_t;
 
 

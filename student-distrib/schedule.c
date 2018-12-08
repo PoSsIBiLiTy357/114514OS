@@ -31,9 +31,10 @@ void pit_catch(){
     }
     ///////////////Code for process switch////////////////////////
 
-    int32_t nxt_pid = (curr+1)%6;
+    int32_t nxt_pid = (curr+1)%6; //need find runnable process in other terminal
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
     pcb_t *nxt_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * nxt_pid);/////process gonna run
+
 
     curr = nxt_pcb->pid;
     //switch paging for next process(cr3)
