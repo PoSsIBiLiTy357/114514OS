@@ -9,6 +9,7 @@
 
 #define PCB_SIZE            0x1000
 #define KSTACK_BOT          0x7FF000
+#define KSTACK_START        0x800000
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
 #define MEM_FENCE           4

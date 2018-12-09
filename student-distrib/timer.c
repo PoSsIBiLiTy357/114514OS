@@ -45,6 +45,7 @@ void pit_init() {
 }
 
 void pit_int_handler() {
+    int32_t nxt_terminal;
     cli();
     /* Send EOI for PIT interrupt */
     send_eoi(PIT_IRQ);
@@ -55,7 +56,16 @@ void pit_int_handler() {
     }
     
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    int32_t nxt_terminal = (cur_pcb->terminal+1)%3;
+
+    // if(t_curr[1] != -1 && t_curr[2] != -1){
+    //     nxt_terminal = (cur_pcb->terminal+1)%3;
+    // }
+    nxt_terminal = (cur_pcb->terminal+1)%3;
+    while(t_curr[nxt_terminal] == -1){
+        nxt_terminal = (nxt_terminal+1)%3;
+    }
+
+
     pcb_t *nxt_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * t_curr[nxt_terminal]);
 
     curr = nxt_pcb->pid;
@@ -64,7 +74,8 @@ void pit_int_handler() {
     pid_page_map(nxt_pcb->pid);
     /* Update the tss.ss0/esp0 */
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = KSTACK_BOT - (PCB_SIZE * nxt_pcb->pid) - MEM_FENCE;
+    tss.esp0 = KSTACK_START - (PCB_SIZE * nxt_pcb->pid) - MEM_FENCE;
+
     sti();
 
     asm volatile(

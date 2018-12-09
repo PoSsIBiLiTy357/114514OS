@@ -9,7 +9,6 @@
 #define START_ADDR        24
 #define ADDR_OFFSET        8
 
-#define KSTACK_START        0x800000
 #define PROGRAM_IMAGE_ADDR  0x8048000
 #define PROC_NUM            6
 #define ASM                 1
@@ -49,7 +48,7 @@ void pcb_init(int pid, int terminal_num) {
 
     /* Create PCB for current process and assign PID */
     pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
-    pcb_t* p_pcb;
+    pcb_t* p_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
     pcb->pid = pid;
 
     /* Fill in file descriptors for reserved file stdin for every new process */
@@ -76,9 +75,9 @@ void pcb_init(int pid, int terminal_num) {
     /* Check if this is the first process, and if it is, set parent ptr to NULL */
     if (t_curr[terminal_num] == -1) {
         pcb->p_pid = pid;
+
     }
     else {
-        p_pcb = (pcb_t *)(tss.esp0 & KSTACK_BOT);
         pcb->p_pid = p_pcb->pid;
     }
     
@@ -141,11 +140,11 @@ int32_t halt(uint8_t status){
     
     }
 
-    curr = par_pcb->pid;
-    t_curr[cur_pcb->terminal] = par_pcb->pid;
+    curr = cur_pcb->p_pid;
+    t_curr[cur_pcb->terminal] = cur_pcb->p_pid;
 
     if(cur_pcb->pid == cur_pcb->p_pid){
-        execute((uint8_t *)"shell");
+        execute_with_terminal_num((uint8_t *)"shell", cur_pcb->terminal);
     }
 
     //restore parent paging (cr3)
@@ -239,7 +238,7 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num){
     pcb->terminal=terminal_num;
 
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = KSTACK_BOT - (PCB_SIZE * pid) - MEM_FENCE;
+    tss.esp0 = KSTACK_START - (PCB_SIZE * pid) - MEM_FENCE;
 
     pcb->current_ebp=tss.esp0;
     pcb->current_esp=tss.esp0;
