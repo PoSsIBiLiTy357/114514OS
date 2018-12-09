@@ -12,7 +12,7 @@
 #define CMD_LIMIT         129
 
 #define PCB_SIZE            0x2000
-#define MEM_FENCE           4
+#define MEM_FENCE           16
 
 
 /*typedef struct func_pointer{

@@ -18,6 +18,7 @@
 #define TOTAL_KEY_NUM 128
 #define PRINT_LIM 1025*2
 #define TERMINAL_NUM 3
+
 int8_t pressed_key[TOTAL_KEY_NUM];
 unsigned char keyboard_buffer[TERMINAL_NUM][TOTAL_KEY_NUM+1];
 unsigned char print_buffer[TERMINAL_NUM][PRINT_LIM];
@@ -27,6 +28,16 @@ int hold_num;
 int terminal_read_ready[TERMINAL_NUM];
 int need_nl = 0;
 volatile int terminal_2_running = 0, terminal_3_running = 0;
+
+
+int8_t term2_running() {
+	return terminal_2_running;
+}
+
+int8_t term3_running() {
+	return terminal_3_running;
+}
+
 /* keyboard initilization
  *
  * initialize the keyboard and let it begin generating interrupts

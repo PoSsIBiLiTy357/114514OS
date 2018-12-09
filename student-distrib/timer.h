@@ -8,6 +8,7 @@
 #include "lib.h"
 #include "i8259.h"
 #include "syscall.h"
+#include "keyboard.h"
 
 /* PIT initialization and interrupt handler routines */
 void pit_init();

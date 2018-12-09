@@ -75,7 +75,7 @@ void pcb_init(int pid, int terminal_num, int isTerm) {
     
     /* Create PCB for current process and assign PID */
     pcb_t* pcb= (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
-    pcb->pid=pid;
+    pcb->pid = pid;
 
     /* Fill in file descriptors for reserved file stdin for every new process */
     pcb->file_array[0].read  = terminal_read_wrap;  //init stdin and stdout
@@ -90,7 +90,11 @@ void pcb_init(int pid, int terminal_num, int isTerm) {
     pcb->file_array[1].open  = terminal_nothing;
     pcb->file_array[1].close = terminal_nothing;
     pcb->file_array[1].flag  = 1;
-    pcb->bitmap[1] =1;
+    pcb->bitmap[1] = 1;
+
+    pcb->current_ebp = KSTACK_START - (PCB_SIZE * pid) - MEM_FENCE;
+    pcb->current_esp = KSTACK_START - (PCB_SIZE * pid) - MEM_FENCE;
+
 
     /* Set remaining files as unused (flag = 0) for every new process */
     for (i = RESERV_FILES; i < FDESC_SIZE; i++) {
@@ -118,18 +122,24 @@ void pcb_init(int pid, int terminal_num, int isTerm) {
     /* Check if we are initializing a PCB for a teriminal */
     if (isTerm) {
         prev_pcb = NULL;
-        pcb->isTerm = isTerm;
         pcb->p_pid = pid;
         pcb->c_pid = -1;        /* No child set yet */
+
+        pcb->parent_ebp = (KSTACK_START - PCB_SIZE * pid - MEM_FENCE);
+        pcb->parent_esp = (KSTACK_START - PCB_SIZE * pid - MEM_FENCE);
     } else {
         /* Find PCB for current terminal and set its child PID */
         prev_pcb = get_term_pcb(terminal_num);
         prev_pcb->c_pid = pid;
         pcb->p_pid = prev_pcb->pid;
+
+        pcb->parent_ebp = prev_pcb->current_ebp;
+        pcb->parent_esp = prev_pcb->current_esp;
     }
 
     /* Save terminal num for prgrm or terminal to run */
     pcb->terminal = terminal_num;
+    pcb->isTerm = isTerm;
     
     // if (isTerm == 0){
     //     prev_pcb->c_pid = pcb->pid;

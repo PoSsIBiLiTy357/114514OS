@@ -48,48 +48,65 @@ void pit_init() {
 
 void pit_int_handler() {
     cli();
-    send_eoi(PIT_IRQ);  // delete this if uncommenting chunk below
-    sti();              // delete this if uncommenting chunk below
+    // send_eoi(PIT_IRQ);  // delete this if uncommenting chunk below
+    // sti();              // delete this if uncommenting chunk below
 //////////////////////////////////////////////////////////////////////////////////////////
 
-    // int32_t pid;
-    // int8_t found_process = 0;
+    int32_t pid;
+    int8_t found_process = 0;
 
-    // /* Send EOI for PIT interrupt */
-    // send_eoi(PIT_IRQ);
+    /* Send EOI for PIT interrupt */
+    send_eoi(PIT_IRQ);
 
-    // /* Traverse all processes and find a different active process than current */
-    // pcb_t * next_pcb;
-    // for (pid = PID_NEXT(get_curr_pcb()->pid); pid != get_curr_pcb()->pid; pid = PID_NEXT(pid)) {
-    //     if (curr_running(pid)) {
-    //         next_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
-    //         found_process = 1;
-    //         break;
-    //         //if (next_pcb->c_pid == -1) { break; }
-    //     }
-    // }
+    if (term2_running() != 1 && term3_running() != 1) {
+        sti();  return;
+    }
 
-    // /* Exit and continue running current process if no new one was found */
-    // if (!found_process) {
-    //     sti();  return;
-    // }
+    /* Traverse all processes and find a different active process than current */
+    pcb_t * next_pcb;
+    for (pid = PID_NEXT(get_curr_pcb()->pid); pid != get_curr_pcb()->pid; pid = PID_NEXT(pid)) {
+        if (curr_running(pid)) {
+            next_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
+            found_process = 1;
+            break;
+            //if (next_pcb->c_pid == -1) { break; }
+        }
+    }
 
-    // /* Update the currently running process to new process and initialize paging */
-    // set_curr_process(next_pcb->pid);
-    // pid_page_map(next_pcb->pid);
+    pcb_t * curr_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * get_curr_pcb()->pid);
 
-    // tss.ss0 = KERNEL_DS;
-    // tss.esp0 = KSTACK_BOT - (PCB_SIZE * next_pcb->pid) - MEM_FENCE;
-    // sti();
+    /* Exit and continue running current process if no new one was found */
+    if (!found_process) {
+        sti();  return;
+    }
 
-    // asm volatile(
-    //     "movl   %0, %%esp   ;"
-    //     "movl   %1, %%ebp   ;"
-    //     "LEAVE;"
-    //     "RET;"
+    /* Update the currently running process to new process and initialize paging */
+    pid_page_map(next_pcb->pid);
 
-    //     : :"r"(next_pcb->current_esp), "r"(next_pcb->current_ebp)
-    // );
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = KSTACK_BOT - (PCB_SIZE * next_pcb->pid) - MEM_FENCE;
+    set_curr_process(next_pcb->pid);
+    set_active_terminal(next_pcb->terminal);
+
+    sti();
+
+
+	asm volatile(
+        "movl   %%ebp, %0   ;"
+        "movl   %%esp, %1   ;"
+        :"=r"(curr_pcb->current_ebp), "=r"(curr_pcb->current_esp)
+    );
+
+
+
+    asm volatile(
+        "movl   %0, %%esp   ;"
+        "movl   %1, %%ebp   ;"
+        "LEAVE;"
+        "RET;"
+
+        : :"r"(next_pcb->current_esp), "r"(next_pcb->current_ebp)
+    );
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
