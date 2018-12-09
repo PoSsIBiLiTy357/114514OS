@@ -66,6 +66,8 @@ void pcb_init(int pid, int terminal_num) {
     pcb->file_array[1].flag  = 1;
     pcb->bitmap[1] =1;
 
+    pcb->current_ebp = KSTACK_START - (PCB_SIZE * pid) - MEM_FENCE;
+    pcb->current_esp = KSTACK_START - (PCB_SIZE * pid) - MEM_FENCE;
     /* Set remaining files as unused (flag = 0) for every new process */
     for (i = RESERV_FILES; i < FDESC_SIZE; i++) {
         pcb->file_array[i].flag = 0;
@@ -75,10 +77,15 @@ void pcb_init(int pid, int terminal_num) {
     /* Check if this is the first process, and if it is, set parent ptr to NULL */
     if (t_curr[terminal_num] == -1) {
         pcb->p_pid = pid;
+        pcb->parent_esp = (KSTACK_START - PCB_SIZE * pid - MEM_FENCE);
+        pcb->parent_esp = (KSTACK_START - PCB_SIZE * pid - MEM_FENCE);
 
     }
     else {
         pcb->p_pid = p_pcb->pid;
+        pcb->parent_ebp = p_pcb->current_ebp;
+        pcb->parent_esp = p_pcb->current_ebp;
+
     }
     
     curr = pid;
@@ -240,8 +247,8 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num){
     tss.ss0 = KERNEL_DS;
     tss.esp0 = KSTACK_START - (PCB_SIZE * pid) - MEM_FENCE;
 
-    pcb->current_ebp=tss.esp0;
-    pcb->current_esp=tss.esp0;
+    pcb->current_ebp = tss.esp0;
+    pcb->current_esp = tss.esp0;
     
     sti();
     /* IRET setup and context switch */

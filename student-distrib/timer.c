@@ -13,6 +13,7 @@
 #define LSB_MASK                    0xFF
 #define MSB_SHIFT                   8
 #define PIT_IRQ                     0
+
 extern int32_t t_curr[3];
 int8_t prog_timer = 0;
 //static int curr_process;          // set in execute()?
@@ -51,32 +52,37 @@ void pit_int_handler() {
     send_eoi(PIT_IRQ);
 
 //////////////////////Code for process switch////////////////////////////
+
+    // if only 1st terminal running, return
     if(t_curr[1] == -1 && t_curr[2] == -1){
         return;
     }
     
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
 
-    // if(t_curr[1] != -1 && t_curr[2] != -1){
-    //     nxt_terminal = (cur_pcb->terminal+1)%3;
-    // }
+    //find next terminal that need run process
     nxt_terminal = (cur_pcb->terminal+1)%3;
     while(t_curr[nxt_terminal] == -1){
         nxt_terminal = (nxt_terminal+1)%3;
     }
 
-
     pcb_t *nxt_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * t_curr[nxt_terminal]);
 
-    curr = nxt_pcb->pid;
-    //t_curr[nxt_terminal] = nxt_pcb->pid;
     //switch paging for next process(cr3)
     pid_page_map(nxt_pcb->pid);
     /* Update the tss.ss0/esp0 */
     tss.ss0 = KERNEL_DS;
     tss.esp0 = KSTACK_START - (PCB_SIZE * nxt_pcb->pid) - MEM_FENCE;
+    curr = nxt_pcb->pid;
+    set_active_terminal(nxt_pcb->terminal);
 
     sti();
+
+	asm volatile(
+        "movl   %%ebp, %0   ;"
+        "movl   %%esp, %1   ;"
+        :"=r"(cur_pcb->current_ebp), "=r"(cur_pcb->current_esp)
+        );
 
     asm volatile(
         "movl   %0, %%esp   ;"
@@ -87,7 +93,7 @@ void pit_int_handler() {
     );
 
 //////////////////////////////////////////////////////////////////////// 
-    //PIT_ctr++;            // delete later
+
     return;
 
 }

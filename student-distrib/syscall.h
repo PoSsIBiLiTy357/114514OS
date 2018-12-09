@@ -12,7 +12,7 @@
 #define KSTACK_START        0x800000
 #define FDESC_SIZE          8
 #define CMD_LIMIT         129
-#define MEM_FENCE           4
+#define MEM_FENCE           0x10
 
 /*typedef struct func_pointer{
     int (*open)(int32_t,int32_t, int8_t* , int32_t); 
@@ -24,6 +24,7 @@
 } func_pointer;
 */
 int32_t curr;
+
  //page table
 /* Initialization struct for device referenced from: */
 /* https://stackoverflow.com/questions/9932212/jump-table-examples-in-c */
