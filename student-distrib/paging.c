@@ -238,13 +238,15 @@ void vidMem_page_map(int vAddr){
     vidMem_table[0].page_attr     = 0;
     vidMem_table[0].page_global   = 0;
     vidMem_table[0].page_avail    = 0;
-    vidMem_table[0].page_addr =PT_VIDEO;
+    vidMem_table[0].page_addr =PT_VIDEO;//+get_display_terminal()+1;
 
     flush_tlb();
 
 }
 
 void set_active_terminal_paging(int terminal_id,int display){
+    if (display ==0) return;
+    else
     ////////////////////////////////////////////////////////////////
     page_table[PT_VIDEO].page_addr=PT_VIDEO;                 ///////
     ////////////////////////////////////////////////////////////////   debug here if needed
