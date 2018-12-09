@@ -54,18 +54,7 @@ void set_disiplay_terminal(int terminal_id)
     update_cursor(screen_x_multi[terminal_id], screen_y_multi[terminal_id]);
 }
 
-void erase_last_ch() {
-    if( screen_x_multi[active_terminal] == 0 )
-    {
-        screen_x_multi[active_terminal] = NUM_COLS -1;
-        screen_y_multi[active_terminal] --;
-    }
-    else screen_x_multi[active_terminal]--;
-    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_multi[active_terminal] + screen_x_multi[active_terminal]) << 1)) = ' ';
-    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_multi[active_terminal] + screen_x_multi[active_terminal]) << 1) + 1) = ATTRIB;
-    if(active_terminal == display_terminal)
-        update_cursor(screen_x_multi[active_terminal], screen_y_multi[active_terminal]);
-}
+
 
 void erase_last_ch_display() {
     if( screen_x_multi[display_terminal] == 0 )
@@ -78,13 +67,6 @@ void erase_last_ch_display() {
     *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_multi[display_terminal] + screen_x_multi[display_terminal]) << 1) + 1) = ATTRIB;
     update_cursor(screen_x_multi[display_terminal], screen_y_multi[display_terminal]);
 }
-
-
-
-
-
-
-
 
 
 /* void clear(void);
@@ -104,27 +86,7 @@ void clear(void) {
 }
 
 
-// void screen_x_set(int n){
-//     screen_x = n;
-// }
-/* void put_refresh_line(const  char* buf);
- * Inputs: buf
- * Return Value: none
- * Function: keep refreshing lines and print out new strings */
-// void put_refresh_line(const  char* buf){
 
-//     int j;
-
-//     for (j=0;j<NUM_COLS;j++){
-//         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + j) << 1)) = ' ';
-//         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + j) << 1) + 1) = ATTRIB;     
-//     }
-
-//     screen_x = 0;
-
-//     puts(buf);
-
-// }
 
 void update_cursor(int x,int y){
     uint16_t pos = y*NUM_COLS + x;
@@ -169,29 +131,7 @@ int32_t puts_scroll(int8_t* s, int32_t len) {
 }
 
 
-/*int32_t puts_scroll_refresh(int8_t* s){
-    register int32_t idx=0;
-    int x,y;
-    if(screen_x==0 && screen_y==25 && screen_y_preinput==24){
-            shift();
-            screen_y=24;
-            screen_y_preinput=23;
-        }
-    for(y=screen_y_preinput;y<=screen_y;y++){
-        for(x=0;x<NUM_COLS;x++){
-            *(uint8_t *)(video_mem + ((NUM_COLS * y + x) << 1)) = ' ';
-            *(uint8_t *)(video_mem + ((NUM_COLS * y + x) << 1) + 1) = ATTRIB;
-        }
-    }
-    screen_x=0;
-    screen_y=screen_y_preinput;
-    while(s[idx]!='\0'){
-        putc_scroll(s[idx]);
-        idx++;
-    }
-    update_cursor(screen_x,screen_y);
-    return idx;
-}*/
+
 
 void putc_scroll_display(uint8_t c) {
     if(c == '\n' || c == '\r') {

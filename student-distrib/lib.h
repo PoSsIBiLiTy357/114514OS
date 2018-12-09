@@ -30,7 +30,7 @@ void set_active_terminal(int terminal_id);
 void set_disiplay_terminal(int terminal_id);
 void putc_scroll_display(uint8_t c);
 void erase_last_ch_display();
-void erase_last_ch();
+
 
 
 
