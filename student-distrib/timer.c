@@ -16,8 +16,9 @@
 #define PIT_IRQ                     0
 
 #define NUM_TERMINALS               3
+#define GET_NEXT_TERM(x)            (((x)+ 1) % NUM_TERMINALS)
 
-extern int32_t t_curr[3];
+extern int32_t t_curr[NUM_TERMINALS];
 int8_t prog_timer = 0;
 
 /*
@@ -60,8 +61,7 @@ void pit_int_handler() {
     /* Send EOI for PIT interrupt */
     send_eoi(PIT_IRQ);
 
-//////////////////////Code for process switch////////////////////////////
-
+    /* Ensure that if the last terminal is ever closed a new shell is spawned */
     if(t_curr[0] == -1){
         clear();
         execute_with_terminal_num((uint8_t *)"shell", 0);
@@ -69,15 +69,15 @@ void pit_int_handler() {
     
     pcb_t *cur_pcb = GET_PCB(curr);
 
-    //find next terminal that need run process
-    nxt_terminal = (cur_pcb->terminal + 1) % NUM_TERMINALS;
+    /* Find next active terminal that needs to run a process */
+    nxt_terminal = GET_NEXT_TERM(cur_pcb->terminal);
     while(t_curr[nxt_terminal] == -1){
-        nxt_terminal = (nxt_terminal + 1) % NUM_TERMINALS;
+        nxt_terminal = GET_NEXT_TERM(nxt_terminal);
     }
 
     pcb_t *nxt_pcb = GET_PCB(t_curr[nxt_terminal]);
 
-    //switch paging for next process(cr3)
+    /* Switch paging for next process(cr3) */
     pid_page_map(nxt_pcb->pid);
     vidMem_page_map(132 * _MB_, nxt_pcb->terminal);
 
@@ -94,7 +94,7 @@ void pit_int_handler() {
         "movl   %%ebp, %0   ;"
         "movl   %%esp, %1   ;"
         :"=r"(cur_pcb->current_ebp), "=r"(cur_pcb->current_esp)
-        );
+    );
 
     /* Load in next process's ebp and esp to start running it */
     asm volatile(

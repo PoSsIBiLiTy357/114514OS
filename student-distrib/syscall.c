@@ -139,13 +139,12 @@ int32_t halt(uint8_t status){
     proc_state[cur_pcb->pid] = 0;    
 
     /* Close any relevant FDs */
-    for(i = 0; i < FDESC_SIZE; i++){
+    for (i = 0; i < FDESC_SIZE; i++) {
 
-        if(cur_pcb->file_array[i].flag){
+        if (cur_pcb->file_array[i].flag){
             close(i);
         }
         cur_pcb->file_array[i].flag = 0;
-    
     }
 
     /* Restore active process ID to parent process in active terminal table */
@@ -164,6 +163,8 @@ int32_t halt(uint8_t status){
     tss.esp0 = cur_pcb->parent_esp;   
 
     sti();
+
+    /* Load in parent process's ebp and esp and save status to eax */
     asm volatile(
         "movl   %0, %%esp   ;"
         "movl   %1, %%ebp   ;"
@@ -247,7 +248,8 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num){
 				movl %%esp, %%ebx 	\n\
 			"
 			:"=a"(pcb->parent_ebp), "=b"(pcb->parent_esp)
-            );
+    );
+
 
     /* Initialize paging for process */
     pid_page_map(pid);
@@ -268,24 +270,23 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num){
     sti();
 
     /* IRET setup and context switch */
-    asm volatile(
-            
-            "mov $0x2B, %%ax;"
-            "mov %%ax, %%ds;"
-            "movl $0x83FFFFC, %%eax;"
-            "pushl $0x2B;"
-            "pushl %%eax;"
-            "pushfl;"
-            "pushl $0x23;"
-            "pushl %0;"
-            "iret;"
-            "RETURN_FROM_IRET:;"
-            "LEAVE;"
-            "RET;"
-            :	            /* no outputs         */
-            :"r"(v_addr)	/* input              */
-            :"%edx","%eax"	/* clobbered register */
-            );
+    asm volatile(       
+        "mov $0x2B, %%ax;"
+        "mov %%ax, %%ds;"
+        "movl $0x83FFFFC, %%eax;"
+        "pushl $0x2B;"
+        "pushl %%eax;"
+        "pushfl;"
+        "pushl $0x23;"
+        "pushl %0;"
+        "iret;"
+        "RETURN_FROM_IRET:;"
+        "LEAVE;"
+        "RET;"
+        :	            /* no outputs         */
+        :"r"(v_addr)	/* input              */
+        :"%edx","%eax"	/* clobbered register */
+    );
 
     return 0;
 }
