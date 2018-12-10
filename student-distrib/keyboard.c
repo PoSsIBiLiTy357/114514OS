@@ -58,6 +58,7 @@ unsigned char char_match(unsigned char c)
     if( (cap_status == 1) && (res>='a') && (res<='z') ){
     	if( (pressed_key[LEFTSHIFT]==1) || (pressed_key[RIGHTSHIFT]==1)){
         	res = scan_code[c];
+			if(c = ENTER) res = '\n';
 		}
 		else{
 			res = shift_convert[c];
@@ -65,6 +66,7 @@ unsigned char char_match(unsigned char c)
 	}
 	else if( (pressed_key[LEFTSHIFT]==1) || (pressed_key[RIGHTSHIFT]==1)){
         	res = shift_convert[c];
+			if(c = ENTER) res = '\n';
 		}
     return res;
 }
@@ -146,6 +148,9 @@ void keyboard_handler()
 			{
 				if(cursor_ind[terminal_id]>=MAX_KEY_IND+1)
 				{
+					if(input==ENTER){
+						putc_scroll_display(char_match(input));
+					}
 				}
 				else
 				{
