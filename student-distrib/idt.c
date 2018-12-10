@@ -433,6 +433,7 @@ void idt_init(){
 	}
 	SET_IDT_ENTRY(idt[0x21], keyboard_handler_asm);         //set keyboard 0X21 is th keyboard handler, which is PIC+1
 	SET_IDT_ENTRY(idt[0x28], rtc_handler_asm);          //set RTC 0X28 is the rtc handler, which is PIC+8
+	SET_IDT_ENTRY(idt[0x20], pit_handler_asm);
 	
 	idt[SYSTEM_CALL].reserved3 = 1;		//system call handler is trap gate
 	SET_IDT_ENTRY(idt[SYSTEM_CALL],syscall_asm); //set 0x80 to be assembly linkage of syscall

@@ -104,13 +104,13 @@ void paging_init(){
     int i;
 
     //create index 2-1023 PDEs
-    for(i = 2; i < PAGE_ENTRY_SIZE; i++){
+    for (i = 2; i < PAGE_ENTRY_SIZE; i++) {
         pdt_init_mb(i);
          page_directory[i].mb.pt_base_addr = i;
     }
 
     //create all 1024 PTEs
-    for(i = 0; i < PAGE_ENTRY_SIZE; i++){
+    for (i = 0; i < PAGE_ENTRY_SIZE; i++) {
         pt_init(i);
         page_table[i].page_present = 0;
         page_table[i].page_addr = i;
@@ -118,10 +118,10 @@ void paging_init(){
 
     //create index 0-4MB as 4kB page directory entry
     pdt_init_kb(0);
-     page_directory[0].kb.pt_present = 1;
-     page_directory[0].kb.pt_rw = 1;
+    page_directory[0].kb.pt_present = 1;
+    page_directory[0].kb.pt_rw = 1;
     //assign page table base addr(right shift 12 bits) to PDE 0
-     page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12; 
+    page_directory[0].kb.pt_base_addr = (uint32_t)page_table>>12; 
 
     //mark video mem present in corresponding page table entry
     page_table[PT_VIDEO].page_present = 1;
@@ -129,20 +129,36 @@ void paging_init(){
     page_table[PT_VIDEO].page_cache_da = 1;
     page_table[PT_VIDEO].page_addr = PT_VIDEO;
 
+    //mark video mem present in corresponding page table entry
+    page_table[PT_VIDEO+1].page_present = 1;
+    page_table[PT_VIDEO+1].page_rw = 1;
+    page_table[PT_VIDEO+1].page_cache_da = 1;
+    page_table[PT_VIDEO+1].page_addr = PT_VIDEO+1;
+
+    //mark video mem present in corresponding page table entry
+    page_table[PT_VIDEO+2].page_present = 1;
+    page_table[PT_VIDEO+2].page_rw = 1;
+    page_table[PT_VIDEO+2].page_cache_da = 1;
+    page_table[PT_VIDEO+2].page_addr = PT_VIDEO+2;
+
+    //mark video mem present in corresponding page table entry
+    page_table[PT_VIDEO+3].page_present = 1;
+    page_table[PT_VIDEO+3].page_rw = 1;
+    page_table[PT_VIDEO+3].page_cache_da = 1;
+    page_table[PT_VIDEO+3].page_addr = PT_VIDEO+3;
+    
+    //mark video mem present in corresponding page table entry
+    page_table[PT_VIDEO+4].page_present = 1;
+    page_table[PT_VIDEO+4].page_rw = 1;
+    page_table[PT_VIDEO+4].page_cache_da = 1;
+    page_table[PT_VIDEO+4].page_addr = PT_VIDEO+4;
+
     //create 4-8MB kernel as 4MB page directory entry
     pdt_init_mb(1);
-     page_directory[1].mb.pt_present = 1;
-     page_directory[1].mb.pt_rw = 1;
-     page_directory[1].mb.pt_base_addr = 1;
+    page_directory[1].mb.pt_present = 1;
+    page_directory[1].mb.pt_rw = 1;
+    page_directory[1].mb.pt_base_addr = 1;
 
-/*
-    pdt_init_mb(pid, program_pageIdx);
-    process[pid].page_directory[program_pageIdx].mb.pt_present = 1;
-    process[pid].page_directory[program_pageIdx].mb.pt_size = 1;
-    process[pid].page_directory[program_pageIdx].mb.pt_us = 1;
-    process[pid].page_directory[program_pageIdx].mb.pt_rw = 1;
-    process[pid].page_directory[program_pageIdx].mb.pt_base_addr = ((pid*_4MB_) + _8MB_)>>22;
-*/
     printf("PAGE_INIT OK\n");
 
     __asm__ (
@@ -165,6 +181,16 @@ void paging_init(){
 
 
 
+/*
+ * flush_tlb
+ *     DESCRIPTION: Flushes the translation lookup buffer by resetting
+ *         control register 3. Method derived from: https://wiki.osdev.org/TLB
+ *          
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ *     SIDE EFFECTS: flushes TLB
+ */
 void flush_tlb(void){
 	asm volatile(
                  "mov %%cr3, %%eax;"
@@ -175,10 +201,9 @@ void flush_tlb(void){
                  );
 }
 
+
 void pid_page_map(int pid){
 
-
-    //pdt_init_mb(0, program_pageIdx);
      page_directory[program_pageIdx].mb.pt_present = 1;
      page_directory[program_pageIdx].mb.pt_size = 1;
      page_directory[program_pageIdx].mb.pt_us = 1;
@@ -190,9 +215,9 @@ void pid_page_map(int pid){
 }
 
 
-void vidMem_page_map(int vAddr){
-    //int i, pd_i;      //not using i?
+void vidMem_page_map(int vAddr, int t_id){
     int pd_i;
+    int t_display = get_display_terminal();
     pd_i = vAddr>>22;
 
     //set up pd according to virtual addr
@@ -213,12 +238,25 @@ void vidMem_page_map(int vAddr){
     vidMem_table[0].page_attr     = 0;
     vidMem_table[0].page_global   = 0;
     vidMem_table[0].page_avail    = 0;
-    vidMem_table[0].page_addr = PT_VIDEO;
+
+    if(t_id == t_display){
+        vidMem_table[0].page_addr = PT_VIDEO;
+    }
+    else{
+        vidMem_table[0].page_addr = 0;
+    }
+
 
     flush_tlb();
-
 }
 
-
+void set_active_terminal_paging(int terminal_id){
+  
+    ////////////////////////////////////////////////////////////////
+    page_table[PT_VIDEO].page_addr=PT_VIDEO;                 ///////
+    ////////////////////////////////////////////////////////////////   debug here if needed
+   
+    flush_tlb();
+}
 
 

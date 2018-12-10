@@ -51,7 +51,7 @@
 #define   H		35
 #define   J		36
 #define   K		37
-#define   L		38
+
 #define   Z		44
 #define   X		45
 #define   C		46
@@ -74,18 +74,6 @@
 #define 	COMMA	51
 #define 	POINT	52
 
-#define 	F1             59
-#define 	F2             60
-#define 	F3             61
-#define 	F4             62
-#define 	F5             63
-#define 	F6             64
-#define 	F7             65
-#define 	F8             66
-#define 	F9             67
-#define 	F10            68
-#define 	F11            87
-#define 	F12            88
 
 #define 	PAGEUP			104
 #define 	PAGEDOWN        109
@@ -145,6 +133,10 @@ void init_scan_code(){
 	shift_convert[Z]='Z';
 	shift_convert[X]='X';
     shift_convert[C]='C';
+	shift_convert[V]='V';
+    shift_convert[B]='B';
+    shift_convert[N]='N';
+    shift_convert[M]='M';
 	
 	shift_convert[BACKTICK]= '~';
 	shift_convert[ONE]='!';

@@ -52,8 +52,8 @@ void rtc_init() {
 
 /*
 * rtc_int_handler
-*   DESCRIPTION: Interrupt handler for RTC interrupts. Should call a test
-*       functoin somehow. Needs work.
+*   DESCRIPTION: Interrupt handler for RTC interrupts. Simply sets interrupt flag 
+*       and re-enables interrupts.
 *
 *   INPUTS: none
 *   OUTPUTS: none

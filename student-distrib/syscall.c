@@ -9,10 +9,8 @@
 #define START_ADDR        24
 #define ADDR_OFFSET        8
 
-#define KSTACK_START        0x800000
 #define PROGRAM_IMAGE_ADDR  0x8048000
 #define PROC_NUM            6
-#define PCB_SIZE            0x2000
 #define ASM                 1
 #define RESERV_FILES        2
 #define ERR_BUF            26
@@ -21,11 +19,8 @@
 #define FILE_DIR            1
 #define FILE_REG            2
 
-#define MEM_FENCE           BYTE_LEN
-
-
-/* Current PID */
-static int curr = 0;
+/* Table of active and inactive terminals (active = 1, inactive = 0) */
+int32_t t_curr[3] = {-1,-1,-1};
 
 /* Table of active and inactive processes (active = 1, inactive = 0) */
 static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
@@ -45,13 +40,13 @@ static uint32_t argSize = 0;
 *   RETURN VALUE: none
 *	SIDE EFFECTS : Creates a new PCB for the process with requested PID
 */
-void pcb_init(int pid) {
+void pcb_init(int pid, int terminal_num) {
     int i;
-    curr = pid;
-    
+
     /* Create PCB for current process and assign PID */
-    pcb_t* pcb= (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
-    pcb->pid=pid;
+    pcb_t* pcb = GET_PCB(pid);
+    pcb_t* p_pcb = GET_PCB(curr);
+    pcb->pid = pid;
 
     /* Fill in file descriptors for reserved file stdin for every new process */
     pcb->file_array[0].read  = terminal_read_wrap;  //init stdin and stdout
@@ -60,6 +55,7 @@ void pcb_init(int pid) {
     pcb->file_array[0].close = terminal_nothing;
     pcb->file_array[0].flag  = 1;
     pcb->bitmap[0] = 1;
+
     /* Fill in file descriptors for reserved file stdout for every new process */
     pcb->file_array[1].read  = terminal_wrong;
     pcb->file_array[1].write = terminal_write_wrap;
@@ -68,6 +64,9 @@ void pcb_init(int pid) {
     pcb->file_array[1].flag  = 1;
     pcb->bitmap[1] =1;
 
+    pcb->current_ebp = GET_ESP(pid);
+    pcb->current_esp = GET_ESP(pid);
+
     /* Set remaining files as unused (flag = 0) for every new process */
     for (i = RESERV_FILES; i < FDESC_SIZE; i++) {
         pcb->file_array[i].flag = 0;
@@ -75,12 +74,24 @@ void pcb_init(int pid) {
 
 
     /* Check if this is the first process, and if it is, set parent ptr to NULL */
-    if (pid == 0) {
+    if (t_curr[terminal_num] == -1) {
         pcb->p_pid = pid;
+        pcb->parent_esp = GET_ESP(pid);
+        pcb->parent_esp = GET_ESP(pid);
+
     }
     else {
-        pcb->p_pid = pid-1;
+        pcb->p_pid = p_pcb->pid;
+        pcb->parent_ebp = p_pcb->current_ebp;
+        pcb->parent_esp = p_pcb->current_ebp;
+
     }
+    
+    /* Update state variables for what terminal(s) are active and current terminal */
+    curr = pid;
+    t_curr[terminal_num] = pid;
+    pcb->terminal = terminal_num;
+
 }
 
 
@@ -94,13 +105,12 @@ void pcb_init(int pid) {
 *   OUTPUTS: int - PID (0-5)
 *   RETURN VALUE: none
 */
-int get_pid(){
+int get_pid() {
     int i;
 
     /* Look thru process table for an inactive process (marked 0) and return it */
     for(i = 0; i < PROC_NUM; i++){
         if(proc_state[i] == 0){
-            proc_state[i] = 1;      /* Mark pid as used */
             return i;
         }
     }
@@ -119,38 +129,42 @@ int get_pid(){
 */
 int32_t halt(uint8_t status){
     int32_t i;
+
     cli();
-    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    pcb_t *par_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * cur_pcb->p_pid);
 
-    //restore parent data 
-    proc_state[cur_pcb->pid] = 0;
+    pcb_t *cur_pcb = GET_PCB(curr);
+    pcb_t *par_pcb = GET_PCB(cur_pcb->p_pid);
 
-    //tss.esp0 = KSTACK_BOT - PCB_SIZE * curr - 4;      
+    /* Set closing process status to inactive */
+    proc_state[cur_pcb->pid] = 0;    
 
-    //close any relevant FDs 
-    for(i = 0; i < FDESC_SIZE; i++){
+    /* Close any relevant FDs */
+    for (i = 0; i < FDESC_SIZE; i++) {
 
-        if(cur_pcb->file_array[i].flag){
+        if (cur_pcb->file_array[i].flag){
             close(i);
         }
         cur_pcb->file_array[i].flag = 0;
-    
     }
 
-    curr = par_pcb->pid;
+    /* Restore active process ID to parent process in active terminal table */
+    curr = cur_pcb->p_pid;
+    t_curr[cur_pcb->terminal] = cur_pcb->p_pid;
 
+    /* Check if the process to be halted is the bottom-most process and if so, start a new shell */
     if(cur_pcb->pid == cur_pcb->p_pid){
-        execute((uint8_t *)"shell");
+        execute_with_terminal_num((uint8_t *)"shell", cur_pcb->terminal);
     }
 
-    //restore parent paging (cr3)
+    /* Restore parent paging (cr3) */
     pid_page_map(par_pcb->pid);
 
     /* Update the tss.esp0 */
     tss.esp0 = cur_pcb->parent_esp;   
 
     sti();
+
+    /* Load in parent process's ebp and esp and save status to eax */
     asm volatile(
         "movl   %0, %%esp   ;"
         "movl   %1, %%ebp   ;"
@@ -172,7 +186,6 @@ int32_t halt(uint8_t status){
 * execute
 *   DESCRIPTION: Executes a user level progam by and hands processor
 *           off to the new program until it terminates.
-*   NOTE: does not take args into account, need to work on this...
 *
 *   INPUTS: uint8_t * command - first string is filename followed by args to
 *               be interpreted by getargs()
@@ -181,11 +194,29 @@ int32_t halt(uint8_t status){
 *	SIDE EFFECTS : Switches processor to user mode to run given user program
 */
 int32_t execute(const uint8_t * command){
+    pcb_t *pcb = GET_PCB(curr);
+    return execute_with_terminal_num(command, pcb->terminal);
+}
+
+
+/*
+* execute_with_terminal_num
+*   DESCRIPTION: Helper function for execute that allows program to 
+*           identify which terminal to run in.
+*
+*   INPUTS: uint8_t * command - first string is filename followed by args to
+*               be interpreted by getargs()
+*           int terminal_num - terminal number (0-2)
+*   OUTPUTS: none
+*   RETURN VALUE: 0 on success, -1 on failure
+*	SIDE EFFECTS : Switches processor to user mode to run given user program
+*/
+int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num){
     uint8_t inFile[CMD_LIMIT];  /* name of executable file           */
     uint32_t v_addr;            /* virtual addr of first instruction */
     dentry_t d;
     int pid;
-    char errMsg[ERR_BUF] = "TOO MANY PROCESSES OPEN!";
+    char errMsg[ERR_BUF] = "TOO MANY PROCESSES OPEN!\n";
 
     /* Ensure parameter is valid */
     if (command == NULL) { return -1; }
@@ -203,10 +234,13 @@ int32_t execute(const uint8_t * command){
         terminal_write(errMsg, ERR_BUF);
         return 0; 
     }
+
+    /* Mark pid as used */
+    proc_state[pid] = 1;      
     
     /* Create PCB */
-    pcb_init(pid);
-    pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
+    pcb_init(pid, terminal_num);
+    pcb_t* pcb = GET_PCB(pid);
 
 	/* Saving the current ESP and EBP into the PCB struct */
 	asm volatile("			\n\
@@ -214,41 +248,45 @@ int32_t execute(const uint8_t * command){
 				movl %%esp, %%ebx 	\n\
 			"
 			:"=a"(pcb->parent_ebp), "=b"(pcb->parent_esp)
-            );
+    );
+
 
     /* Initialize paging for process */
     pid_page_map(pid);
 
+    /* Update current terminal number and init paging for that terminal */
+    set_active_terminal(terminal_num);
 
     /* User-level Program Loader */
     read_dentry_by_name(inFile, &d);
     read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
 
-    /* Upate TSS ss0 and esp0 */
+    /* Update TSS */
     tss.ss0 = KERNEL_DS;
-    //tss.esp0 = (0x100000*8) - PCB_SIZE * pid - 4;
-    tss.esp0 = KSTACK_BOT - (PCB_SIZE * pid) - MEM_FENCE;
-
+    tss.esp0 = GET_ESP(pid);
+    pcb->current_ebp = tss.esp0;
+    pcb->current_esp = tss.esp0;
+    
     sti();
+
     /* IRET setup and context switch */
-    asm volatile(
-            
-            "mov $0x2B, %%ax;"
-            "mov %%ax, %%ds;"
-            "movl $0x83FFFFC, %%eax;"
-            "pushl $0x2B;"
-            "pushl %%eax;"
-            "pushfl;"
-            "pushl $0x23;"
-            "pushl %0;"
-            "iret;"
-            "RETURN_FROM_IRET:;"
-            "LEAVE;"
-            "RET;"
-            :	            /* no outputs         */
-            :"r"(v_addr)	/* input              */
-            :"%edx","%eax"	/* clobbered register */
-            );
+    asm volatile(       
+        "mov $0x2B, %%ax;"
+        "mov %%ax, %%ds;"
+        "movl $0x83FFFFC, %%eax;"
+        "pushl $0x2B;"
+        "pushl %%eax;"
+        "pushfl;"
+        "pushl $0x23;"
+        "pushl %0;"
+        "iret;"
+        "RETURN_FROM_IRET:;"
+        "LEAVE;"
+        "RET;"
+        :	            /* no outputs         */
+        :"r"(v_addr)	/* input              */
+        :"%edx","%eax"	/* clobbered register */
+    );
 
     return 0;
 }
@@ -333,23 +371,23 @@ int32_t read(int32_t fd, void * buf, int32_t nbytes){
     if (fd >= FDESC_SIZE || fd < 0) { return -1; }
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to read() */
-    pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
-    /////////////////////////////////
+    pcb_t * temp_pcb = GET_PCB(curr);
+    
+    /* Ensure file to read has been opened */
     if(temp_pcb->file_array[fd].flag == 0) return -1;
-    /////////////////////////////////
+
+    /* Read in file starting offset and inode to pass in when calling read() */
     int offset = temp_pcb->file_array[fd].file_pos;
     int inode = temp_pcb->file_array[fd].inode;
-    int count = temp_pcb->file_array[fd].read(inode,offset,buf,nbytes);
+    int count = temp_pcb->file_array[fd].read(inode, offset, buf, nbytes);
 
     /* Check if read handler returned an error, if so, return -1 */
     if (count < 0) return -1;
-    
 
     /* Increment the read offset */
     temp_pcb->file_array[fd].file_pos += count;
 
     return count;
-    
 }
 
 
@@ -372,11 +410,13 @@ int32_t write(int32_t fd, const void * buf, int32_t nbytes){
     /* Check that we haven't exceeded max number of open files */
     if (fd >= FDESC_SIZE || fd < 0 || buf == NULL) return -1;
 
-    /* Create a temporary PCB and initalize offest and inode for file to then jump to write() */
-    pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
-     /////////////////////////////////
+    /* Create a temporary PCB and initalize inode for file to then jump to write() */
+    pcb_t * temp_pcb = GET_PCB(curr);
+    
+    /* Ensure file to write to has been opened */
     if(temp_pcb->bitmap[fd] == 0) return -1;
-    /////////////////////////////////
+
+    /* Read in inode to pass in when calling write() */
     int inode = temp_pcb->file_array[fd].inode;
     int count = temp_pcb->file_array[fd].write(inode, 0, (uint8_t *)buf, nbytes);
 
@@ -405,10 +445,10 @@ int32_t open(const uint8_t * filename){
     if (filename == NULL) { return -1; }
 
     /* initialize PCB to the bottom of kernel stack offest by 8MB * curr PID */
-    pcb = (pcb_t *)(KSTACK_BOT - (PCB_SIZE * curr));
+    pcb = GET_PCB(curr);
 
     /* If the filename does not exist, return -1 */
-    if (read_dentry_by_name(filename, &temp_dentry) ==-1) return -1; 
+    if (read_dentry_by_name(filename, &temp_dentry) ==-1) { return -1; } 
     
     for (i = 2; i < FDESC_SIZE; i++) {
         if (pcb->bitmap[i] == 0) {
@@ -416,7 +456,7 @@ int32_t open(const uint8_t * filename){
             break;
         } 
     }
-    if (i == FDESC_SIZE) return -1; //if no descriptors are free, return -1
+    if (i == FDESC_SIZE) return -1;     /* if no descriptors are free, return -1 */
     
     /* Check if the file type is an RTC file */
     if (temp_dentry.ftype == FILE_RTC) {
@@ -450,7 +490,6 @@ int32_t open(const uint8_t * filename){
     pcb->file_array[i].file_pos = 0;
     
     return i;
-
 }
 
 
@@ -463,17 +502,15 @@ int32_t open(const uint8_t * filename){
 */
 int32_t close(int32_t fd){
     /* Make sure given file descriptor is within range */
-/////////////////////////////////////////////////////////
-    if (fd > 7 || fd < 2) return -1;///arg change to 7
-/////////////////////////////////////////////////////////
+    if (fd > FDESC_SIZE || fd < MIN_FILES) { return -1; }
     
-    
-    pcb_t *temp_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    /////////////////////////////////
-    if(temp_pcb->file_array[fd].flag == 0) return -1;
-    /////////////////////////////////
-    //int temp_pcb_addr = 0x800000-0x2000-curr*0x2000;
+    /* Create a temporary PCB and then jump to close() */
+    pcb_t *temp_pcb = GET_PCB(curr);
 
+    /* Ensure file to write to has been opened */
+    if(temp_pcb->file_array[fd].flag == 0) { return -1; }
+
+    /* Update file array status for current process */
     temp_pcb->file_array[fd].flag = 0;
     temp_pcb->bitmap[fd] = 0;
     
@@ -516,8 +553,8 @@ int32_t vidmap(uint8_t ** start_screen) {
     if(start_screen == NULL || start_screen == (uint8_t **)_4MB_){
         return -1;
     } 
-    
-    vidMem_page_map((int)(132 * _MB_));
+    int t_display = get_display_terminal();
+    vidMem_page_map((int)(132 * _MB_), t_display);
 
     *start_screen = (uint8_t *)(132 * _MB_);
 
@@ -529,7 +566,7 @@ int32_t vidmap(uint8_t ** start_screen) {
 
 /*
 *  set_handler
-*   DESCRIPTION: 
+*   DESCRIPTION: NOT USED
 *
 *   INPUTS: uint32_t signum
 *           void * handler_address
@@ -543,7 +580,7 @@ int32_t set_handler(int32_t signum, void * handler_address){
 
 /*
 *  sigreturn
-*   DESCRIPTION: 
+*   DESCRIPTION: NOT USED
 *
 *   INPUTS: none
 *   OUTPUTS: 

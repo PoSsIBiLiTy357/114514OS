@@ -12,7 +12,7 @@
 #include "keyboard.h"
 #include "paging.h"
 #include "filesys_read.h"
-#define RUN_TESTS   1
+#define RUN_TESTS   0
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -153,6 +153,7 @@ void entry(unsigned long magic, unsigned long addr) {
     read_filesys_bootblock(bootBlk_addr);
     init_keyboard();
 
+    pit_init();
     rtc_init();
 
     /* Enable interrupts */
@@ -167,6 +168,8 @@ void entry(unsigned long magic, unsigned long addr) {
     launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
+    clear();
+    execute_with_terminal_num((uint8_t *)"shell",0);
 
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
