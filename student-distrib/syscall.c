@@ -537,8 +537,8 @@ int32_t vidmap(uint8_t ** start_screen) {
     if(start_screen == NULL || start_screen == (uint8_t **)_4MB_){
         return -1;
     } 
-    
-    vidMem_page_map((int)(132 * _MB_));
+    int t_display = get_display_terminal();
+    vidMem_page_map((int)(132 * _MB_), t_display);
 
     *start_screen = (uint8_t *)(132 * _MB_);
 

@@ -70,6 +70,7 @@ void pit_int_handler() {
 
     //switch paging for next process(cr3)
     pid_page_map(nxt_pcb->pid);
+    vidMem_page_map(132 * _MB_, nxt_pcb->terminal);
     /* Update the tss.ss0/esp0 */
     tss.ss0 = KERNEL_DS;
     tss.esp0 = KSTACK_START - (PCB_SIZE * nxt_pcb->pid) - MEM_FENCE;

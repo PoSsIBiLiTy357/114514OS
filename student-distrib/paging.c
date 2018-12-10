@@ -215,9 +215,11 @@ void pid_page_map(int pid){
 }
 
 
-void vidMem_page_map(int vAddr){
+void vidMem_page_map(int vAddr, int t_id){
     //int i, pd_i;      //not using i?
     int pd_i;
+    //int t_active = get_active_terminal();
+    int t_display = get_display_terminal();
     pd_i = vAddr>>22;
 
     //set up pd according to virtual addr
@@ -227,7 +229,7 @@ void vidMem_page_map(int vAddr){
     page_directory[pd_i].kb.pt_rw = 1;
     page_directory[pd_i].kb.pt_base_addr = (uint32_t)vidMem_table>>12; 
 
-    //set up pt for video mem
+        //set up pt for video mem
     vidMem_table[0].page_present = 1;
     vidMem_table[0].page_rw = 1;
     vidMem_table[0].page_us = 1;
@@ -238,7 +240,15 @@ void vidMem_page_map(int vAddr){
     vidMem_table[0].page_attr     = 0;
     vidMem_table[0].page_global   = 0;
     vidMem_table[0].page_avail    = 0;
-    vidMem_table[0].page_addr =PT_VIDEO;//+get_display_terminal()+1;
+    //vidMem_table[0].page_addr = PT_VIDEO+t_active+1;
+
+    if(t_id == t_display){
+        vidMem_table[0].page_addr = PT_VIDEO;
+    }
+    else{
+        vidMem_table[0].page_addr = 0;
+    }
+
 
     flush_tlb();
 
