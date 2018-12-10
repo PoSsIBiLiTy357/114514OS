@@ -5,6 +5,7 @@
 
 #include "timer.h"
 
+/* PIT initialization bytes and values*/
 #define DESIRED_FREQ                50
 #define PIT_CLOCK_FREQ              1193180
 #define PIT_COMM_PORT               0x43
@@ -14,11 +15,10 @@
 #define MSB_SHIFT                   8
 #define PIT_IRQ                     0
 
+#define NUM_TERMINALS               3
+
 extern int32_t t_curr[3];
 int8_t prog_timer = 0;
-//static int curr_process;          // set in execute()?
-
-//int PIT_ctr = 0;            // for testing delete later
 
 /*
 * pit_init
@@ -45,50 +45,58 @@ void pit_init() {
     outb(divisor >> MSB_SHIFT, PIT_CHANNEL_0);
 }
 
+/*
+* pit_int_handler
+*   DESCRIPTION: 
+*
+*   INPUTS: none
+*   OUTPUTS: none
+*   RETURN VALUE: none
+*/
 void pit_int_handler() {
     int32_t nxt_terminal;
     cli();
+
     /* Send EOI for PIT interrupt */
     send_eoi(PIT_IRQ);
 
 //////////////////////Code for process switch////////////////////////////
 
-    //if only 1st terminal running, return
-    // if(t_curr[1] == -1 && t_curr[2] == -1){
-    //     return;
-    // }
     if(t_curr[0] == -1){
         clear();
         execute_with_terminal_num((uint8_t *)"shell", 0);
     }
     
-    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t *cur_pcb = GET_PCB(curr);
 
     //find next terminal that need run process
-    nxt_terminal = (cur_pcb->terminal+1)%3;
+    nxt_terminal = (cur_pcb->terminal + 1) % NUM_TERMINALS;
     while(t_curr[nxt_terminal] == -1){
-        nxt_terminal = (nxt_terminal+1)%3;
+        nxt_terminal = (nxt_terminal + 1) % NUM_TERMINALS;
     }
 
-    pcb_t *nxt_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * t_curr[nxt_terminal]);
+    pcb_t *nxt_pcb = GET_PCB(t_curr[nxt_terminal]);
 
     //switch paging for next process(cr3)
     pid_page_map(nxt_pcb->pid);
     vidMem_page_map(132 * _MB_, nxt_pcb->terminal);
+
     /* Update the tss.ss0/esp0 */
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = KSTACK_START - (PCB_SIZE * nxt_pcb->pid) - MEM_FENCE;
+    tss.esp0 = GET_ESP(nxt_pcb->pid);
     curr = nxt_pcb->pid;
     set_active_terminal(nxt_pcb->terminal);
 
     sti();
 
+    /* Save currently running process's ebp and esp */
 	asm volatile(
         "movl   %%ebp, %0   ;"
         "movl   %%esp, %1   ;"
         :"=r"(cur_pcb->current_ebp), "=r"(cur_pcb->current_esp)
         );
 
+    /* Load in next process's ebp and esp to start running it */
     asm volatile(
         "movl   %0, %%esp   ;"
         "movl   %1, %%ebp   ;"
@@ -96,8 +104,6 @@ void pit_int_handler() {
         "RET;"
         : :"r"(nxt_pcb->current_esp), "r"(nxt_pcb->current_ebp) 
     );
-
-//////////////////////////////////////////////////////////////////////// 
 
     return;
 
