@@ -48,7 +48,9 @@ void pit_init() {
 
 /*
 * pit_int_handler
-*   DESCRIPTION: 
+*   DESCRIPTION: Handler for PIT interrupts uses round-robin scheduling
+*       to give each process a timeslice to execute, therefore allowing
+*       multiple programs to execute seemingly concurrently.
 *
 *   INPUTS: none
 *   OUTPUTS: none
