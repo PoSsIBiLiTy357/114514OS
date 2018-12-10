@@ -4,7 +4,7 @@
 #include "lib.h"
 #include "paging.h"
 #define VIDEO       0xB8000
-#define VIDEO_PHYSICAL       (0xB8000+0x4000)
+//#define VIDEO_PHYSICAL       (0xB8000+0x4000)
 #define NUM_COLS    80
 #define NUM_ROWS    25
 #define ATTRIB      0x7
@@ -17,7 +17,7 @@ static int screen_y_multi[TERMINAL_NUM] = {0,0,0};
 static int screen_x_before_input = 0;
 static int screen_y_before_input;
 static char* video_mem = (char *)VIDEO;
-static char* physical_video_mem = (char *)VIDEO_PHYSICAL;
+//static char* physical_video_mem = (char *)VIDEO_PHYSICAL;
 static char* TERMINAL_MEM[3] = { (char *)(VIDEO+0x1000), (char *)(VIDEO+0x2000), (char *)(VIDEO+0x3000) };
 static int display_terminal=0;
 static int active_terminal=0;
