@@ -44,6 +44,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
 
     int i;
     uint8_t *i_fname;
+
     //loop through all dentries
     for(i = 0; i < num_dentry; i++){
         i_fname = dentry_start[i].fname;
@@ -63,6 +64,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
 
     return -1;
 }
+
 
 /*
  * int32_t read_dentry_by_index (uint32_t index dentry_t* dentry)
@@ -103,27 +105,23 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry){
  *     RETURN VALUE: success:length  reach to end:0  failed:-1
  */
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
-/*//////////////////////////////////
-    if(temp_counter ==5) {
-        temp_counter =0;
-        return 0;
-    }
-    temp_counter++;
-*///////////////////////////////////
     int i, inode_datablk_offset, datablk_offset;
 
     //invalid input checks
     if(buf == NULL) return -1;
     if(inode == NULL || inode <0 || inode >= num_inodes) return -1;
+
     //return 0 if offset reach end 
     if(offset >= inode_start[inode].length) return 0;
 
     inode_datablk_offset = offset / DATABLK_SIZE;
     datablk_offset = offset % DATABLK_SIZE;
+
     //fill buf with desired length
     for(i = 0; i<length; i++){
 
         if(i >= inode_start[inode].length) return i;
+
         //reset index when finish 1 datablock and points to next
         if(datablk_offset == DATABLK_SIZE){
             datablk_offset = 0;
@@ -189,13 +187,6 @@ int32_t load_f (uint8_t * fname, uint32_t buffer)
 }
 
 
-
-
-
-
-
-
-
 /*
  * int32_t read_f(int32_t inode, int32_t offset, uint8_t *buf, uint32_t length)
  *     DESCRIPTION: read file by given name and fill up buf 
@@ -209,6 +200,7 @@ int32_t read_f(uint32_t inode, uint8_t *buf){
 
 }
 
+
 /*
  * int32_t write_f()
  *     DESCRIPTION: write file
@@ -220,6 +212,7 @@ int32_t write_f(){
     return -1;
 }
 
+
 /*
  * int32_t open_f()
  *     DESCRIPTION: open file
@@ -230,6 +223,7 @@ int32_t write_f(){
 int32_t open_f(){
     return 0;
 }
+
 
 /*
  * int32_t close_f()
@@ -364,16 +358,7 @@ int read_file_test(uint8_t *fname){
     printf("1st data block #: %d\n",inode.data_block[0]);
     printf("2nd data block #: %d\n",inode.data_block[1]);
     printf("3rd data block #: %d\n",inode.data_block[2]);
-/*
-    printf("4th data block #: %d\n",inode.data_block[3]);
-    printf("5th data block #: %d\n",inode.data_block[4]);
-    printf("6th data block #: %d\n",inode.data_block[5]);
-    printf("7th data block #: %d\n",inode.data_block[6]);
-    printf("8th data block #: %d\n",inode.data_block[7]);
-    printf("9th data block #: %d\n",inode.data_block[8]);
-    printf("10th data block #: %d\n",inode.data_block[9]);
-    printf("11th data block #: %d\n",inode.data_block[10]);
-*/
+
     memset(buf, 0, sizeof(buf));
 
     read_data(d.inode, 0, buf, PROGRAM_MAX_SIZE);
@@ -386,34 +371,114 @@ int read_file_test(uint8_t *fname){
 	return 1;
 }
 
+
+/*
+ * read_dir_wrapper
+ *     DESCRIPTION: wrapper function for read_dir()
+ *     INPUTS: uint32_t inode - inode for file to read 
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int read_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
     return read_dir(buf);
 }
 
+
+/*
+ * write_dir_wrapper
+ *     DESCRIPTION: wrapper function for write_dir()
+ *     INPUTS: uint32_t inode - inode for file to write 
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int write_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
     return write_dir();
 }
 
+
+/*
+ * open_dir_wrapper
+ *     DESCRIPTION: wrapper function for open_dir()
+ *     INPUTS: uint32_t inode - inode for file to open
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int open_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
     return open_dir();
 }
 
+
+/*
+ * close_dir_wrapper
+ *     DESCRIPTION: wrapper function for close_dir()
+ *     INPUTS: uint32_t inode - inode for file to read 
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int close_dir_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
     return close_dir();
 }
 
+
+/*
+ * read_f_wrapper
+ *     DESCRIPTION: wrapper function for read_data()
+ *     INPUTS: uint32_t inode - inode for file to read 
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int read_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
     return  read_data(inode,offset, buf,count);
 }
 
+
+/*
+ * write_f_wrapper
+ *     DESCRIPTION: wrapper function for write_f()
+ *     INPUTS: uint32_t inode - inode for file to write 
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int write_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
     return write_f();
 }
 
+
+/*
+ * open_f_wrapper
+ *     DESCRIPTION: wrapper function for open_f()
+ *     INPUTS: uint32_t inode - inode for file to open
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int open_f_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
     return open_f();
 }
 
+
+/*
+ * close_f_wrapper
+ *     DESCRIPTION: wrapper function for close_f()
+ *     INPUTS: uint32_t inode - inode for file to close 
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int close_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
     return close_f();
 }

@@ -5,25 +5,26 @@
 #include "lib.h"
 #include "x86_desc.h"
 
-#define MAX_FILE_NUM 63
-#define MAX_DATABLOCK_NUM 1023
-#define NUM_INODE_OFFSET 4
-#define NUM_DBLK_OFFSET 8
-#define DENTRY_START_OFFSET 64
-#define INODE_START_OFFSET  4096
-#define DATABLK_SIZE  4096
-#define datablk(i)  (datablk_start + DATABLK_SIZE*i)
-#define PROGRAM_MAX_SIZE (0x100000*4)
+#define MAX_FILE_NUM                    63
+#define MAX_DATABLOCK_NUM               1023
+#define NUM_INODE_OFFSET                4
+#define NUM_DBLK_OFFSET                 8
+#define DENTRY_START_OFFSET             64
+#define INODE_START_OFFSET              4096
+#define DATABLK_SIZE                    4096
+#define datablk(i)                      (datablk_start + DATABLK_SIZE*i)
+#define PROGRAM_MAX_SIZE                (0x100000*4)
+#define FNAME_SIZE                      32
+#define RESERVED_SIZE                   24
 
 typedef struct {
 
-    uint8_t fname[32];    //32 byte fname size specified in doc
+    uint8_t fname[FNAME_SIZE];    //32 byte fname size specified in doc
     uint32_t ftype;
     uint32_t inode;         
-    uint8_t reserved[24]; //24 byte reserved size specified in doc
+    uint8_t reserved[RESERVED_SIZE]; //24 byte reserved size specified in doc
 
 } dentry_t;
-
 
 typedef struct {
  
@@ -39,13 +40,9 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry);
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
 
 /* file system calls */
-//int32_t read_f_by_name(uint8_t *fname, int32_t offset, uint8_t *buf, uint32_t length);    /* compiler error */
 int32_t read_f_by_name(uint8_t *fname, uint32_t offset, uint8_t *buf, uint32_t length);
 int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t length);
-//int32_t read_f(uint32_t inode, uint8_t *buf);                                             /* compiler error */
-
 int32_t load_f (uint8_t * fname, uint32_t buffer);
-
 int32_t read_f(uint32_t inode, uint8_t *buf);
 int32_t write_f();
 int32_t open_f();
@@ -71,5 +68,3 @@ int open_f_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count
 int close_f_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count);
 
 #endif  /* _FILESYS_READ_H  */  
-////wrappers
-
