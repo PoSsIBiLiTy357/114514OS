@@ -53,9 +53,13 @@ void pit_int_handler() {
 
 //////////////////////Code for process switch////////////////////////////
 
-    // if only 1st terminal running, return
-    if(t_curr[1] == -1 && t_curr[2] == -1){
-        return;
+    //if only 1st terminal running, return
+    // if(t_curr[1] == -1 && t_curr[2] == -1){
+    //     return;
+    // }
+    if(t_curr[0] == -1){
+        clear();
+        execute_with_terminal_num((uint8_t *)"shell", 0);
     }
     
     pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
