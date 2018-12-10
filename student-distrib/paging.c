@@ -2,8 +2,8 @@
 #include "lib.h"
 #include "paging.h"
 #include "x86_desc.h"
-#define ASM 1
 
+#define ASM 1
 #define program_pageIdx 32
 
 /*
@@ -32,6 +32,7 @@ void pdt_init_kb(int idx){
     page_directory[idx] = pdt_entry;
 }
 
+
 /*
  *void pdt_init_mb(int idx)
  *     DESCRIPTION: PDT entery 4MB initialization 
@@ -59,6 +60,7 @@ void pdt_init_mb(int idx){
 
     page_directory[idx] = pdt_entry;
 }
+
 
 /*
  *void pt_init(int idx)
@@ -180,7 +182,6 @@ void paging_init(){
 }
 
 
-
 /*
  * flush_tlb
  *     DESCRIPTION: Flushes the translation lookup buffer by resetting
@@ -202,35 +203,55 @@ void flush_tlb(void){
 }
 
 
+/*
+ * pid_page_map
+ *     DESCRIPTION: Paging initialization for whatever process is
+ * *        specified by the passed in process ID.
+ *          
+ *     INPUTS: int pid - Desired PID
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ *     SIDE EFFECTS: Page initialization
+ */
 void pid_page_map(int pid){
 
      page_directory[program_pageIdx].mb.pt_present = 1;
      page_directory[program_pageIdx].mb.pt_size = 1;
      page_directory[program_pageIdx].mb.pt_us = 1;
      page_directory[program_pageIdx].mb.pt_rw = 1;
-     page_directory[program_pageIdx].mb.pt_base_addr = ((pid*_4MB_) + _8MB_)>>22;
+     page_directory[program_pageIdx].mb.pt_base_addr = ((pid*_4MB_) + _8MB_) >> 22;
 
     flush_tlb();
-
 }
 
 
+/*
+ * vidMem_page_map
+ *     DESCRIPTION: Paging initialization for video memory used
+ *          by user program.
+ *          
+ *     INPUTS: int vAddr - virtual address to where video memory is stored
+ *             int t_id - terminal number (0-2) we are displaying
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ *     SIDE EFFECTS: Page initialization for video memory
+ */
 void vidMem_page_map(int vAddr, int t_id){
     int pd_i;
     int t_display = get_display_terminal();
-    pd_i = vAddr>>22;
+    pd_i = vAddr >> 22;
 
-    //set up pd according to virtual addr
+    /* Set up pd according to virtual addr */
     pdt_init_kb(pd_i);
     page_directory[pd_i].kb.pt_present = 1;
     page_directory[pd_i].kb.pt_us = 1;
     page_directory[pd_i].kb.pt_rw = 1;
     page_directory[pd_i].kb.pt_base_addr = (uint32_t)vidMem_table>>12; 
 
-    //set up pt for video mem
-    vidMem_table[0].page_present = 1;
-    vidMem_table[0].page_rw = 1;
-    vidMem_table[0].page_us = 1;
+    /* Set up pt for video mem */
+    vidMem_table[0].page_present  = 1;
+    vidMem_table[0].page_rw       = 1;
+    vidMem_table[0].page_us       = 1;
     vidMem_table[0].page_wthrough = 0;
     vidMem_table[0].page_cache_da = 0;
     vidMem_table[0].page_accessed = 0;
@@ -239,24 +260,28 @@ void vidMem_page_map(int vAddr, int t_id){
     vidMem_table[0].page_global   = 0;
     vidMem_table[0].page_avail    = 0;
 
-    if(t_id == t_display){
+    /* Ensure requested terminal matches the currently displaying terminal */
+    if (t_id == t_display) {
         vidMem_table[0].page_addr = PT_VIDEO;
-    }
-    else{
+    } else {
         vidMem_table[0].page_addr = 0;
     }
 
-
     flush_tlb();
 }
 
+
+/*
+ * set_active_terminal_paging
+ *     DESCRIPTION: Sets the page table video memory address for the
+ *           requested terminal.
+ *          
+ *     INPUTS: int terminal_id - requested terminal number (0-2)
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ *     SIDE EFFECTS: Sets page table address
+ */
 void set_active_terminal_paging(int terminal_id){
-  
-    ////////////////////////////////////////////////////////////////
-    page_table[PT_VIDEO].page_addr=PT_VIDEO;                 ///////
-    ////////////////////////////////////////////////////////////////   debug here if needed
-   
+    page_table[PT_VIDEO].page_addr = PT_VIDEO;
     flush_tlb();
 }
-
-
