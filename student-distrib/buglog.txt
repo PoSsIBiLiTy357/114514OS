@@ -1,0 +1,118 @@
+/*****************************************************************************/
+/*						 Checkpoint 1 bugs  								 */
+/*****************************************************************************/
+10/15/18 - 10/22/18
+
+Known Bugs:
+#1 - Keyboard can only receive one character, after that freezes up
+#2 - Cannot print from RTC handler
+
+Fixes:
+#1 - 10/21/18
+    Unmasked IRQ line on Slave PIC and Master PIC (before we were just masking 
+    IRQ on Master PIC).
+    by:
+
+#2 - 10/22/18
+    Was trying to print global variable from rtc.c in tests.c. Externed variable
+    RTC_ctr so it could be accessed and printed in tests.c for test cases.
+    by: Andrew Chen
+
+/*****************************************************************************/
+/*						 Checkpoint 2 bugs									 */
+/*****************************************************************************/
+10/22/18 - 10/29/18
+
+Known Bugs:
+#1 - Characters print with spaces inbetween
+#2 - Cannot read verylargetextwithverylongname.txt (other files work fine)
+#3 - RTC_write doesn't handle invalid inputs properly (base 2 values)
+#4 - Every line printed in terminal had an extra new line preceding it
+
+Fixes:
+#1 - 10/24/18
+    Handled keyboard input cases for when keyboard was pressed and released. 
+    by:
+
+#2 - 10/25/18
+    Expanded read-in buffer so that verylargetextwithverylongname.txt can
+    be read and stored properly.
+    by:
+
+#3 - 10/25/18
+    Created a lookup table of all valid values for frequencies and return -1 if
+    input is not among them.
+    by: Andrew Chen
+
+#4 - 11/5/18
+    //////////////////Rewrote keyboard stuff, need to elaborate)////////////////
+    by:
+
+/*****************************************************************************/
+/*						 Checkpoint 3 bugs					        		 */
+/*****************************************************************************/
+10/29/18 - 11/12/18
+
+Known Bugs:
+#1 - execute() only works once
+#2 - Cannot print current directory (list of files)
+
+
+Fixes:
+#1 - 11/10/18
+    When parsing inputted command, was not null-terminating command so the buffer
+    would be overwritten at times and not recognize the next command. Also started
+    clearing the buffer everytime function is called.
+    by: Andrew Chen, 
+
+#2 - 11/14/18
+    ////////////Filesystem was not properly initialized? Need to elaborate ///////////
+    by: 
+
+/*****************************************************************************/
+/*						 Checkpoint 4 bugs									 */
+/*****************************************************************************/
+11/12/18 - 11/27/18
+
+Known Bugs:
+#1 - cat and grep files only worked once
+#2 - syserr number 5 failed (problems with read(), write(), and close())
+#3 - syserr number 7 failed (problems with read() and write())
+#4 - Kernel page-faults after sixth shell
+
+Fixes:
+#1 - 11/24/18
+    Clear buffer before reading and zero terminate string after writing in getargs().
+    by: Andrew Chen, 
+
+#2 - 11/27/18
+    /////////////////// Need to elaborate /////////////////////////////
+    by:
+
+#3 - 11/27/18
+    /////////////////// Need to elaborate /////////////////////////////
+    by:
+
+#4 - 11/27/18
+    Checks list of all open processes before executing and uses terminal_write()
+    to print warning message if all process slots are full.
+    by: Andrew Chen
+
+/*****************************************************************************/
+/*						 Checkpoint 5 bugs									 */
+/*****************************************************************************/
+11/27/18 - 12/10/18
+
+Known Bugs:
+#1 - Video memory is printed across all three terminals
+#2 - Terminals are not independent from one another
+#3 - Terminal 0 doesn't work after Terminal 1 and 2 are launched
+
+Fixes:
+#1 - 12/9/18
+
+
+#2 - 12/7/18
+
+
+#3 - 
