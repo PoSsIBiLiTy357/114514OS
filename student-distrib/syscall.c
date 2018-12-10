@@ -19,11 +19,11 @@
 #define FILE_DIR            1
 #define FILE_REG            2
 
+#define GET_PCB(x)          (pcb_t *)(KSTACK_BOT - PCB_SIZE * (x))
+#define GET_ESP(x)          (KSTACK_START - (PCB_SIZE * (x)) - MEM_FENCE)
+
+/* Table of active and inactive terminals (active = 1, inactive = 0) */
 int32_t t_curr[3] = {-1,-1,-1};
-
-
-/* Current PID */
-//static int curr = 0;
 
 /* Table of active and inactive processes (active = 1, inactive = 0) */
 static int proc_state[PROC_NUM] = {0, 0, 0, 0, 0, 0};
@@ -47,8 +47,8 @@ void pcb_init(int pid, int terminal_num) {
     int i;
 
     /* Create PCB for current process and assign PID */
-    pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
-    pcb_t* p_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t* pcb = GET_PCB(pid);
+    pcb_t* p_pcb = GET_PCB(curr);
     pcb->pid = pid;
 
     /* Fill in file descriptors for reserved file stdin for every new process */
@@ -66,8 +66,8 @@ void pcb_init(int pid, int terminal_num) {
     pcb->file_array[1].flag  = 1;
     pcb->bitmap[1] =1;
 
-    pcb->current_ebp = KSTACK_START - (PCB_SIZE * pid) - MEM_FENCE;
-    pcb->current_esp = KSTACK_START - (PCB_SIZE * pid) - MEM_FENCE;
+    pcb->current_ebp = GET_ESP(pid);
+    pcb->current_esp = GET_ESP(pid);
     /* Set remaining files as unused (flag = 0) for every new process */
     for (i = RESERV_FILES; i < FDESC_SIZE; i++) {
         pcb->file_array[i].flag = 0;
@@ -77,8 +77,8 @@ void pcb_init(int pid, int terminal_num) {
     /* Check if this is the first process, and if it is, set parent ptr to NULL */
     if (t_curr[terminal_num] == -1) {
         pcb->p_pid = pid;
-        pcb->parent_esp = (KSTACK_START - PCB_SIZE * pid - MEM_FENCE);
-        pcb->parent_esp = (KSTACK_START - PCB_SIZE * pid - MEM_FENCE);
+        pcb->parent_esp = GET_ESP(pid);
+        pcb->parent_esp = GET_ESP(pid);
 
     }
     else {
@@ -88,8 +88,10 @@ void pcb_init(int pid, int terminal_num) {
 
     }
     
+    /* Update state variables for what terminal(s) are active and current terminal */
     curr = pid;
     t_curr[terminal_num] = pid;
+    pcb->terminal = terminal_num;
 
 }
 
@@ -128,9 +130,11 @@ int get_pid() {
 */
 int32_t halt(uint8_t status){
     int32_t i;
+
     cli();
-    pcb_t *cur_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    pcb_t *par_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * cur_pcb->p_pid);
+
+    pcb_t *cur_pcb = GET_PCB(curr);
+    pcb_t *par_pcb = GET_PCB(cur_pcb->p_pid);
 
     //restore parent data 
     proc_state[cur_pcb->pid] = 0;
@@ -177,20 +181,32 @@ int32_t halt(uint8_t status){
 
 }
 
-int32_t execute(const uint8_t * command){
-    pcb_t *pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
-    return execute_with_terminal_num(command, pcb->terminal);
-}
-
 
 /*
 * execute
 *   DESCRIPTION: Executes a user level progam by and hands processor
 *           off to the new program until it terminates.
-*   NOTE: does not take args into account, need to work on this...
 *
 *   INPUTS: uint8_t * command - first string is filename followed by args to
 *               be interpreted by getargs()
+*   OUTPUTS: none
+*   RETURN VALUE: 0 on success, -1 on failure
+*	SIDE EFFECTS : Switches processor to user mode to run given user program
+*/
+int32_t execute(const uint8_t * command){
+    pcb_t *pcb = GET_PCB(curr);
+    return execute_with_terminal_num(command, pcb->terminal);
+}
+
+
+/*
+* execute_with_terminal_num
+*   DESCRIPTION: Helper function for execute that allows program to 
+*           identify which terminal to run in.
+*
+*   INPUTS: uint8_t * command - first string is filename followed by args to
+*               be interpreted by getargs()
+*           int terminal_num - terminal number (0-2)
 *   OUTPUTS: none
 *   RETURN VALUE: 0 on success, -1 on failure
 *	SIDE EFFECTS : Switches processor to user mode to run given user program
@@ -219,11 +235,12 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num){
         return 0; 
     }
 
-    proc_state[pid] = 1;      /* Mark pid as used */
+    /* Mark pid as used */
+    proc_state[pid] = 1;      
     
     /* Create PCB */
     pcb_init(pid, terminal_num);
-    pcb_t* pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * pid);
+    pcb_t* pcb = GET_PCB(pid);
 
 	/* Saving the current ESP and EBP into the PCB struct */
 	asm volatile("			\n\
@@ -236,21 +253,21 @@ int32_t execute_with_terminal_num(const uint8_t * command,int terminal_num){
     /* Initialize paging for process */
     pid_page_map(pid);
 
+    /* Update current terminal number and init paging for that terminal */
     set_active_terminal(terminal_num);
 
     /* User-level Program Loader */
     read_dentry_by_name(inFile, &d);
     read_f(d.inode, (uint8_t *)PROGRAM_IMAGE_ADDR);
 
-    pcb->terminal=terminal_num;
-
+    /* Update TSS */
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = KSTACK_START - (PCB_SIZE * pid) - MEM_FENCE;
-
+    tss.esp0 = GET_ESP(pid);
     pcb->current_ebp = tss.esp0;
     pcb->current_esp = tss.esp0;
     
     sti();
+
     /* IRET setup and context switch */
     asm volatile(
             
@@ -355,22 +372,22 @@ int32_t read(int32_t fd, void * buf, int32_t nbytes){
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to read() */
     pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
-    /////////////////////////////////
+    
+    /* Ensure file to read has been opened */
     if(temp_pcb->file_array[fd].flag == 0) return -1;
-    /////////////////////////////////
+
+    /* Read in file starting offset and inode to pass in when calling read() */
     int offset = temp_pcb->file_array[fd].file_pos;
     int inode = temp_pcb->file_array[fd].inode;
-    int count = temp_pcb->file_array[fd].read(inode,offset,buf,nbytes);
+    int count = temp_pcb->file_array[fd].read(inode, offset, buf, nbytes);
 
     /* Check if read handler returned an error, if so, return -1 */
     if (count < 0) return -1;
-    
 
     /* Increment the read offset */
     temp_pcb->file_array[fd].file_pos += count;
 
     return count;
-    
 }
 
 
@@ -395,9 +412,11 @@ int32_t write(int32_t fd, const void * buf, int32_t nbytes){
 
     /* Create a temporary PCB and initalize offest and inode for file to then jump to write() */
     pcb_t * temp_pcb = (pcb_t*)(KSTACK_BOT - (curr * PCB_SIZE));
-     /////////////////////////////////
+    
+    /* Ensure file to write to has been opened */
     if(temp_pcb->bitmap[fd] == 0) return -1;
-    /////////////////////////////////
+
+    /* Read in inode to pass in when calling write() */
     int inode = temp_pcb->file_array[fd].inode;
     int count = temp_pcb->file_array[fd].write(inode, 0, (uint8_t *)buf, nbytes);
 
@@ -489,7 +508,7 @@ int32_t close(int32_t fd){
 /////////////////////////////////////////////////////////
     
     
-    pcb_t *temp_pcb = (pcb_t *)(KSTACK_BOT - PCB_SIZE * curr);
+    pcb_t *temp_pcb = GET_PCB(curr);
     /////////////////////////////////
     if(temp_pcb->file_array[fd].flag == 0) return -1;
     /////////////////////////////////
