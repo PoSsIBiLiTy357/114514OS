@@ -21,7 +21,6 @@
 /* Initialization struct for device referenced from: */
 /* https://stackoverflow.com/questions/9932212/jump-table-examples-in-c */
 typedef struct file_desc_t { 
-    //func_pointer * pointer;
     int (*open)(uint32_t,uint32_t, uint8_t* , uint32_t);
     int (*close)(uint32_t,uint32_t, uint8_t* , uint32_t);
     int (*read)(uint32_t,uint32_t, uint8_t* , uint32_t);
