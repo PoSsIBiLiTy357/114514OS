@@ -250,13 +250,12 @@ void vidMem_page_map(int vAddr, int t_id){
     flush_tlb();
 }
 
-void set_active_terminal_paging(int terminal_id, int display){
-    if (display == 0) {
-        return;
-    } else {
-        page_table[PT_VIDEO].page_addr = PT_VIDEO;
-    }
-
+void set_active_terminal_paging(int terminal_id){
+  
+    ////////////////////////////////////////////////////////////////
+    page_table[PT_VIDEO].page_addr=PT_VIDEO;                 ///////
+    ////////////////////////////////////////////////////////////////   debug here if needed
+   
     flush_tlb();
 }
 

@@ -47,7 +47,7 @@ void init_keyboard()
     cap_status = 0;
 }
 /* change by shift */
-unsigned char character_convert(unsigned char c)
+unsigned char char_match(unsigned char c)
 {
     if( scan_code[c] ==0 ) return 0;
     unsigned char res = scan_code[c];
@@ -81,6 +81,8 @@ void keyboard_handler()
     while( (inb(KEYBOARD_STATUS_PORT)&0x1)>0 ) //use 0x1 to check the last bit, whether the buffer is still full.
     {
         input = inb(KEYBOARD_DATA_PORT);
+		int terminal_id;
+		terminal_id=get_display_terminal();
 		//////////////////////////////////////			
 		if( input>MAX_KEY_IND )
 		{
@@ -95,8 +97,8 @@ void keyboard_handler()
 			if( (input==L) && (pressed_key[LEFTCTRL]==1)  )
 			{
 				clear();
-				memset(keyboard_buffer[get_display_terminal()], 0 , sizeof(keyboard_buffer[get_display_terminal()]) );
-				cursor_ind[get_display_terminal()] = 0;
+				memset(keyboard_buffer[terminal_id], 0 , sizeof(keyboard_buffer[terminal_id]) );
+				cursor_ind[terminal_id] = 0;
 			}
 			else if (  (pressed_key[LEFTALT]==1)  )
 			{
@@ -131,32 +133,32 @@ void keyboard_handler()
 			}
 			else if(scan_code[input]!=0)
 			{
-				if(cursor_ind[get_display_terminal()]>=MAX_KEY_IND+1)
+				if(cursor_ind[terminal_id]>=MAX_KEY_IND+1)
 				{
 				}
 				else
 				{
-					keyboard_buffer[get_display_terminal()][ cursor_ind[get_display_terminal()]++ ] = character_convert(input);
-					putc_scroll_display(character_convert(input));
+					keyboard_buffer[terminal_id][ cursor_ind[terminal_id]++ ] = char_match(input);
+					putc_scroll_display(char_match(input));
 				}
 			}
 		}
 
 		if(input==ENTER)
 		{
-			memset(print_buffer[get_display_terminal()],0, sizeof(print_buffer[get_display_terminal()]));
-			memcpy(print_buffer[get_display_terminal()], keyboard_buffer[get_display_terminal()], sizeof(keyboard_buffer[get_display_terminal()]));
-			memset(keyboard_buffer[get_display_terminal()], 0 , sizeof(keyboard_buffer[get_display_terminal()]) );
-			terminal_read_ready[get_display_terminal()] = 1;
-			cursor_ind[get_display_terminal()] = 0;
+			memset(print_buffer[terminal_id],0, sizeof(print_buffer[terminal_id]));
+			memcpy(print_buffer[terminal_id], keyboard_buffer[terminal_id], sizeof(keyboard_buffer[terminal_id]));
+			memset(keyboard_buffer[terminal_id], 0 , sizeof(keyboard_buffer[terminal_id]) );
+			terminal_read_ready[terminal_id] = 1;
+			cursor_ind[terminal_id] = 0;
 		}
 
 		if(input==BACKSPACE)
 		{
-			if(cursor_ind[get_display_terminal()]!= 0)
+			if(cursor_ind[terminal_id]!= 0)
 			{
-				keyboard_buffer[get_display_terminal()][ --cursor_ind[get_display_terminal()] ] = '\0';
-				erase_last_ch_display();
+				keyboard_buffer[terminal_id][ --cursor_ind[terminal_id] ] = '\0';
+				delete_c();
 			}
 		}
 			

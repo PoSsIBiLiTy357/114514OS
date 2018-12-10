@@ -91,7 +91,8 @@ void paging_init();
 void flush_tlb(void);
 void pid_page_map(int pid);
 void vidMem_page_map(int vAddr, int t_id);
-void set_active_terminal_paging(int terminal_id,int display);
+
+void set_active_terminal_paging(int terminal_id);
 
 /* Page tables and directory entries */
 pt_entry_t page_table[PAGE_ENTRY_SIZE] __attribute__((aligned (4096))); //page table
