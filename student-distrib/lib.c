@@ -4,7 +4,6 @@
 #include "lib.h"
 #include "paging.h"
 #define VIDEO       0xB8000
-#define VIDEO_PHYSICAL       (0xB8000+0x4000)
 #define NUM_COLS    80
 #define NUM_ROWS    25
 #define ATTRIB      0x7
@@ -12,13 +11,10 @@
 #define TERMINAL_NUM 3
 static int screen_x;
 static int screen_y;
-static int screen_x_multi[TERMINAL_NUM] = {0,0,0};
-static int screen_y_multi[TERMINAL_NUM] = {0,0,0};
-static int screen_x_before_input = 0;
-static int screen_y_before_input;
+static int screen_x_array[TERMINAL_NUM] = {0,0,0};
+static int screen_y_array[TERMINAL_NUM] = {0,0,0};
 static char* video_mem = (char *)VIDEO;
-static char* physical_video_mem = (char *)VIDEO_PHYSICAL;
-static char* TERMINAL_MEM[3] = { (char *)(VIDEO+0x1000), (char *)(VIDEO+0x2000), (char *)(VIDEO+0x3000) };
+static char* terminal_mem[3] = { (char *)(VIDEO+0x1000), (char *)(VIDEO+0x2000), (char *)(VIDEO+0x3000) };
 static int display_terminal=0;
 static int active_terminal=0;
 
@@ -39,33 +35,31 @@ int get_display_terminal()
 void set_active_terminal(int terminal_id)
 {
     if(terminal_id == display_terminal)
-        set_active_terminal_paging(terminal_id, 1);
-    else
-        set_active_terminal_paging(terminal_id, 0);
+        set_active_terminal_paging(terminal_id);
     active_terminal = terminal_id;
 }
 
 void set_disiplay_terminal(int terminal_id)
 {
-    memcpy(TERMINAL_MEM[display_terminal], video_mem, KB_4);
-    memcpy(video_mem, TERMINAL_MEM[terminal_id], KB_4);
+    memcpy(terminal_mem[display_terminal], video_mem, KB_4);
+    memcpy(video_mem, terminal_mem[terminal_id], KB_4);
     display_terminal = terminal_id;
     set_active_terminal(active_terminal);
-    update_cursor(screen_x_multi[terminal_id], screen_y_multi[terminal_id]);
+    update_cursor(screen_x_array[terminal_id], screen_y_array[terminal_id]);
 }
 
 
 
-void erase_last_ch_display() {
-    if( screen_x_multi[display_terminal] == 0 )
+void delete_c() {
+    if( screen_x_array[display_terminal] == 0 )
     {
-        screen_x_multi[display_terminal] = NUM_COLS -1;
-        screen_y_multi[display_terminal] --;
+        screen_x_array[display_terminal] = NUM_COLS -1;
+        screen_y_array[display_terminal] --;
     }
-    else screen_x_multi[display_terminal]--;
-    *(uint8_t *)(video_mem+ ((NUM_COLS * screen_y_multi[display_terminal] + screen_x_multi[display_terminal]) << 1)) = ' ';
-    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_multi[display_terminal] + screen_x_multi[display_terminal]) << 1) + 1) = ATTRIB;
-    update_cursor(screen_x_multi[display_terminal], screen_y_multi[display_terminal]);
+    else screen_x_array[display_terminal]--;
+    *(uint8_t *)(video_mem+ ((NUM_COLS * screen_y_array[display_terminal] + screen_x_array[display_terminal]) << 1)) = ' ';
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_array[display_terminal] + screen_x_array[display_terminal]) << 1) + 1) = ATTRIB;
+    update_cursor(screen_x_array[display_terminal], screen_y_array[display_terminal]);
 }
 
 
@@ -75,13 +69,13 @@ void erase_last_ch_display() {
  * Function: Clears video memory */
 void clear(void) {
     int32_t i;
-    screen_x_multi[display_terminal]=0;
-    screen_y_multi[display_terminal]=0;
+    screen_x_array[display_terminal]=0;
+    screen_y_array[display_terminal]=0;
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
-    update_cursor(screen_x_multi[display_terminal], screen_y_multi[display_terminal]);
+    update_cursor(screen_x_array[display_terminal], screen_y_array[display_terminal]);
     //puts_scroll("391OS> ",7);
 }
 
@@ -100,36 +94,36 @@ void update_cursor(int x,int y){
 void putc_scroll(uint8_t c) {
     
     if(c == '\n' || c == '\r') {
-        screen_y_multi[active_terminal]++;
-        screen_x_multi[active_terminal] = 0;
-        while(screen_y_multi[active_terminal] >= NUM_ROWS )
+        screen_y_array[active_terminal]++;
+        screen_x_array[active_terminal] = 0;
+        while(screen_y_array[active_terminal] >= NUM_ROWS )
             {
                 if (active_terminal == display_terminal)
                 shift_up_display();
                 else shift_up();
             }                 ////////////////////////////////////////////////////////////////need change shift_up later
     } else {
-        while(screen_y_multi[active_terminal] >= NUM_ROWS)
+        while(screen_y_array[active_terminal] >= NUM_ROWS)
             {
                 if (active_terminal == display_terminal)
                 shift_up_display();
                 else shift_up();
             }
         if (active_terminal == display_terminal){
-            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_multi[active_terminal] + screen_x_multi[active_terminal]) << 1)) = c;
-            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_multi[active_terminal] + screen_x_multi[active_terminal]) << 1) + 1) = ATTRIB;
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_array[active_terminal] + screen_x_array[active_terminal]) << 1)) = c;
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_array[active_terminal] + screen_x_array[active_terminal]) << 1) + 1) = ATTRIB;
         }
         else{
-            *(uint8_t *)(video_mem + (active_terminal+1) * 0x1000 + ((NUM_COLS * screen_y_multi[active_terminal] + screen_x_multi[active_terminal]) << 1)) = c;
-            *(uint8_t *)(video_mem + (active_terminal+1) * 0x1000 + ((NUM_COLS * screen_y_multi[active_terminal] + screen_x_multi[active_terminal]) << 1) + 1) = ATTRIB;    
+            *(uint8_t *)(video_mem + (active_terminal+1) * 0x1000 + ((NUM_COLS * screen_y_array[active_terminal] + screen_x_array[active_terminal]) << 1)) = c;
+            *(uint8_t *)(video_mem + (active_terminal+1) * 0x1000 + ((NUM_COLS * screen_y_array[active_terminal] + screen_x_array[active_terminal]) << 1) + 1) = ATTRIB;    
         }
-        screen_x_multi[active_terminal]++;
-        screen_y_multi[active_terminal] = screen_y_multi[active_terminal] + screen_x_multi[active_terminal]/NUM_COLS;
-        screen_x_multi[active_terminal] %= NUM_COLS;
+        screen_x_array[active_terminal]++;
+        screen_y_array[active_terminal] = screen_y_array[active_terminal] + screen_x_array[active_terminal]/NUM_COLS;
+        screen_x_array[active_terminal] %= NUM_COLS;
         
     }
     if(active_terminal == display_terminal)
-        update_cursor(screen_x_multi[active_terminal], screen_y_multi[active_terminal]);
+        update_cursor(screen_x_array[active_terminal], screen_y_array[active_terminal]);
 }
 
 int32_t puts_scroll(int8_t* s, int32_t len) {
@@ -141,8 +135,7 @@ int32_t puts_scroll(int8_t* s, int32_t len) {
         //index++;
     }
     //update_cursor(screen_x, screen_y);
-    screen_x_before_input = screen_x;
-    screen_y_before_input = screen_y;
+    
     return index;
 }
 
@@ -151,20 +144,20 @@ int32_t puts_scroll(int8_t* s, int32_t len) {
 
 void putc_scroll_display(uint8_t c) {
     if(c == '\n' || c == '\r') {
-        screen_y_multi[display_terminal]++;
-        screen_x_multi[display_terminal] = 0;
-        while(screen_y_multi[display_terminal] >= NUM_ROWS )
+        screen_y_array[display_terminal]++;
+        screen_x_array[display_terminal] = 0;
+        while(screen_y_array[display_terminal] >= NUM_ROWS )
             shift_up_display();
     } else {
-        while(screen_y_multi[display_terminal] >= NUM_ROWS)
+        while(screen_y_array[display_terminal] >= NUM_ROWS)
             shift_up_display();
-        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_multi[display_terminal] + screen_x_multi[display_terminal]) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_multi[display_terminal] + screen_x_multi[display_terminal]) << 1) + 1) = ATTRIB;
-        screen_x_multi[display_terminal]++;
-        screen_y_multi[display_terminal] = screen_y_multi[display_terminal] + screen_x_multi[display_terminal]/NUM_COLS;
-        screen_x_multi[display_terminal] %= NUM_COLS;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_array[display_terminal] + screen_x_array[display_terminal]) << 1)) = c;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y_array[display_terminal] + screen_x_array[display_terminal]) << 1) + 1) = ATTRIB;
+        screen_x_array[display_terminal]++;
+        screen_y_array[display_terminal] = screen_y_array[display_terminal] + screen_x_array[display_terminal]/NUM_COLS;
+        screen_x_array[display_terminal] %= NUM_COLS;
     }
-    update_cursor(screen_x_multi[display_terminal], screen_y_multi[display_terminal]);
+    update_cursor(screen_x_array[display_terminal], screen_y_array[display_terminal]);
 }
 
 void shift_up_display()
@@ -187,8 +180,8 @@ void shift_up_display()
         *(uint8_t *)(video_mem + ((NUM_COLS * y + x) << 1) + 1) = ATTRIB;
     }
 
-    screen_y_multi[display_terminal] = NUM_ROWS-1;
-    screen_x_multi[display_terminal] = 0;
+    screen_y_array[display_terminal] = NUM_ROWS-1;
+    screen_x_array[display_terminal] = 0;
 }
 
 
@@ -212,8 +205,8 @@ void shift_up(){
     //screen_y--;
     //screen_y=screen_y_preinput;
     //screen_x =0;
-    screen_y_multi[active_terminal] = NUM_ROWS-1;
-    screen_x_multi[active_terminal] = 0;
+    screen_y_array[active_terminal] = NUM_ROWS-1;
+    screen_x_array[active_terminal] = 0;
 }
 
 
