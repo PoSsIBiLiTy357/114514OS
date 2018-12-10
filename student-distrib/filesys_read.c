@@ -7,8 +7,8 @@ static dentry_t *dentry_start;
 static inode_t *inode_start;
 static uint8_t *datablk_start;
 static int32_t read_dir_index;
-
 static int temp_counter;
+
 /*
  * void read_filesys_bootblock(uint32_t bootBlk_addr)
  *     DESCRIPTION: Initialize file system, read in all the metadata in first dentry
@@ -153,6 +153,7 @@ int32_t read_f_by_name(uint8_t *fname, uint32_t offset, uint8_t *buf, uint32_t l
     return read_data(dentry.inode, offset, buf, length);
 }
 
+
 /*
  * int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t length)
  *     DESCRIPTION: read file by index and full up buf
@@ -168,7 +169,6 @@ int32_t read_f_by_index(uint32_t index, int32_t offset, uint8_t *buf, uint32_t l
     }
     return read_data(dentry.inode, offset, buf, length);
 }
-
 
 
 int32_t load_f (uint8_t * fname, uint32_t buffer)

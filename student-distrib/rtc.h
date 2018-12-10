@@ -61,6 +61,7 @@ int32_t rtc_close(int32_t fd);
 /* RTC helper functions */
 void convert_freq(uint32_t *);
 
+/* Wrapper functions */
 int rtc_read_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count);
 int rtc_write_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count);
 int rtc_open_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count);
