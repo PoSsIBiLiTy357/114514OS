@@ -245,20 +245,61 @@ void convert_freq(uint32_t * freq) {
     }
 }
 
+
+/*
+ * rtc_read_wrapper
+ *     DESCRIPTION: wrapper function for rtc_read()
+ *     INPUTS: uint32_t inode - inode for file to read
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int rtc_read_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
     int fd;
     return rtc_read(fd,buf,count);
 }
 
+
+/*
+ * rtc_write_wrapper
+ *     DESCRIPTION: wrapper function for rtc_write()
+ *     INPUTS: uint32_t inode - inode for file to write
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int rtc_write_wrapper(uint32_t inode,uint32_t offset, uint8_t* buf, uint32_t count){
     int fd;
     return rtc_write(fd,buf,count);
 }
+
+
+/*
+ * rtc_open_wrapper
+ *     DESCRIPTION: wrapper function for rtc_open()
+ *     INPUTS: uint32_t inode - inode for file to open
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int rtc_open_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
     const uint8_t * file;
     return rtc_open(file);
 }
 
+
+/*
+ * rtc_close_wrapper
+ *     DESCRIPTION: wrapper function for rtc_close()
+ *     INPUTS: uint32_t inode - inode for file to close 
+ *             uint32_t offset - offset position inside file 
+ *             uint8_t * buf - buffer to store bytes from file
+ *             uint32_t count - how many bytes were stored
+ *     OUTPUTS: 0 on success, -1 on fail
+ */
 int rtc_close_wrapper(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t count){
     int fd;
     return rtc_close(fd);
