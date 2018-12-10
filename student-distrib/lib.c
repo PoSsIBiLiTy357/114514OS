@@ -32,6 +32,7 @@ int get_display_terminal()
     return display_terminal;
 }
 
+//check and see whether the active terminal is displaying. change the active terminal id 
 void set_active_terminal(int terminal_id)
 {
     if(terminal_id == display_terminal)
@@ -39,6 +40,10 @@ void set_active_terminal(int terminal_id)
     active_terminal = terminal_id;
 }
 
+/* void set_disiplay_terminal(int terminal_id);
+ * Inputs: terminal_id 
+ * Return Value: void
+ *  Function: switching displaying terminal */
 void set_disiplay_terminal(int terminal_id)
 {
     memcpy(terminal_mem[display_terminal], video_mem, KB_4);
@@ -49,7 +54,10 @@ void set_disiplay_terminal(int terminal_id)
 }
 
 
-
+/* void delete_c();
+ * Inputs: none
+ * Return Value: void
+ *  Function: backspace, delete a char in displaying terminal */
 void delete_c() {
     if( screen_x_array[display_terminal] == 0 )
     {
@@ -81,7 +89,7 @@ void clear(void) {
 
 
 
-
+//https://wiki.osdev.org/Text_Mode_Cursor
 void update_cursor(int x,int y){
     uint16_t pos = y*NUM_COLS + x;
 
@@ -91,6 +99,10 @@ void update_cursor(int x,int y){
     outb((uint8_t)((pos>>8)&0xFF),0x3D5);
 }
 
+/* void putc_scroll(uint8_t c);
+ * Inputs: uint_8* c = character to print
+ * Return Value: void
+ *  Function: Output a character to the terminal running in pit */
 void putc_scroll(uint8_t c) {
     
     if(c == '\n' || c == '\r') {
@@ -126,6 +138,10 @@ void putc_scroll(uint8_t c) {
         update_cursor(screen_x_array[active_terminal], screen_y_array[active_terminal]);
 }
 
+/* int32_t puts_scroll 
+ *   Inputs: int_8* s - pointer to a string of characters, len - length of the string
+ *   Return Value: Number of bytes written
+ *    Function: Output a string to the running terminal in pit */
 int32_t puts_scroll(int8_t* s, int32_t len) {
     register int32_t index = 0;
     int lim = len;
@@ -141,7 +157,10 @@ int32_t puts_scroll(int8_t* s, int32_t len) {
 
 
 
-
+/* void putc_scroll_display(uint8_t c);
+ * Inputs: uint_8* c = character to print
+ * Return Value: void
+ *  Function: Output a character to the console */
 void putc_scroll_display(uint8_t c) {
     if(c == '\n' || c == '\r') {
         screen_y_array[display_terminal]++;
@@ -159,6 +178,12 @@ void putc_scroll_display(uint8_t c) {
     }
     update_cursor(screen_x_array[display_terminal], screen_y_array[display_terminal]);
 }
+
+
+/* void shift_up_display(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: scroll screen of displaying terminal */
 
 void shift_up_display()
 {
@@ -186,10 +211,10 @@ void shift_up_display()
 
 
 
-/* void clear(void);
+/* void shift_up(void);
  * Inputs: void
  * Return Value: none
- * Function: scroll screen */
+ * Function: scroll screen in running terminal in pit */
 void shift_up(){
     int i,j;
     for (i = 0; i<NUM_ROWS-1;i++){
